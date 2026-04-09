@@ -1,23 +1,23 @@
-import 'package:emolens_app/screens/mood_calender_page.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'mood_calender_page.dart';
 
 class MoodPage extends StatefulWidget {
-  const MoodPage({super.key});
+  final String initialMood;
+
+  const MoodPage({super.key, required this.initialMood});
 
   @override
   State<MoodPage> createState() => _MoodPageState();
 }
 
 class _MoodPageState extends State<MoodPage> {
-
-  String selectedMood = "senang";
+  late String selectedMood;
   final TextEditingController noteController = TextEditingController();
+  final TextEditingController titleController = TextEditingController();
   bool isLoading = false;
 
-  // 🔥 Mapping Mood → Code (Untuk AI)
   final Map<String, int> moodCodeMap = {
     "senang": 1,
     "marah": 2,
@@ -28,15 +28,15 @@ class _MoodPageState extends State<MoodPage> {
     "jijik": 7,
   };
 
+  @override
+  void initState() {
+    super.initState();
+    selectedMood = widget.initialMood;
+  }
+
   Future<void> saveMood() async {
     final user = FirebaseAuth.instance.currentUser;
-
-    if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("User belum login")),
-      );
-      return;
-    }
+    if (user == null) return;
 
     try {
       setState(() {
@@ -48,28 +48,25 @@ class _MoodPageState extends State<MoodPage> {
       await FirebaseFirestore.instance.collection('moods').add({
         'userId': user.uid,
         'email': user.email,
-        'mood_label': selectedMood,   // Untuk UI
-        'emosi_kode': moodCode,        // Untuk AI
+        'mood_label': selectedMood,
+        'emosi_kode': moodCode,
+        'title': titleController.text,
         'note': noteController.text,
         'createdAt': Timestamp.now(),
       });
 
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Mood berhasil disimpan ✅")),
       );
 
+      titleController.clear();
       noteController.clear();
-
     } catch (e) {
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Gagal menyimpan mood: $e")),
       );
-
-      print("FIRESTORE ERROR: $e");
     } finally {
       if (mounted) {
         setState(() {
@@ -82,85 +79,121 @@ class _MoodPageState extends State<MoodPage> {
   @override
   void dispose() {
     noteController.dispose();
+    titleController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text("Input Mood"),
-        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Row(
+          children: [
+            const Icon(Icons.local_fire_department, color: Colors.purple),
+            const SizedBox(width: 8),
+            const Text(
+              "IT DEL EMOLENS",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.purpleAccent,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text(
+                "5 Streak",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            const Spacer(),
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () {},
+            )
+          ],
+        ),
       ),
-      body: Padding(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF9CC7F5), Color(0xFFDCE8F4)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              "Mood: ${selectedMood.toUpperCase()}",
+              style: const TextStyle(
+                  fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
             const Text(
-              "Bagaimana perasaanmu hari ini?",
+              "Ceritakan singkat tentang perasaanmu..",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-
-            const SizedBox(height: 20),
-
-            DropdownButtonFormField<String>(
-              value: selectedMood,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-              ),
-              items: const [
-                DropdownMenuItem(value: "senang", child: Text("Senang 😊")),
-                DropdownMenuItem(value: "marah", child: Text("Marah 😡")),
-                DropdownMenuItem(value: "sedih", child: Text("Sedih 😢")),
-                DropdownMenuItem(value: "takut", child: Text("Takut 😰")),
-                DropdownMenuItem(value: "biasa", child: Text("Biasa 😐")),
-                DropdownMenuItem(value: "kaget", child: Text("Kaget 😱")),
-                DropdownMenuItem(value: "jijik", child: Text("Jijik 🤢")),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  selectedMood = value!;
-                });
-              },
-            ),
-
             const SizedBox(height: 15),
-
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const MoodCalendarPage(),
-                  ),
-                );
-              },
-              child: const Text("Lihat Riwayat Mood"),
-            ),
-
-            const SizedBox(height: 20),
-
             TextField(
-              controller: noteController,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: "Catatan (opsional)",
-                border: OutlineInputBorder(),
+              controller: titleController,
+              decoration: InputDecoration(
+                hintText: "Judul ceritamu..",
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
               ),
             ),
-
-            const SizedBox(height: 30),
-
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: isLoading ? null : saveMood,
-                child: isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("Simpan Mood"),
+            const SizedBox(height: 12),
+            Expanded(
+              child: TextField(
+                controller: noteController,
+                maxLines: null,
+                expands: true,
+                decoration: InputDecoration(
+                  hintText: "Tuliskan perasaanmu...",
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
               ),
             ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey),
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text("KEMBALI"),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: isLoading ? null : saveMood,
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.greenAccent),
+                    child: isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text("KIRIM"),
+                  ),
+                ),
+              ],
+            )
           ],
         ),
       ),

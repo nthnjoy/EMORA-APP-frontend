@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:emolens_app/screens/register_screen.dart';
 import 'package:emolens_app/services/auth_service.dart';
 import 'package:emolens_app/screens/main_navigation_page.dart';
+import '../services/cis_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
