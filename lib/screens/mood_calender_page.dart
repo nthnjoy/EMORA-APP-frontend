@@ -124,7 +124,7 @@ class _MoodCalendarPageState extends State<MoodCalendarPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               DropdownButtonFormField<String>(
-                value: selectedMood,
+                initialValue: selectedMood,
                 items: const [
                   DropdownMenuItem(value: "senang", child: Text("Senang")),
                   DropdownMenuItem(value: "marah", child: Text("Marah")),
@@ -160,8 +160,10 @@ class _MoodCalendarPageState extends State<MoodCalendarPage> {
                   'note': noteController.text,
                 });
 
-                Navigator.pop(context);
-                fetchMoodData();
+                if (mounted) {
+                  Navigator.pop(context);
+                  fetchMoodData();
+                }
               },
               child: const Text("Simpan"),
             )

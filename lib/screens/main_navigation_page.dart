@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'home_page.dart';
+import 'mood_page.dart';
 import 'mood_calender_page.dart';
 import 'counseling_page.dart';
 import 'profile_page.dart';
@@ -16,7 +16,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = const [
-    HomePage(),
+    MoodPage(),
     MoodCalendarPage(), 
     CounselingPage(),
     ProfilePage(),
