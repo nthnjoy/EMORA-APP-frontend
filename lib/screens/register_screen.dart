@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'home_page.dart';
+import 'mood_page.dart';
 import 'package:emolens_app/services/auth_service.dart';
 
 
@@ -22,11 +22,13 @@ class _RegisterPageState extends State<RegisterPage> {
     );
 
     if (user != null) {
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const HomePage()),
+        MaterialPageRoute(builder: (_) => const MoodPage()),
       );
     } else {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Register gagal")),
       );
