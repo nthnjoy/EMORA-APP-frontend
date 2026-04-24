@@ -12,16 +12,11 @@ dependencies:
     sdk: flutter
   http: ^1.2.0
 
-
-  firebase_core: ^2.30.0
-  firebase_auth: ^4.17.0
-  cloud_firestore: ^4.15.0
-
-
   table_calendar: ^3.0.9
   fl_chart: ^0.66.0
 
   cupertino_icons: ^1.0.8
+  shared_preferences: ^2.5.5
 
 dev_dependencies:
   flutter_test:

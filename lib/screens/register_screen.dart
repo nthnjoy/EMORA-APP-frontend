@@ -1,61 +1,26 @@
 import 'package:flutter/material.dart';
-import 'mood_page.dart';
-import 'package:emolens_app/services/auth_service.dart';
-
-
-class RegisterPage extends StatefulWidget {
+class RegisterPage extends StatelessWidget {
   const RegisterPage({super.key});
-
-  @override
-  State<RegisterPage> createState() => _RegisterPageState();
-}
-
-class _RegisterPageState extends State<RegisterPage> {
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-  final authService = AuthService();
-
-  void register() async {
-    final user = await authService.register(
-      emailController.text.trim(),
-      passwordController.text.trim(),
-    );
-
-    if (user != null) {
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const MoodPage()),
-      );
-    } else {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Register gagal")),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Register")),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
+      body: Center(
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(labelText: "Email"),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: Text(
+                "Registrasi akun tidak dilakukan dari aplikasi.\nSilakan gunakan akun CIS yang sudah terdaftar.",
+                textAlign: TextAlign.center,
+              ),
             ),
-            TextField(
-              controller: passwordController,
-              decoration: const InputDecoration(labelText: "Password"),
-              obscureText: true,
-            ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: register,
-              child: const Text("Register"),
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Kembali"),
             ),
           ],
         ),

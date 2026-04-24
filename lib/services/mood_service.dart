@@ -1,0 +1,207 @@
+import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'api_config.dart';
+import 'laravel_session_service.dart';
+
+class MoodService {
+  const MoodService._();
+
+  static Future<Map<String, Object?>> fetchMoods() async {
+    if (!LaravelSessionService.isAuthenticated) {
+      return {
+        'success': false,
+        'status_code': 401,
+        'message': 'Sesi login tidak ditemukan. Silakan login ulang.',
+        'data': <Map<String, Object?>>[],
+      };
+    }
+
+    try {
+      final response = await http
+          .get(
+            Uri.parse(ApiConfig.moodsUrl),
+            headers: _headers(),
+          )
+          .timeout(const Duration(seconds: 20));
+
+      final parsed = _parseResponse(
+        response,
+        defaultErrorMessage: 'Gagal mengambil data mood.',
+      );
+
+      final rawData = parsed['data'];
+      final data = rawData is List
+          ? rawData
+              .whereType<Map>()
+              .map((item) => Map<String, Object?>.from(item))
+              .toList()
+          : <Map<String, Object?>>[];
+
+      return {
+        ...parsed,
+        'data': data,
+      };
+    } on TimeoutException {
+      return {
+        'success': false,
+        'status_code': 0,
+        'message': 'Timeout saat mengambil data mood.',
+        'data': <Map<String, Object?>>[],
+      };
+    } catch (_) {
+      return {
+        'success': false,
+        'status_code': 0,
+        'message': 'Tidak dapat terhubung ke backend Laravel.',
+        'data': <Map<String, Object?>>[],
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> createMood({
+    required String moodLabel,
+    required String feeling,
+    required int emotionCode,
+    String? title,
+    String? note,
+    DateTime? recordedAt,
+  }) async {
+    if (!LaravelSessionService.isAuthenticated) {
+      return {
+        'success': false,
+        'status_code': 401,
+        'message': 'Sesi login tidak ditemukan. Silakan login ulang.',
+      };
+    }
+
+    final payload = <String, dynamic>{
+      'mood_label': moodLabel,
+      'perasaan': feeling,
+      'emosi_kode': emotionCode,
+      'title': title,
+      'note': note,
+      'recorded_at': (recordedAt ?? DateTime.now()).toIso8601String(),
+    };
+
+    try {
+      final response = await http
+          .post(
+            Uri.parse(ApiConfig.moodsUrl),
+            headers: _headers(),
+            body: jsonEncode(payload),
+          )
+          .timeout(const Duration(seconds: 20));
+
+      return _parseResponse(
+        response,
+        defaultErrorMessage: 'Gagal menyimpan mood.',
+      );
+    } on TimeoutException {
+      return {
+        'success': false,
+        'status_code': 0,
+        'message': 'Timeout saat menyimpan mood.',
+      };
+    } catch (_) {
+      return {
+        'success': false,
+        'status_code': 0,
+        'message': 'Tidak dapat terhubung ke backend Laravel.',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> updateMood({
+    required String moodId,
+    required String moodLabel,
+    required int emotionCode,
+    String? feeling,
+    String? title,
+    String? note,
+  }) async {
+    if (!LaravelSessionService.isAuthenticated) {
+      return {
+        'success': false,
+        'status_code': 401,
+        'message': 'Sesi login tidak ditemukan. Silakan login ulang.',
+      };
+    }
+
+    final payload = <String, dynamic>{
+      'mood_label': moodLabel,
+      'perasaan': feeling,
+      'emosi_kode': emotionCode,
+      'title': title,
+      'note': note,
+    };
+
+    try {
+      final response = await http
+          .put(
+            Uri.parse(ApiConfig.moodByIdUrl(moodId)),
+            headers: _headers(),
+            body: jsonEncode(payload),
+          )
+          .timeout(const Duration(seconds: 20));
+
+      return _parseResponse(
+        response,
+        defaultErrorMessage: 'Gagal memperbarui mood.',
+      );
+    } on TimeoutException {
+      return {
+        'success': false,
+        'status_code': 0,
+        'message': 'Timeout saat memperbarui mood.',
+      };
+    } catch (_) {
+      return {
+        'success': false,
+        'status_code': 0,
+        'message': 'Tidak dapat terhubung ke backend Laravel.',
+      };
+    }
+  }
+
+  static Map<String, String> _headers() {
+    final headers = <String, String>{
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    };
+
+    final authHeader = LaravelSessionService.authorizationHeader;
+    if (authHeader != null) {
+      headers['Authorization'] = authHeader;
+    }
+
+    return headers;
+  }
+
+  static Map<String, dynamic> _parseResponse(
+    http.Response response, {
+    required String defaultErrorMessage,
+  }) {
+    Map<String, dynamic> bodyJson = {};
+    if (response.body.isNotEmpty) {
+      try {
+        bodyJson = jsonDecode(response.body) as Map<String, dynamic>;
+      } catch (_) {
+        bodyJson = {};
+      }
+    }
+
+    final isHttpOk = response.statusCode >= 200 && response.statusCode < 300;
+    final success = isHttpOk && bodyJson['success'] == true;
+
+    return {
+      'success': success,
+      'status_code': response.statusCode,
+      'message':
+          (bodyJson['message'] ?? (success ? 'OK' : defaultErrorMessage))
+              .toString(),
+      'data': bodyJson['data'],
+      'raw': bodyJson,
+    };
+  }
+}

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
+import '../services/mood_service.dart';
 import 'feeling_page.dart';
 
 class MoodPage extends StatefulWidget {
@@ -12,6 +12,7 @@ class MoodPage extends StatefulWidget {
 class _MoodPageState extends State<MoodPage> {
   String? selectedMood;
   String? selectedFeeling;
+  bool isSavingMood = false;
 
   final List<Map<String, dynamic>> moods = [
     {
@@ -68,9 +69,7 @@ class _MoodPageState extends State<MoodPage> {
   Future<void> goToFeelingPage(String mood) async {
     final result = await Navigator.push<String>(
       context,
-      MaterialPageRoute(
-        builder: (_) => FeelingPage(selectedMood: mood),
-      ),
+      MaterialPageRoute(builder: (_) => FeelingPage(selectedMood: mood)),
     );
 
     if (result != null) {
@@ -78,240 +77,195 @@ class _MoodPageState extends State<MoodPage> {
         selectedMood = mood;
         selectedFeeling = result;
       });
+
+      await saveMoodSelection();
+    }
+  }
+
+  int _moodCodeFromLabel(String moodLabel) {
+    switch (moodLabel.toLowerCase()) {
+      case 'senang':
+        return 1;
+      case 'marah':
+        return 2;
+      case 'sedih':
+        return 3;
+      case 'takut':
+        return 4;
+      case 'biasa':
+        return 5;
+      case 'terkejut':
+        return 6;
+      case 'jijik':
+        return 7;
+      default:
+        return 5;
+    }
+  }
+
+  Future<void> saveMoodSelection() async {
+    if (selectedMood == null || selectedFeeling == null) {
+      return;
+    }
+
+    setState(() => isSavingMood = true);
+
+    final result = await MoodService.createMood(
+      moodLabel: selectedMood!,
+      feeling: selectedFeeling!,
+      emotionCode: _moodCodeFromLabel(selectedMood!),
+      note: null,
+      title: null,
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() => isSavingMood = false);
+
+    if (result['success'] == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Mood berhasil disimpan ke MongoDB')),
+      );
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          Navigator.pop(context);
+        }
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result['message'] ?? 'Gagal menyimpan mood')),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final authService = AuthService();
-    final user = authService.currentUser;
-
-    final String userName =
-        (user?.displayName != null && user!.displayName!.trim().isNotEmpty)
-            ? user.displayName!.trim()
-            : (user?.email != null && user!.email!.contains('@')
-                ? user.email!.split('@')[0]
-                : 'User');
-
     return Scaffold(
-      backgroundColor: const Color(0xFFDCEEFF),
+      appBar: AppBar(
+        title: const Text('Pilih Mood'),
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      backgroundColor: Colors.white,
       body: SafeArea(
-        child: Column(
-          children: [
-            const _TopHeader(),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    RichText(
-                      text: TextSpan(
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.black,
-                          height: 1.2,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Bagaimana suasana hatimu?',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Pilih satu mood yang paling sesuai dengan perasaanmu saat ini.',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black87,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 30),
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 16,
+                runSpacing: 16,
+                children: moods.map((mood) {
+                  return GestureDetector(
+                    onTap: () => goToFeelingPage(mood['label']),
+                    child: Container(
+                      width: 100,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: mood['bgColor'],
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: mood['borderColor'],
+                          width: 2,
                         ),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          const TextSpan(text: 'Bagaimana\nsuasana hatimu, '),
-                          TextSpan(
-                            text: '$userName?',
-                            style: const TextStyle(color: Colors.red),
+                          Text(
+                            mood['emoji'],
+                            style: const TextStyle(fontSize: 40),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            mood['label'],
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: mood['textColor'],
+                            ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 18),
-                    const Text(
-                      'Catatan harian ini membantu Anda memantau\nemosi dan kesejahteraan mental setiap hari.',
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: Colors.black87,
-                        height: 1.45,
-                      ),
-                    ),
-                    const SizedBox(height: 30),
-
-                    Expanded(
-                      child: Center(
-                        child: Wrap(
-                          alignment: WrapAlignment.center,
-                          spacing: 14,
-                          runSpacing: 18,
-                          children: moods.map((mood) {
-                            final bool isLast = mood['label'] == 'Jijik';
-
-                            return SizedBox(
-                              width: isLast ? 100 : 72,
-                              child: GestureDetector(
-                                onTap: () => goToFeelingPage(mood['label']),
-                                child: Container(
-                                  height: 86,
-                                  decoration: BoxDecoration(
-                                    color: mood['bgColor'],
-                                    borderRadius: BorderRadius.circular(18),
-                                    border: Border.all(
-                                      color: mood['borderColor'],
-                                      width: 1.6,
-                                    ),
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        mood['emoji'],
-                                        style: const TextStyle(fontSize: 34),
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        mood['label'],
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                          color: mood['textColor'],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
+                  );
+                }).toList(),
+              ),
+              if (selectedMood != null && selectedFeeling != null) ...[
+                const SizedBox(height: 30),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: Colors.blue.shade200),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Pilihan Kamu:',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
                         ),
                       ),
-                    ),
-
-                    if (selectedMood != null && selectedFeeling != null) ...[
-                      const SizedBox(height: 10),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: Colors.black12),
-                        ),
-                        child: Text(
-                          'Mood terpilih: $selectedMood\nPerasaan terpilih: $selectedFeeling',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Mood: $selectedMood',
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Perasaan: $selectedFeeling',
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Sedang disimpan otomatis...',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                          fontStyle: FontStyle.italic,
                         ),
                       ),
                     ],
-                  ],
+                  ),
                 ),
-              ),
-            ),
-            const _BottomNavBar(),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _TopHeader extends StatelessWidget {
-  const _TopHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 10, 18, 8),
-      child: Row(
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: const BoxDecoration(
-              color: Color(0xFFD94CFF),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.local_fire_department,
-              color: Colors.white,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 10),
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'IT DEL EMOLENS',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.5,
-                ),
-              ),
-              SizedBox(height: 3),
-              _StreakBadge(),
+              ],
             ],
           ),
-          const Spacer(),
-          Container(
-            width: 42,
-            height: 42,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.wb_sunny_outlined, color: Colors.black87),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StreakBadge extends StatelessWidget {
-  const _StreakBadge();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: const Color(0xFFD000FF),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: const Text(
-        '5 Streak',
-        style: TextStyle(
-          fontSize: 10,
-          color: Colors.white,
-          fontWeight: FontWeight.w700,
         ),
       ),
     );
   }
 }
 
-class _BottomNavBar extends StatelessWidget {
-  const _BottomNavBar();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 68,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          top: BorderSide(color: Color(0xFFE0E0E0)),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: const [
-          Icon(Icons.home, color: Color(0xFF3F5F7A)),
-          Icon(Icons.accessibility_new, color: Color(0xFF9AA7B8)),
-          Icon(Icons.calendar_today, color: Color(0xFF9AA7B8)),
-          Icon(Icons.person, color: Color(0xFF9AA7B8)),
-        ],
-      ),
-    );
-  }
-}

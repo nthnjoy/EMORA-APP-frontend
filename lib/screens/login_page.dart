@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:emolens_app/screens/main_navigation_page.dart';
-import 'package:emolens_app/screens/register_screen.dart';
 import 'package:emolens_app/services/laravel_auth_service.dart';
+import 'package:emolens_app/services/laravel_session_service.dart';
+import 'package:emolens_app/services/user_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -40,6 +41,25 @@ class _LoginPageState extends State<LoginPage> {
       if (!mounted) return;
 
       if (result['success'] == true) {
+        LaravelSessionService.saveFromLoginResult(result);
+        final tokenSource = (result['token_source'] ?? '')
+            .toString()
+            .trim()
+            .toLowerCase();
+        if (tokenSource != 'sanctum') {
+          LaravelSessionService.clear();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                "Login CIS berhasil, tetapi sinkronisasi MongoDB gagal. Cek koneksi database backend.",
+              ),
+            ),
+          );
+          setState(() => isLoading = false);
+          return;
+        }
+        await UserService.fetchCurrentUser();
+        if (!mounted) return;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const MainNavigationPage()),
@@ -119,16 +139,7 @@ class _LoginPageState extends State<LoginPage> {
 
             const SizedBox(height: 10),
 
-            // 🔗 KE REGISTER
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const RegisterPage()),
-                );
-              },
-              child: const Text("Belum punya akun? Register"),
-            ),
+            // TextButton untuk daftar dihapus karena tidak ada sistem daftar
           ],
         ),
       ),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'api_config.dart';
@@ -12,11 +13,16 @@ class LaravelAuthService {
     final uri = Uri.parse(ApiConfig.loginUrl);
 
     try {
-      final response = await http.post(
-        uri,
-        headers: {'Accept': 'application/json'},
-        body: {'username': username, 'password': password},
-      );
+      final response = await http
+          .post(
+            uri,
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({'username': username, 'password': password}),
+          )
+          .timeout(const Duration(seconds: 20));
 
       Map<String, dynamic> bodyJson = {};
       if (response.body.isNotEmpty) {
@@ -39,6 +45,12 @@ class LaravelAuthService {
         'token_source': bodyJson['token_source'],
         'user': bodyJson['user'],
         'raw': bodyJson,
+      };
+    } on TimeoutException {
+      return {
+        'success': false,
+        'status_code': 0,
+        'message': 'Timeout saat menghubungi backend Laravel.',
       };
     } catch (_) {
       return {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'mood_page.dart';
+import 'dashboard_page.dart';
 import 'mood_calender_page.dart';
 import 'counseling_page.dart';
 import 'profile_page.dart';
@@ -12,12 +12,11 @@ class MainNavigationPage extends StatefulWidget {
 }
 
 class _MainNavigationPageState extends State<MainNavigationPage> {
-
   int _selectedIndex = 0;
 
   final List<Widget> _pages = const [
-    MoodPage(),
-    MoodCalendarPage(), 
+    DashboardPage(),
+    MoodCalendarPage(),
     CounselingPage(),
     ProfilePage(),
   ];
@@ -39,22 +38,13 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
         unselectedItemColor: Colors.grey,
         type: BottomNavigationBarType.fixed,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: "Beranda",
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Beranda"),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_month),
             label: "Riwayat",
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat),
-            label: "Konseling",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: "Profil",
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Konseling"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),
         ],
       ),
     );
