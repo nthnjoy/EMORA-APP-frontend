@@ -1,19 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../services/laravel_session_service.dart';
 
-class StreakPage extends StatelessWidget {
+class StreakPage extends StatefulWidget {
   final List<Map<String, dynamic>> moods;
 
   const StreakPage({super.key, required this.moods});
 
-  String _dayLabel(DateTime date) {
-    const names = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-    return names[date.weekday % 7];
+  @override
+  State<StreakPage> createState() => _StreakPageState();
+}
+
+class _StreakPageState extends State<StreakPage> with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+
+    _scaleAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   int _currentStreak() {
     var count = 0;
-    for (var i = moods.length - 1; i >= 0; i--) {
-      final entry = moods[i];
+    for (var i = widget.moods.length - 1; i >= 0; i--) {
+      final entry = widget.moods[i];
       final value = entry['count'] as int? ?? 0;
       if (value > 0) {
         count += 1;
@@ -24,139 +48,211 @@ class StreakPage extends StatelessWidget {
     return count;
   }
 
+  int _totalInput() {
+    var total = 0;
+    for (var item in widget.moods) {
+      total += (item['count'] as int? ?? 0);
+    }
+    return total;
+  }
+
   @override
   Widget build(BuildContext context) {
     final streak = _currentStreak();
-    final isActive = streak > 0;
+    final totalInput = _totalInput();
+    final displayName = LaravelSessionService.displayName;
+    final firstName = displayName.split(' ').first;
+
+    // Tentukan State (Padam, Sedang, Tinggi)
+    Color bgColorStart;
+    Color bgColorEnd;
+    List<Color> flameColors;
+    String titleText;
+    String subtitleText;
+
+    if (streak == 0) {
+      // Padam (Abu-abu)
+      bgColorStart = const Color(0xFF6B7280);
+      bgColorEnd = const Color(0xFF374151);
+      flameColors = [Colors.grey.shade300, Colors.grey.shade500, Colors.grey.shade700];
+      titleText = 'Streaknya padam, \n$firstName...';
+      subtitleText = 'Laporan perasaanmu sekarang untuk membantu kami mendukung kesejahteraan mental Anda.';
+    } else if (streak < 5) {
+      // Sedang (Orange/Kuning)
+      bgColorStart = const Color(0xFFFFB347);
+      bgColorEnd = const Color(0xFFFF7B00);
+      flameColors = [Colors.yellow.shade300, Colors.orange.shade500, Colors.deepOrange.shade600];
+      titleText = 'Lencana Streak ditingkatkan, \n$firstName...';
+      subtitleText = 'Laporan perasaanmu dalam 7 hari ini sudah sebanyak $totalInput, terus laporkan perasaanmu untuk membantu kami mendukung kesejahteraan mental Anda.';
+    } else {
+      // Tinggi (Merah)
+      bgColorStart = const Color(0xFFFF4B4B);
+      bgColorEnd = const Color(0xFFB90000);
+      flameColors = [Colors.orange.shade300, Colors.red.shade600, Colors.red.shade900];
+      titleText = 'Lencana Streak ditingkatkan, \n$firstName...';
+      subtitleText = 'Luar biasa! Laporan perasaanmu sangat konsisten. Terus laporkan perasaanmu untuk membantu kami mendukung kesejahteraan mental Anda.';
+    }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Detail Streak'),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
+      body: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [bgColorStart, bgColorEnd],
+          ),
+        ),
+        child: SafeArea(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: isActive ? Colors.deepPurple : Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(24),
+              // Custom Top Bar
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: Row(
+                  children: [
+                    // Back Button
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 22),
+                    ),
+                    const SizedBox(width: 15),
+                    
+                    // Flame Icon Circle
+                    Container(
+                      width: 45,
+                      height: 45,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFB100FF), // Bright purple
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4)),
+                        ],
+                      ),
+                      child: const Icon(Icons.local_fire_department, color: Colors.white, size: 26),
+                    ),
+                    const SizedBox(width: 12),
+                    
+                    // EMORA & Streak Badge
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'EMORA',
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFB100FF), // Bright purple pill
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: const [
+                              BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
+                            ],
+                          ),
+                          child: Text(
+                            '$streak Streak',
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
+              ),
+
+              const SizedBox(height: 50),
+
+              // Title and Subtitle
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Streak saat ini',
-                      style: TextStyle(
-                        color: isActive ? Colors.white70 : Colors.black54,
-                        fontSize: 14,
+                    RichText(
+                      text: TextSpan(
+                        style: GoogleFonts.poppins(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          height: 1.2,
+                        ),
+                        children: [
+                          TextSpan(text: titleText.split(',')[0] + ',\n'),
+                          TextSpan(
+                            text: titleText.split(',')[1].trim(),
+                            style: TextStyle(
+                              color: streak == 0 ? Colors.redAccent : (streak < 5 ? Colors.red.shade700 : Colors.yellowAccent),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 20),
                     Text(
-                      isActive ? '$streak Hari Berturut-turut' : 'Streak belum aktif',
-                      style: TextStyle(
-                        color: isActive ? Colors.white : Colors.black87,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      isActive
-                          ? 'Teruskan dengan mengisi mood atau cerita hari ini.'
-                          : 'Masukkan mood atau cerita untuk memulai streak kamu.',
-                      style: TextStyle(
-                        color: isActive ? Colors.white70 : Colors.black54,
+                      subtitleText,
+                      style: GoogleFonts.poppins(
                         fontSize: 14,
+                        color: Colors.white.withOpacity(0.9),
                         height: 1.5,
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
-              const Text(
-                'Riwayat 7 hari terakhir',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: ListView.separated(
-                  itemCount: moods.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final entry = moods[index];
-                    final day = entry['date'] as DateTime;
-                    final count = entry['count'] as int;
-                    final active = count > 0;
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: active ? Colors.white : Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(
-                          color: active ? Colors.deepPurple : Colors.grey.shade300,
+
+              const Spacer(),
+
+              // Animated Giant Flame
+              GestureDetector(
+                onTap: () {
+                  // Interactive feedback when tapping the flame
+                  _animationController.forward(from: 0.5);
+                },
+                child: AnimatedBuilder(
+                  animation: _scaleAnimation,
+                  builder: (context, child) {
+                    return Transform.scale(
+                      scale: _scaleAnimation.value,
+                      child: ShaderMask(
+                        shaderCallback: (bounds) => LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: flameColors,
+                        ).createShader(bounds),
+                        child: Icon(
+                          Icons.local_fire_department,
+                          size: 280,
+                          color: Colors.white, // Color is ignored due to ShaderMask, but required
+                          shadows: [
+                            Shadow(
+                              color: Colors.black.withOpacity(0.3),
+                              blurRadius: 30,
+                              offset: const Offset(0, 15),
+                            ),
+                          ],
                         ),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 22,
-                            backgroundColor: active ? Colors.deepPurple : Colors.grey.shade300,
-                            child: Text(
-                              _dayLabel(day),
-                              style: TextStyle(
-                                color: active ? Colors.white : Colors.black87,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${day.day}/${day.month}/${day.year}',
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  active ? '$count input mood/cerita' : 'Belum ada input',
-                                  style: TextStyle(
-                                    color: active ? Colors.black87 : Colors.black54,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Icon(
-                            active ? Icons.check_circle : Icons.remove_circle_outline,
-                            color: active ? Colors.deepPurple : Colors.grey,
-                          ),
-                        ],
                       ),
                     );
                   },
                 ),
               ),
+
+              const Spacer(flex: 2),
             ],
           ),
         ),
       ),
     );
-  }
-}
-
-extension StringCapitalization on String {
-  String capitalize() {
-    if (isEmpty) return this;
-    return substring(0, 1).toUpperCase() + substring(1);
   }
 }

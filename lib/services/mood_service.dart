@@ -63,8 +63,6 @@ class MoodService {
     required String moodLabel,
     required String feeling,
     required int emotionCode,
-    String? title,
-    String? note,
     DateTime? recordedAt,
   }) async {
     if (!LaravelSessionService.isAuthenticated) {
@@ -79,9 +77,7 @@ class MoodService {
       'mood_label': moodLabel,
       'perasaan': feeling,
       'emosi_kode': emotionCode,
-      'title': title,
-      'note': note,
-      'recorded_at': (recordedAt ?? DateTime.now()).toIso8601String(),
+      'recorded_at': (recordedAt ?? DateTime.now().toUtc()).toIso8601String(),
     };
 
     try {
@@ -117,8 +113,6 @@ class MoodService {
     required String moodLabel,
     required int emotionCode,
     String? feeling,
-    String? title,
-    String? note,
   }) async {
     if (!LaravelSessionService.isAuthenticated) {
       return {
@@ -132,8 +126,6 @@ class MoodService {
       'mood_label': moodLabel,
       'perasaan': feeling,
       'emosi_kode': emotionCode,
-      'title': title,
-      'note': note,
     };
 
     try {

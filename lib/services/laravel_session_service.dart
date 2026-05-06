@@ -51,15 +51,22 @@ class LaravelSessionService {
   static Future<void> updateUser(dynamic rawUser) async {
     if (rawUser is Map<String, dynamic>) {
       _user = Map<String, dynamic>.from(rawUser);
-      return;
-    }
-
-    if (rawUser is Map) {
+    } else if (rawUser is Map) {
       _user = Map<String, dynamic>.from(rawUser);
-      return;
+    } else {
+      _user = null;
     }
+    await _saveToPrefs();
+  }
 
-    _user = null;
+  static String get activeThemeId => _user?['active_theme']?.toString() ?? 'default';
+
+  static List<String> get purchasedThemeIds {
+    final themes = _user?['purchased_themes'];
+    if (themes is List) {
+      return themes.map((e) => e.toString()).toList();
+    }
+    return ['default'];
   }
 
   static String? get accessToken => _accessToken;

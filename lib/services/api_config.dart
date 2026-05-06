@@ -19,9 +19,10 @@ class ApiConfig {
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        return 'http://10.0.2.2:8000';
+      case TargetPlatform.iOS:
+        return 'http://10.216.133.162:8000'; // IP laptop kamu saat ini
       default:
-        return 'http://127.0.0.1:8000';
+        return 'http://10.216.133.162:8000';
     }
   }
 
@@ -33,4 +34,7 @@ class ApiConfig {
   static String get moodsUrl => '$baseUrl/api/moods';
   static String moodByIdUrl(String id) => '$baseUrl/api/moods/$id';
   static String get storiesUrl => '$baseUrl/api/stories';
+  static String get updatePointsUrl => '$baseUrl/api/user/update-points';
+  static String get buyThemeUrl => '$baseUrl/api/user/buy-theme';
+  static String get setActiveThemeUrl => '$baseUrl/api/user/set-active-theme';
 }

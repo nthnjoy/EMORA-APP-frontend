@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/mood_service.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../services/laravel_session_service.dart';
 import 'feeling_page.dart';
 
 class MoodPage extends StatefulWidget {
@@ -10,262 +11,410 @@ class MoodPage extends StatefulWidget {
 }
 
 class _MoodPageState extends State<MoodPage> {
-  String? selectedMood;
-  String? selectedFeeling;
-  bool isSavingMood = false;
+  int _selectedMoodIndex = 0;
+  late PageController _pageController;
+  // Large multiplier to allow "infinite" scrolling in both directions
+  static const int _infiniteMultiplier = 1000;
+  late int _initialPage;
 
-  final List<Map<String, dynamic>> moods = [
-    {
-      'emoji': '😊',
-      'label': 'Senang',
-      'textColor': const Color(0xFFF4A300),
-      'borderColor': const Color(0xFFF4A300),
-      'bgColor': const Color(0xFFFFF4CC),
-    },
-    {
-      'emoji': '😡',
-      'label': 'Marah',
-      'textColor': const Color(0xFFFF4D00),
-      'borderColor': const Color(0xFFFF4D00),
-      'bgColor': const Color(0xFFFFD9D1),
-    },
-    {
-      'emoji': '😢',
-      'label': 'Sedih',
-      'textColor': const Color(0xFF3366FF),
-      'borderColor': const Color(0xFF3366FF),
-      'bgColor': const Color(0xFFE3EBFF),
-    },
-    {
-      'emoji': '😨',
-      'label': 'Takut',
-      'textColor': const Color(0xFF8E44FF),
-      'borderColor': const Color(0xFF8E44FF),
-      'bgColor': const Color(0xFFEBDFFF),
-    },
-    {
-      'emoji': '😐',
-      'label': 'Biasa',
-      'textColor': const Color(0xFF37474F),
-      'borderColor': const Color(0xFF37474F),
-      'bgColor': const Color(0xFFE5E5E5),
-    },
-    {
-      'emoji': '😱',
-      'label': 'Terkejut',
-      'textColor': const Color(0xFFFF6A00),
-      'borderColor': const Color(0xFFFF6A00),
-      'bgColor': const Color(0xFFFFE3D1),
-    },
-    {
-      'emoji': '🤢',
-      'label': 'Jijik',
-      'textColor': const Color(0xFF5E8C00),
-      'borderColor': const Color(0xFF5E8C00),
-      'bgColor': const Color(0xFFDCE9C7),
-    },
-  ];
-
-  Future<void> goToFeelingPage(String mood) async {
-    final result = await Navigator.push<String>(
-      context,
-      MaterialPageRoute(builder: (_) => FeelingPage(selectedMood: mood)),
-    );
-
-    if (result != null) {
-      setState(() {
-        selectedMood = mood;
-        selectedFeeling = result;
-      });
-
-      await saveMoodSelection();
-    }
-  }
-
-  int _moodCodeFromLabel(String moodLabel) {
-    switch (moodLabel.toLowerCase()) {
-      case 'senang':
-        return 1;
-      case 'marah':
-        return 2;
-      case 'sedih':
-        return 3;
-      case 'takut':
-        return 4;
-      case 'biasa':
-        return 5;
-      case 'terkejut':
-        return 6;
-      case 'jijik':
-        return 7;
-      default:
-        return 5;
-    }
-  }
-
-  Future<void> saveMoodSelection() async {
-    if (selectedMood == null || selectedFeeling == null) {
-      return;
-    }
-
-    setState(() => isSavingMood = true);
-
-    final result = await MoodService.createMood(
-      moodLabel: selectedMood!,
-      feeling: selectedFeeling!,
-      emotionCode: _moodCodeFromLabel(selectedMood!),
-      note: null,
-      title: null,
-    );
-
-    if (!mounted) {
-      return;
-    }
-
-    setState(() => isSavingMood = false);
-
-    if (result['success'] == true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Mood berhasil disimpan ke MongoDB')),
-      );
-      Future.delayed(const Duration(milliseconds: 500), () {
-        if (mounted) {
-          Navigator.pop(context);
-        }
-      });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result['message'] ?? 'Gagal menyimpan mood')),
-      );
-    }
+  @override
+  void initState() {
+    super.initState();
+    // Start at a large offset so user can scroll left from the first item
+    _initialPage = _infiniteMultiplier ~/ 2 * 7; // multiple of moods.length
+    _pageController =
+        PageController(initialPage: _initialPage, viewportFraction: 0.6);
   }
 
   @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  final List<Map<String, dynamic>> moods = [
+    {
+      'image': 'assets/image/senang.png',
+      'label': 'Senang',
+      'description':
+          'Rasa Senang adalah reaksi emosional terhadap pencapaian tujuan atau pengalaman yang menyenangkan, yang memotivasi individu untuk mengulangi perilaku yang menimbulkan kepuasan tersebut.',
+      'gradientStart': const Color(0xFFFFF2B2), // Pastel Yellow
+      'gradientEnd': const Color(0xFFF3C766),
+      'textColor': const Color(0xFF8C6415),
+    },
+    {
+      'image': 'assets/image/antusias.png',
+      'label': 'Antusias',
+      'description':
+          'Rasa Antusias adalah perasaan gairah atau minat yang intens terhadap aktivitas tertentu, yang berfungsi memfokuskan perhatian dan meningkatkan keterlibatan dalam aktivitas tersebut.',
+      'gradientStart': const Color(0xFFF6C884), // Pastel Orange/Brown
+      'gradientEnd': const Color(0xFFC8873B),
+      'textColor': const Color(0xFF6B451A),
+    },
+    {
+      'image': 'assets/image/biasa.png',
+      'label': 'Netral',
+      'description':
+          'Rasa Netral adalah pengalaman emosional yang tidak memicu respons fisiologis atau perilaku yang spesifik.',
+      'gradientStart': const Color(0xFFE2F6E2), // Pastel Green
+      'gradientEnd': const Color(0xFF8DE191),
+      'textColor': const Color(0xFF2C6D30),
+    },
+    {
+      'image': 'assets/image/terkejut.png',
+      'label': 'Terkejut',
+      'description':
+          'Rasa Terkejut adalah emosi yang bersifat singkat dan intens, yang dapat bertransformasi menjadi emosi lain (misal takut atau senang), tergantung konteks stimulus.',
+      'gradientStart': const Color(0xFFECD8FB), // Pastel Purple
+      'gradientEnd': const Color(0xFFB878EE),
+      'textColor': const Color(0xFF5E2E88),
+    },
+    {
+      'image': 'assets/image/sedih.png',
+      'label': 'Sedih',
+      'description':
+          'Rasa Sedih adalah emosi yang ditandai dengan perasaan duka, kesedihan, atau duka cita terhadap suatu kehilangan.',
+      'gradientStart': const Color(0xFFCED9FA), // Pastel Blue
+      'gradientEnd': const Color(0xFF86A3F3),
+      'textColor': const Color(0xFF2B4791),
+    },
+    {
+      'image': 'assets/image/takut.png',
+      'label': 'Takut',
+      'description':
+          'Rasa Takut adalah emosi yang muncul sebagai respons terhadap ancaman atau bahaya yang dirasakan.',
+      'gradientStart': const Color(0xFFD0D8E1), // Pastel Grey
+      'gradientEnd': const Color(0xFF9CA6B2),
+      'textColor': const Color(0xFF3B4856),
+    },
+    {
+      'image': 'assets/image/marah.png',
+      'label': 'Marah',
+      'description':
+          'Rasa Marah adalah reaksi emosional negatif yang menunjukkan ketidakpuasan atau frustasi terhadap situasi tertentu.',
+      'gradientStart': const Color(0xFFF9CDCD), // Pastel Pink/Red
+      'gradientEnd': const Color(0xFFDF7B7B),
+      'textColor': const Color(0xFF7A2929),
+    },
+  ];
+
+  @override
   Widget build(BuildContext context) {
+    final displayName = LaravelSessionService.displayName;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pilih Mood'),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Bagaimana suasana hatimu?',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+      backgroundColor: const Color(0xFF768266),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background image
+          Image.asset(
+            'assets/image/dashbord.png',
+            fit: BoxFit.cover,
+          ),
+          // Green gradient overlay matching app theme
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0x99556B2F), // dark olive green semi-transparent
+                  Color(0xCC4A5E38), // deeper green bottom
+                ],
               ),
-              const SizedBox(height: 12),
-              const Text(
-                'Pilih satu mood yang paling sesuai dengan perasaanmu saat ini.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black87,
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 30),
-              Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 16,
-                runSpacing: 16,
-                children: moods.map((mood) {
-                  return GestureDetector(
-                    onTap: () => goToFeelingPage(mood['label']),
-                    child: Container(
-                      width: 100,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: mood['bgColor'],
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(
-                          color: mood['borderColor'],
-                          width: 2,
-                        ),
+            ),
+          ),
+          // Main content
+          SafeArea(
+            child: Column(
+              children: [
+            // Top section with search and header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Search bar
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    
+                    
+                  ),
+                  const SizedBox(height: 28),
+
+                  // Header text with name highlighted
+                  RichText(
+                    text: TextSpan(
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        height: 1.4,
                       ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            mood['emoji'],
-                            style: const TextStyle(fontSize: 40),
+                      children: [
+                        const TextSpan(
+                          text: 'Pilih emoji yang menggambarkan mood kamu, ',
+                        ),
+                        TextSpan(
+                          text: displayName.isNotEmpty
+                              ? displayName.split(' ').first
+                              : 'Kamu',
+                          style: const TextStyle(
+                            color: Color(0xFFFFC107),
+                            fontWeight: FontWeight.w800,
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            mood['label'],
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: mood['textColor'],
+                        ),
+                        const TextSpan(text: '.'),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Description
+                  const Text(
+                    'Pilih emoji di bawah yang paling menggambarkan perasaanmu saat ini, agar kami bisa memberikan bantuan yang tepat.',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      height: 1.5,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // PageView for swipeable moods
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return ListenableBuilder(
+                    listenable: _pageController,
+                    builder: (context, child) {
+                      double rawPage = _pageController.hasClients
+                          ? (_pageController.page ??
+                              _initialPage.toDouble())
+                          : _initialPage.toDouble();
+
+                      // Normalize to 0..moods.length range for visual positioning
+                      double currentPageValue = rawPage % moods.length;
+
+                      List<int> sortedIndices =
+                          List.generate(moods.length, (i) => i);
+                      sortedIndices.sort((a, b) {
+                        // Calculate shortest circular distance
+                        double distA = _circularDistance(a.toDouble(), currentPageValue, moods.length.toDouble());
+                        double distB = _circularDistance(b.toDouble(), currentPageValue, moods.length.toDouble());
+                        return distB.compareTo(distA);
+                      });
+
+                      return Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          ...sortedIndices.map((index) {
+                            final currentMood = moods[index];
+                            double diff = _circularDiff(index.toDouble(), currentPageValue, moods.length.toDouble());
+                            double absDiff = diff.abs();
+
+                            if (absDiff > 2.5) {
+                              return const SizedBox.shrink();
+                            }
+
+                            final cardWidth = constraints.maxWidth * 0.65;
+                            final cardHeight = constraints.maxHeight * 0.85;
+
+                            double scale;
+                            double offsetX;
+                            double opacity = 1.0;
+
+                            if (absDiff < 0.5) {
+                              // Center card (layer 0)
+                              double t = absDiff;
+                              scale = 1.0 - (t * 0.04);
+                              offsetX = diff * cardWidth * 0.2;
+                            } else if (absDiff < 1.5) {
+                              // Layer 1 cards
+                              double t = absDiff - 0.5;
+                              scale = 0.88 - (t * 0.04);
+                              offsetX = diff.sign *
+                                  (cardWidth * 0.25 +
+                                      (absDiff - 0.5) * cardWidth * 0.1);
+                            } else {
+                              // Layer 2 cards
+                              double t = (absDiff - 1.5).clamp(0.0, 1.0);
+                              scale = 0.76 - (t * 0.04);
+                              offsetX = diff.sign *
+                                  (cardWidth * 0.42 +
+                                      (absDiff - 1.5) * cardWidth * 0.1);
+                            }
+
+                            return Transform.translate(
+                              offset: Offset(offsetX, 0),
+                              child: Transform.scale(
+                                scale: scale,
+                                child: Opacity(
+                                  opacity: opacity,
+                                  child: Container(
+                                    width: cardWidth,
+                                    height: cardHeight,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          currentMood['gradientStart'],
+                                          currentMood['gradientEnd'],
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(24),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 24,
+                                      horizontal: 16,
+                                    ),
+                                    child: absDiff < 0.5
+                                        // ── CENTER CARD: full content ──
+                                        ? Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              // Solid thick title
+                                              Text(
+                                                currentMood['label'],
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 38,
+                                                  fontWeight: FontWeight.w900,
+                                                  color: currentMood['textColor'],
+                                                  letterSpacing: -0.5,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 16),
+                                              Image.asset(
+                                                currentMood['image'],
+                                                width: 120,
+                                                height: 120,
+                                                fit: BoxFit.contain,
+                                              ),
+                                              const SizedBox(height: 16),
+                                              Expanded(
+                                                child: SingleChildScrollView(
+                                                  child: Text(
+                                                    currentMood['description'],
+                                                    textAlign: TextAlign.center,
+                                                    style: const TextStyle(
+                                                      fontSize: 12,
+                                                      color: Colors.white,
+                                                      height: 1.5,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          )
+                                        // ── SIDE CARDS: show emoji only ──
+                                        : Center(
+                                            child: Image.asset(
+                                              currentMood['image'],
+                                              width: 80, // slightly smaller emoji for background cards
+                                              height: 80,
+                                              fit: BoxFit.contain,
+                                            ),
+                                          ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+
+                          // Invisible PageView to capture gestures (infinite)
+                          Positioned.fill(
+                            child: PageView.builder(
+                              controller: _pageController,
+                              physics: const BouncingScrollPhysics(),
+                              onPageChanged: (index) {
+                                setState(() {
+                                  _selectedMoodIndex = index % moods.length;
+                                });
+                              },
+                              // No itemCount = infinite scrolling
+                              itemBuilder: (context, index) {
+                                return const SizedBox.expand();
+                              },
                             ),
                           ),
                         ],
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+
+            // Bottom section with button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              child: Center(
+                child: SizedBox(
+                  height: 48,
+                  width: 160,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      String selectedMood =
+                          moods[_selectedMoodIndex]['label'];
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              FeelingPage(selectedMood: selectedMood),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(28),
+                      ),
+                      elevation: 4,
+                    ),
+                    child: const Text(
+                      'Lanjutkan',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF2E7D32),
                       ),
                     ),
-                  );
-                }).toList(),
-              ),
-              if (selectedMood != null && selectedFeeling != null) ...[
-                const SizedBox(height: 30),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Colors.blue.shade200),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Pilihan Kamu:',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Mood: $selectedMood',
-                        style: const TextStyle(fontSize: 13),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Perasaan: $selectedFeeling',
-                        style: const TextStyle(fontSize: 13),
-                      ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'Sedang disimpan otomatis...',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ],
                   ),
                 ),
-              ],
-            ],
-          ),
+              ),
+            ),
+          ],
         ),
+          ),
+        ],
       ),
     );
   }
-}
 
+  /// Calculate the shortest circular distance (always positive)
+  double _circularDistance(double a, double b, double length) {
+    double diff = (a - b) % length;
+    if (diff > length / 2) diff -= length;
+    if (diff < -length / 2) diff += length;
+    return diff.abs();
+  }
+
+  /// Calculate the signed circular difference (for positioning left/right)
+  double _circularDiff(double a, double b, double length) {
+    double diff = (a - b) % length;
+    if (diff > length / 2) diff -= length;
+    if (diff < -length / 2) diff += length;
+    return diff;
+  }
+}

@@ -99,6 +99,83 @@ class UserService {
     return headers;
   }
 
+  static Future<Map<String, dynamic>> updateUserPoints(int points) async {
+    if (!LaravelSessionService.isAuthenticated) {
+      return {
+        'success': false,
+        'status_code': 401,
+        'message': 'Sesi login tidak ditemukan. Silakan login ulang.',
+      };
+    }
+
+    try {
+      final response = await http
+          .post(
+            Uri.parse(ApiConfig.updatePointsUrl),
+            headers: _headers(),
+            body: jsonEncode({'points': points}),
+          )
+          .timeout(const Duration(seconds: 20));
+
+      return _parseResponse(
+        response,
+        defaultErrorMessage: 'Gagal update poin.',
+      );
+    } on TimeoutException {
+      return {
+        'success': false,
+        'status_code': 0,
+        'message': 'Timeout saat update poin.',
+      };
+    } catch (_) {
+      return {
+        'success': false,
+        'status_code': 0,
+        'message': 'Tidak dapat terhubung ke backend Laravel.',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> buyTheme(String themeId, int cost) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse(ApiConfig.buyThemeUrl),
+            headers: _headers(),
+            body: jsonEncode({'theme_id': themeId, 'cost': cost}),
+          )
+          .timeout(const Duration(seconds: 20));
+
+      final parsed = _parseResponse(response, defaultErrorMessage: 'Gagal membeli tema.');
+      if (parsed['success'] == true) {
+        await LaravelSessionService.updateUser(parsed['user']);
+      }
+      return parsed;
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  static Future<Map<String, dynamic>> setActiveTheme(String themeId) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse(ApiConfig.setActiveThemeUrl),
+            headers: _headers(),
+            body: jsonEncode({'theme_id': themeId}),
+          )
+          .timeout(const Duration(seconds: 20));
+
+      final parsed = _parseResponse(response, defaultErrorMessage: 'Gagal memasang tema.');
+      if (parsed['success'] == true) {
+        await LaravelSessionService.updateUser(parsed['user']);
+      }
+      return parsed;
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
   static Map<String, dynamic> _parseResponse(
     http.Response response, {
     required String defaultErrorMessage,
@@ -113,7 +190,8 @@ class UserService {
     }
 
     final isHttpOk = response.statusCode >= 200 && response.statusCode < 300;
-    final success = isHttpOk && bodyJson['success'] == true;
+    // Some endpoints might not return 'success' field, so we fallback to HTTP status
+    final success = isHttpOk && (bodyJson['success'] ?? true);
 
     return {
       'success': success,
@@ -122,7 +200,9 @@ class UserService {
           (bodyJson['message'] ?? (success ? 'OK' : defaultErrorMessage))
               .toString(),
       'user': bodyJson['user'],
+      'data': bodyJson['data'],
       'raw': bodyJson,
     };
   }
 }
+

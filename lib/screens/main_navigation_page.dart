@@ -1,51 +1,95 @@
 import 'package:flutter/material.dart';
 import 'dashboard_page.dart';
+import 'self_care_page.dart';
 import 'mood_calender_page.dart';
-import 'counseling_page.dart';
 import 'profile_page.dart';
 
 class MainNavigationPage extends StatefulWidget {
   const MainNavigationPage({super.key});
 
+  static MainNavigationPageState? of(BuildContext context) =>
+      context.findAncestorStateOfType<MainNavigationPageState>();
+
   @override
-  State<MainNavigationPage> createState() => _MainNavigationPageState();
+  State<MainNavigationPage> createState() => MainNavigationPageState();
 }
 
-class _MainNavigationPageState extends State<MainNavigationPage> {
+class MainNavigationPageState extends State<MainNavigationPage> {
   int _selectedIndex = 0;
 
-  final List<Widget> _pages = const [
-    DashboardPage(),
-    MoodCalendarPage(),
-    CounselingPage(),
-    ProfilePage(),
+  late final List<Widget> _pages = [
+    const DashboardPage(),
+    SelfCarePage(onBackToDashboard: () => switchTab(0)),
+    const MoodCalendarPage(),
+    const ProfilePage(),
   ];
 
   void _onItemTapped(int index) {
+    if (_selectedIndex == index) return;
     setState(() {
       _selectedIndex = index;
     });
   }
 
+  void switchTab(int index) => _onItemTapped(index);
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Beranda"),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month),
-            label: "Riwayat",
+    return PopScope(
+      canPop: _selectedIndex == 0,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && _selectedIndex != 0) {
+          _onItemTapped(0);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.grey.shade100,
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: _pages,
+        ),
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(32),
+              topRight: Radius.circular(32),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 15,
+                offset: const Offset(0, -5),
+              ),
+            ],
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Konseling"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),
-        ],
+          child: ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(32),
+              topRight: Radius.circular(32),
+            ),
+            child: BottomNavigationBar(
+              currentIndex: _selectedIndex,
+              onTap: _onItemTapped,
+              backgroundColor: Colors.white,
+              selectedItemColor: Theme.of(context).primaryColor,
+              unselectedItemColor: Theme.of(context).primaryColor.withOpacity(0.4),
+              showSelectedLabels: true,
+              showUnselectedLabels: true,
+              type: BottomNavigationBarType.fixed,
+              elevation: 0,
+              iconSize: 24,
+              selectedFontSize: 10,
+              unselectedFontSize: 10,
+              items: const [
+                BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: "Beranda"),
+                BottomNavigationBarItem(icon: Icon(Icons.extension), label: "Self-Care"),
+                BottomNavigationBarItem(icon: Icon(Icons.calendar_today_rounded), label: "Riwayat"),
+                BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: "Profil"),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
