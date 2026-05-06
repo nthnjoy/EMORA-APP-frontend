@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/laravel_session_service.dart';
 import '../services/user_service.dart';
+import '../utils/gender_dialog.dart';
 import 'login_page.dart';
 import 'daily_boost_page.dart'; // Updated
 import 'mood_calender_page.dart';
@@ -379,28 +380,33 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 45.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 90,
-            child: Text(
-              label,
-              style: const TextStyle(fontSize: 11, color: Colors.black87),
+  Widget _buildInfoRow(String label, String value, {VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 45.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 90,
+              child: Text(
+                label,
+                style: const TextStyle(fontSize: 11, color: Colors.black87),
+              ),
             ),
-          ),
-          const Text(':', style: TextStyle(fontSize: 11, color: Colors.black87)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(fontSize: 11, color: Colors.black87),
+            const Text(':', style: TextStyle(fontSize: 11, color: Colors.black87)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                value,
+                style: const TextStyle(fontSize: 11, color: Colors.black87),
+              ),
             ),
-          ),
-        ],
+            if (onTap != null)
+              const Icon(Icons.edit, size: 12, color: Colors.grey),
+          ],
+        ),
       ),
     );
   }
@@ -456,6 +462,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final prodi = user?['prodi']?.toString() ?? '-';
     final angkatan = user?['angkatan']?.toString() ?? '-';
     final asrama = user?['asrama']?.toString() ?? '-';
+    final gender = user?['jenis_kelamin']?.toString() ?? '-';
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -535,6 +542,14 @@ class _ProfilePageState extends State<ProfilePage> {
               _buildInfoRow('Email', email),
               _buildInfoRow('Angkatan', angkatan),
               _buildInfoRow('Asrama', asrama),
+              _buildInfoRow(
+                'Jenis Kelamin', 
+                gender, 
+                onTap: () async {
+                  await GenderDialog.show(context);
+                  refreshProfile();
+                },
+              ),
               const SizedBox(height: 30),
               _buildMenuButton(Icons.brush, 'Tema', onTap: _showThemeModal),
               _buildMenuButton(Icons.stars, 'Poin', onTap: _showPoinModal),

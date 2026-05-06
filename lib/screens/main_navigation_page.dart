@@ -3,6 +3,8 @@ import 'dashboard_page.dart';
 import 'self_care_page.dart';
 import 'mood_calender_page.dart';
 import 'profile_page.dart';
+import '../services/laravel_session_service.dart';
+import '../utils/gender_dialog.dart';
 
 class MainNavigationPage extends StatefulWidget {
   const MainNavigationPage({super.key});
@@ -23,6 +25,20 @@ class MainNavigationPageState extends State<MainNavigationPage> {
     const MoodCalendarPage(),
     const ProfilePage(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkGender();
+    });
+  }
+
+  void _checkGender() {
+    if (!LaravelSessionService.hasGender) {
+      GenderDialog.show(context);
+    }
+  }
 
   void _onItemTapped(int index) {
     if (_selectedIndex == index) return;

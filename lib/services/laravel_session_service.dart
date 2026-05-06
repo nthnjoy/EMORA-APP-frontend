@@ -69,6 +69,9 @@ class LaravelSessionService {
     return ['default'];
   }
 
+  static String? get gender => _user?['jenis_kelamin']?.toString();
+  static bool get hasGender => gender != null && gender!.isNotEmpty && gender != 'null';
+
   static String? get accessToken => _accessToken;
   static String? get tokenType => _tokenType;
   static String? get tokenSource => _tokenSource;

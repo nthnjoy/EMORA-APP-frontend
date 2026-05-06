@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/mood_service.dart';
 import '../services/laravel_session_service.dart';
+import '../utils/ai_dialog.dart';
 import 'story_page.dart';
 
 class FeelingPage extends StatefulWidget {
@@ -257,9 +258,11 @@ class _FeelingPageState extends State<FeelingPage> {
     setState(() => isSending = false);
 
     if (result['success'] == true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Mood dan perasaan berhasil dikirim.')),
-      );
+      final feedback = result['ai_feedback'] ?? 'Terima kasih sudah berbagi perasaanmu hari ini!';
+      
+      await AiDialog.show(context, feedback);
+      
+      if (!mounted) return;
       Navigator.popUntil(context, (route) => route.isFirst);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
