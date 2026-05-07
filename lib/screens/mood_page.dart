@@ -337,7 +337,7 @@ class _MoodPageState extends State<MoodPage> {
                             child: PageView.builder(
                               controller: _pageController,
                               physics: const BouncingScrollPhysics(),
-                              onPageChanged: (index) {
+                               onPageChanged: (index) {
                                 setState(() {
                                   _selectedMoodIndex = index % moods.length;
                                 });

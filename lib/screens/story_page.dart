@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/story_service.dart';
 import '../services/laravel_session_service.dart';
+import '../utils/ai_dialog.dart';
 
 class StoryPage extends StatefulWidget {
   const StoryPage({super.key});
@@ -32,9 +33,11 @@ class _StoryPageState extends State<StoryPage> {
     setState(() => _isSending = false);
     
     if (result['success'] == true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cerita kamu berhasil dikirim.')),
-      );
+      final feedback = result['ai_feedback'] ?? 'Cerita kamu sangat berharga. Terima kasih sudah berbagi!';
+      
+      await AiDialog.show(context, feedback);
+      
+      if (!mounted) return;
       _storyController.clear();
       Navigator.of(context).pop(true);
     } else {

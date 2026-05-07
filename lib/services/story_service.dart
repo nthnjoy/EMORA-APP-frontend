@@ -125,6 +125,7 @@ class StoryService {
       'message':
           (bodyJson['message'] ?? (success ? 'OK' : defaultErrorMessage))
               .toString(),
+      'ai_feedback': bodyJson['ai_feedback'],
       'data': bodyJson['data'],
       'raw': bodyJson,
     };
