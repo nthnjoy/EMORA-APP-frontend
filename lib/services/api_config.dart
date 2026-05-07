@@ -20,9 +20,9 @@ class ApiConfig {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
-        return 'http://10.216.133.162:8000'; // IP laptop kamu saat ini
+        return 'http://10.102.248.162:8000'; // IP laptop kamu saat ini
       default:
-        return 'http://10.216.133.162:8000';
+        return 'http://10.102.248.162:8000';
     }
   }
 
