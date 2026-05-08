@@ -126,4 +126,21 @@ class UserService {
       return {'success': false, 'message': 'Terjadi kesalahan koneksi'};
     }
   }
+
+  static Future<Map<String, dynamic>> fetchModules() async {
+    try {
+      final response = await http.get(
+        Uri.parse(ApiConfig.modulesUrl),
+        headers: _headers(),
+      ).timeout(const Duration(seconds: 10));
+
+      final result = jsonDecode(response.body);
+      if (response.statusCode == 200 && result['success'] == true) {
+        return {'success': true, 'data': result['data']};
+      }
+      return {'success': false, 'message': result['message'] ?? 'Gagal memuat modul'};
+    } catch (e) {
+      return {'success': false, 'message': 'Kesalahan koneksi'};
+    }
+  }
 }

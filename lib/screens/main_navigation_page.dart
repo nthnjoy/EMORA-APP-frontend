@@ -34,9 +34,12 @@ class MainNavigationPageState extends State<MainNavigationPage> {
     });
   }
 
-  void _checkGender() {
+  Future<void> _checkGender() async {
     if (!LaravelSessionService.hasGender) {
-      GenderDialog.show(context);
+      await GenderDialog.show(context);
+      if (mounted) {
+        setState(() {});
+      }
     }
   }
 

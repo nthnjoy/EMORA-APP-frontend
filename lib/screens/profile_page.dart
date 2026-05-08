@@ -20,13 +20,14 @@ class _ProfilePageState extends State<ProfilePage> {
   bool isLoading = false;
   bool isLoggingOut = false;
   String? errorMessage;
-  Map<String, dynamic>? user;
+  // Removed local user variable to avoid stale data
+  // Map<String, dynamic>? user;
   int totalPoints = 0;
 
   @override
   void initState() {
     super.initState();
-    user = LaravelSessionService.user;
+    // user = LaravelSessionService.user; // Removed local assignment
     _loadPoints();
     refreshProfile();
   }
@@ -50,9 +51,7 @@ class _ProfilePageState extends State<ProfilePage> {
     if (!mounted) return;
 
     if (result['success'] == true) {
-      setState(() {
-        user = LaravelSessionService.user;
-      });
+      setState(() {}); // Just refresh the UI, build() will use the latest from LaravelSessionService
       await _loadPoints();
     } else {
       setState(() {
@@ -456,13 +455,14 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     final displayName = LaravelSessionService.displayName;
-    final username = user?['username']?.toString() ?? '-';
-    final nim = user?['nim']?.toString() ?? '-';
-    final email = user?['email']?.toString() ?? '-';
-    final prodi = user?['prodi']?.toString() ?? '-';
-    final angkatan = user?['angkatan']?.toString() ?? '-';
-    final asrama = user?['asrama']?.toString() ?? '-';
-    final gender = user?['jenis_kelamin']?.toString() ?? '-';
+    final currentUser = LaravelSessionService.user;
+    final username = currentUser?['username']?.toString() ?? '-';
+    final nim = currentUser?['nim']?.toString() ?? '-';
+    final email = currentUser?['email']?.toString() ?? '-';
+    final prodi = currentUser?['prodi']?.toString() ?? '-';
+    final angkatan = currentUser?['angkatan']?.toString() ?? '-';
+    final asrama = currentUser?['asrama']?.toString() ?? '-';
+    final gender = currentUser?['jenis_kelamin']?.toString() ?? '-';
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,

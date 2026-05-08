@@ -37,4 +37,5 @@ class ApiConfig {
   static String get updatePointsUrl => '$baseUrl/api/user/update-points';
   static String get buyThemeUrl => '$baseUrl/api/user/buy-theme';
   static String get setActiveThemeUrl => '$baseUrl/api/user/set-active-theme';
+  static String get modulesUrl => '$baseUrl/api/modules';
 }
