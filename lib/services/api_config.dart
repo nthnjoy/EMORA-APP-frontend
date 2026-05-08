@@ -14,15 +14,15 @@ class ApiConfig {
     }
 
     if (kIsWeb) {
-      return 'http://127.0.0.1:8000';
+      return 'https://dollar-fiftieth-appease.ngrok-free.dev';
     }
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
-        return 'http://10.102.248.162:8000'; // IP laptop kamu saat ini
+        return 'https://dollar-fiftieth-appease.ngrok-free.dev';
       default:
-        return 'http://10.102.248.162:8000';
+        return 'https://dollar-fiftieth-appease.ngrok-free.dev';
     }
   }
 
