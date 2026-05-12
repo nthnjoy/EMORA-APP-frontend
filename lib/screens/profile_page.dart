@@ -4,7 +4,7 @@ import '../services/laravel_session_service.dart';
 import '../services/user_service.dart';
 import '../utils/gender_dialog.dart';
 import 'login_page.dart';
-import 'daily_boost_page.dart'; // Updated
+import 'daily_boost_page.dart';
 import 'mood_calender_page.dart';
 import '../utils/theme_colors.dart';
 import '../services/theme_manager.dart';
@@ -35,9 +35,11 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _loadPoints() async {
     final sessionUser = LaravelSessionService.user;
     final sessionPoints = sessionUser != null ? (sessionUser['point'] ?? 0) : 0;
-    
+
     setState(() {
-      totalPoints = sessionPoints is int ? sessionPoints : int.tryParse(sessionPoints.toString()) ?? 0;
+      totalPoints = sessionPoints is int
+          ? sessionPoints
+          : int.tryParse(sessionPoints.toString()) ?? 0;
     });
   }
 
@@ -51,7 +53,9 @@ class _ProfilePageState extends State<ProfilePage> {
     if (!mounted) return;
 
     if (result['success'] == true) {
-      setState(() {}); // Just refresh the UI, build() will use the latest from LaravelSessionService
+      setState(
+        () {},
+      ); // Just refresh the UI, build() will use the latest from LaravelSessionService
       await _loadPoints();
     } else {
       setState(() {
@@ -116,17 +120,21 @@ class _ProfilePageState extends State<ProfilePage> {
                   const SizedBox(height: 10),
                   Text(
                     'Poin kamu: $currentPoints',
-                    style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: Colors.orange,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 20),
                   Expanded(
                     child: GridView.builder(
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 15,
-                        mainAxisSpacing: 15,
-                        childAspectRatio: 1.2,
-                      ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 15,
+                            mainAxisSpacing: 15,
+                            childAspectRatio: 1.2,
+                          ),
                       itemCount: ThemeColors.allThemes.length,
                       itemBuilder: (context, index) {
                         final theme = ThemeColors.allThemes[index];
@@ -138,7 +146,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: isActive ? theme.color : Colors.grey.shade200,
+                              color: isActive
+                                  ? theme.color
+                                  : Colors.grey.shade200,
                               width: isActive ? 3 : 1,
                             ),
                             boxShadow: [
@@ -146,7 +156,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 color: theme.color.withOpacity(0.1),
                                 blurRadius: 4,
                                 offset: const Offset(0, 2),
-                              )
+                              ),
                             ],
                           ),
                           child: Column(
@@ -163,66 +173,116 @@ class _ProfilePageState extends State<ProfilePage> {
                               const SizedBox(height: 8),
                               Text(
                                 theme.name,
-                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               const SizedBox(height: 4),
                               if (!isOwned)
                                 Text(
                                   '${theme.price} Poin',
-                                  style: const TextStyle(fontSize: 10, color: Colors.grey),
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.grey,
+                                  ),
                                 ),
                               const SizedBox(height: 8),
                               SizedBox(
                                 height: 28,
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: isActive 
-                                        ? Colors.grey 
-                                        : (isOwned ? theme.color : Colors.orange),
+                                    backgroundColor: isActive
+                                        ? Colors.grey
+                                        : (isOwned
+                                              ? theme.color
+                                              : Colors.orange),
                                     foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
                                     elevation: 0,
                                   ),
-                                  onPressed: isActive ? null : () async {
-                                    if (isOwned) {
-                                      final res = await UserService.setActiveTheme(theme.id);
-                                      if (res['success']) {
-                                        ThemeManager().updateTheme(theme.id);
-                                        setModalState(() {});
-                                        setState(() {});
-                                      } else {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text(res['message'])),
-                                        );
-                                      }
-                                    } else {
-                                      if (currentPoints < theme.price) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(content: Text('Poin tidak cukup!')),
-                                        );
-                                        return;
-                                      }
-                                      
-                                      final res = await UserService.buyTheme(theme.id, theme.price);
-                                      if (res['success']) {
-                                        ThemeManager().updateTheme(theme.id);
-                                        await refreshProfile();
-                                        setModalState(() {});
-                                        setState(() {});
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(content: Text('Berhasil membeli tema!')),
-                                        );
-                                      } else {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text(res['message'])),
-                                        );
-                                      }
-                                    }
-                                  },
+                                  onPressed: isActive
+                                      ? null
+                                      : () async {
+                                          if (isOwned) {
+                                            final res =
+                                                await UserService.setActiveTheme(
+                                                  theme.id,
+                                                );
+                                            if (res['success']) {
+                                              ThemeManager().updateTheme(
+                                                theme.id,
+                                              );
+                                              setModalState(() {});
+                                              setState(() {});
+                                            } else {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(res['message']),
+                                                ),
+                                              );
+                                            }
+                                          } else {
+                                            if (currentPoints < theme.price) {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                    'Poin tidak cukup!',
+                                                  ),
+                                                ),
+                                              );
+                                              return;
+                                            }
+
+                                            final res =
+                                                await UserService.buyTheme(
+                                                  theme.id,
+                                                  theme.price,
+                                                );
+                                            if (res['success']) {
+                                              ThemeManager().updateTheme(
+                                                theme.id,
+                                              );
+                                              await refreshProfile();
+                                              setModalState(() {});
+                                              setState(() {});
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                    'Berhasil membeli tema!',
+                                                  ),
+                                                ),
+                                              );
+                                            } else {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(res['message']),
+                                                ),
+                                              );
+                                            }
+                                          }
+                                        },
                                   child: Text(
-                                    isActive ? 'Aktif' : (isOwned ? 'Pakai' : 'Beli'),
-                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                                    isActive
+                                        ? 'Aktif'
+                                        : (isOwned ? 'Pakai' : 'Beli'),
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -267,7 +327,10 @@ class _ProfilePageState extends State<ProfilePage> {
               const SizedBox(height: 40),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 30),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 24,
+                  horizontal: 30,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF3C641),
                   borderRadius: BorderRadius.circular(100),
@@ -298,7 +361,10 @@ class _ProfilePageState extends State<ProfilePage> {
                               decoration: BoxDecoration(
                                 color: const Color(0xFFF6A039),
                                 shape: BoxShape.circle,
-                                border: Border.all(color: Colors.black87, width: 1),
+                                border: Border.all(
+                                  color: Colors.black87,
+                                  width: 1,
+                                ),
                               ),
                             ),
                           ),
@@ -311,9 +377,16 @@ class _ProfilePageState extends State<ProfilePage> {
                               decoration: BoxDecoration(
                                 color: const Color(0xFFF6A039),
                                 shape: BoxShape.circle,
-                                border: Border.all(color: Colors.black87, width: 1),
+                                border: Border.all(
+                                  color: Colors.black87,
+                                  width: 1,
+                                ),
                               ),
-                              child: const Icon(Icons.star_border, color: Colors.black87, size: 24),
+                              child: const Icon(
+                                Icons.star_border,
+                                color: Colors.black87,
+                                size: 24,
+                              ),
                             ),
                           ),
                         ],
@@ -394,7 +467,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 style: const TextStyle(fontSize: 11, color: Colors.black87),
               ),
             ),
-            const Text(':', style: TextStyle(fontSize: 11, color: Colors.black87)),
+            const Text(
+              ':',
+              style: TextStyle(fontSize: 11, color: Colors.black87),
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -485,7 +561,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         fit: BoxFit.cover,
                       ),
                       borderRadius: BorderRadius.vertical(
-                        bottom: Radius.elliptical(MediaQuery.of(context).size.width, 100),
+                        bottom: Radius.elliptical(
+                          MediaQuery.of(context).size.width,
+                          100,
+                        ),
                       ),
                     ),
                     child: Container(
@@ -499,7 +578,10 @@ class _ProfilePageState extends State<ProfilePage> {
                           ],
                         ),
                         borderRadius: BorderRadius.vertical(
-                          bottom: Radius.elliptical(MediaQuery.of(context).size.width, 100),
+                          bottom: Radius.elliptical(
+                            MediaQuery.of(context).size.width,
+                            100,
+                          ),
                         ),
                       ),
                     ),
@@ -508,7 +590,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     top: 130,
                     child: CircleAvatar(
                       radius: 40,
-                      backgroundColor: Theme.of(context).primaryColor.withOpacity(0.2),
+                      backgroundColor: Theme.of(
+                        context,
+                      ).primaryColor.withOpacity(0.2),
                       child: ClipOval(
                         child: Image.asset(
                           'assets/image/boy.png',
@@ -516,7 +600,11 @@ class _ProfilePageState extends State<ProfilePage> {
                           height: 60,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
-                              const Icon(Icons.person, size: 40, color: Colors.orange),
+                              const Icon(
+                                Icons.person,
+                                size: 40,
+                                color: Colors.orange,
+                              ),
                         ),
                       ),
                     ),
@@ -543,8 +631,8 @@ class _ProfilePageState extends State<ProfilePage> {
               _buildInfoRow('Angkatan', angkatan),
               _buildInfoRow('Asrama', asrama),
               _buildInfoRow(
-                'Jenis Kelamin', 
-                gender, 
+                'Jenis Kelamin',
+                gender,
                 onTap: () async {
                   await GenderDialog.show(context);
                   refreshProfile();
@@ -555,19 +643,21 @@ class _ProfilePageState extends State<ProfilePage> {
               _buildMenuButton(Icons.stars, 'Poin', onTap: _showPoinModal),
               _buildMenuButton(Icons.error_outline, 'Panduan'),
               _buildMenuButton(
-                Icons.history, 
-                'Riwayat', 
+                Icons.history,
+                'Riwayat',
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const MoodCalendarPage()),
+                    MaterialPageRoute(
+                      builder: (context) => const MoodCalendarPage(),
+                    ),
                   );
                 },
               ),
               const SizedBox(height: 15),
               _buildMenuButton(
-                Icons.logout, 
-                isLoggingOut ? 'Keluar...' : 'Keluar Akun', 
+                Icons.logout,
+                isLoggingOut ? 'Keluar...' : 'Keluar Akun',
                 onTap: isLoggingOut ? null : logout,
               ),
               const SizedBox(height: 40),
