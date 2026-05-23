@@ -14,15 +14,15 @@ class ApiConfig {
     }
 
     if (kIsWeb) {
-      return 'http://127.0.0.1:8000';
+      return 'https://dollar-fiftieth-appease.ngrok-free.dev';
     }
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
-        return 'http://10.0.2.2:8000'; // Standard localhost alias for Android emulator
+        return 'https://dollar-fiftieth-appease.ngrok-free.dev';
       default:
-        return 'http://127.0.0.1:8000';
+        return 'https://dollar-fiftieth-appease.ngrok-free.dev';
     }
   }
 

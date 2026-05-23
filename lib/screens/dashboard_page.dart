@@ -3,7 +3,6 @@ import '../services/mood_service.dart';
 import '../services/story_service.dart';
 import '../services/laravel_session_service.dart';
 import 'activity_page.dart';
-import 'ai_page.dart';
 import 'music_page.dart';
 import 'notification_page.dart';
 import 'profile_page.dart';
@@ -314,6 +313,109 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
+  Widget _buildLayananHeroCard({
+    required String title,
+    required String subtitle,
+    required String imagePath,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
+      child: Container(
+        height: 110,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.85),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.black12, width: 0.5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: Stack(
+            children: [
+              // Character / Mascot Image aligned to right
+              Positioned(
+                right: -10,
+                bottom: -10,
+                top: -10,
+                child: Image.asset(
+                  imagePath,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              // Left Content
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(Icons.flash_on_rounded, color: Colors.amber, size: 14),
+                          SizedBox(width: 4),
+                          Text(
+                            'TANTANGAN HARIAN',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 9,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 18,
+                        shadows: [
+                          Shadow(color: Colors.black38, offset: Offset(0, 1), blurRadius: 4),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.9),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        shadows: const [
+                          Shadow(color: Colors.black38, offset: Offset(0, 1), blurRadius: 4),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeColor = Theme.of(context).primaryColor;
@@ -540,17 +642,27 @@ class _DashboardPageState extends State<DashboardPage> {
                                   children: [
                                     const Text('Layanan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22, color: Colors.black87)),
                                     const Text('Layanan dan hiburan terbaik untukmu', style: TextStyle(fontSize: 12, color: Colors.black45)),
-                                    const SizedBox(height: 5),
+                                    const SizedBox(height: 16),
+                                    
+                                    // Hero Card - Daily Boost
+                                    _buildLayananHeroCard(
+                                      title: 'Daily Boost', 
+                                      subtitle: 'Tingkatkan motivasimu dengan tantangan harian seru!',
+                                      imagePath: 'assets/image/tantangan.png', 
+                                      color: themeColor, 
+                                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DailyBoostPage())).then((_) => _reloadDashboard()),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    
+                                    // 2x2 Grid for other features
                                     GridView.count(
                                       shrinkWrap: true,
                                       physics: const NeverScrollableScrollPhysics(),
-                                      crossAxisSpacing: 10,
-                                      mainAxisSpacing: 10,
-                                      crossAxisCount: 3,
-                                      childAspectRatio: 1.05,
+                                      crossAxisSpacing: 12,
+                                      mainAxisSpacing: 12,
+                                      crossAxisCount: 2,
+                                      childAspectRatio: 1.45,
                                       children: [
-                                        _buildLayananCard(title: 'AI', imagePath: 'assets/image/AI.png', color: themeColor, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AiPage()))),
-                                        _buildLayananCard(title: 'Daily Boost', imagePath: 'assets/image/tantangan.png', color: themeColor, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DailyBoostPage())).then((_) => _reloadDashboard())),
                                         _buildLayananCard(title: 'Musik', imagePath: 'assets/image/musik.png', color: themeColor, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MusicPage()))),
                                         _buildLayananCard(title: 'Quotes', imagePath: 'assets/image/quotes.png', color: themeColor, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => QuotesPage(moods: moods, stories: stories)))),
                                         _buildLayananCard(title: 'Notifikasi', imagePath: 'assets/image/notifikasi.png', color: themeColor, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationPage()))),

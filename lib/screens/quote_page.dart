@@ -112,6 +112,9 @@ class _QuotesPageState extends State<QuotesPage> {
     final moodLabel = latestMood != null
         ? (latestMood['mood_label'] ?? '').toString().toLowerCase()
         : '';
+    final feeling = latestMood != null
+        ? (latestMood['perasaan'] ?? '').toString()
+        : '';
     final score = latestMood != null ? _calculateScore(latestMood) : null;
     final category = score != null ? _categoryFromScore(score) : null;
     final primaryColor = Theme.of(context).primaryColor;
@@ -168,7 +171,7 @@ class _QuotesPageState extends State<QuotesPage> {
                         Icon(_isLoadingAi ? Icons.sync : Icons.auto_awesome, color: Colors.white, size: 20),
                         const SizedBox(width: 8),
                         Text(
-                          _isLoadingAi ? 'AI sedang merangkai kata...' : 'Rekomendasi AI untukmu',
+                          _isLoadingAi ? 'Quotes yang cocok untuk kondisi kamu saat ini' : 'Quotes untukmu',
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
@@ -194,7 +197,7 @@ class _QuotesPageState extends State<QuotesPage> {
                           ),
                         ),
                     const SizedBox(height: 12),
-                    if (category != null)
+                    if (moodLabel.isNotEmpty || feeling.isNotEmpty)
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
@@ -202,7 +205,7 @@ class _QuotesPageState extends State<QuotesPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          'Kondisi: $category',
+                          'Mood: $moodLabel, Feeling: $feeling',
                           style: const TextStyle(
                             fontSize: 12,
                             color: Colors.white,

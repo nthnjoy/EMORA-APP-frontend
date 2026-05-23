@@ -1,166 +1,185 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../services/activity_service.dart';
 
-class ActivityPage extends StatelessWidget {
+class ActivityPage extends StatefulWidget {
   const ActivityPage({super.key});
 
-  static const List<Map<String, dynamic>> recommendations = [
-    {
-      'id': 'senang',
-      'label': 'Senang',
-      'icon': Icons.sentiment_very_satisfied_rounded,
-      'color': Color(0xFF10B981),
-      'activity': 'Bernyanyi atau menari sebentar untuk menjaga energi positif.',
-      'quote': 'Kebahagiaan adalah energi yang menular!'
-    },
-    {
-      'id': 'marah',
-      'label': 'Marah',
-      'icon': Icons.sentiment_very_dissatisfied_rounded,
-      'color': Color(0xFFEF4444),
-      'activity': 'Lakukan latihan peregangan atau jalan singkat untuk melepas ketegangan.',
-      'quote': 'Tenangkan pikiran, lepaskan beban.'
-    },
-    {
-      'id': 'sedih',
-      'label': 'Sedih',
-      'icon': Icons.sentiment_dissatisfied_rounded,
-      'color': Color(0xFF3B82F6),
-      'activity': 'Dengarkan musik relaksasi dan tulis hal yang kamu syukuri.',
-      'quote': 'Setiap air mata punya cerita, setiap senyum punya harapan.'
-    },
-    {
-      'id': 'takut',
-      'label': 'Takut',
-      'icon': Icons.wb_cloudy_rounded,
-      'color': Color(0xFFF59E0B),
-      'activity': 'Coba tarik napas dalam-dalam sambil duduk tenang selama satu menit.',
-      'quote': 'Keberanian bukan berarti tidak takut, tapi terus melangkah.'
-    },
-    {
-      'id': 'biasa',
-      'label': 'Biasa',
-      'icon': Icons.sentiment_neutral_rounded,
-      'color': Color(0xFF64748B),
-      'activity': 'Ambil waktu satu menit untuk fokus pada pernapasan dan bersyukur.',
-      'quote': 'Ketenangan adalah kunci kejernihan pikiran.'
-    },
-    {
-      'id': 'terkejut',
-      'label': 'Terkejut',
-      'icon': Icons.wb_incandescent_rounded,
-      'color': Color(0xFF8B5CF6),
-      'activity': 'Saatkan satu menit untuk merenungi apa yang terjadi dan tenangkan diri.',
-      'quote': 'Jadikan kejutan sebagai pelajaran berharga.'
-    },
-    {
-      'id': 'jijik',
-      'label': 'Jijik',
-      'icon': Icons.sick_rounded,
-      'color': Color(0xFF06B6D4),
-      'activity': 'Bergerak ringan atau buat minuman hangat untuk menenangkan tubuh.',
-      'quote': 'Beri ruang untuk kenyamanan dirimu.'
-    },
-  ];
+  @override
+  State<ActivityPage> createState() => _ActivityPageState();
+}
+
+class _ActivityPageState extends State<ActivityPage> {
+  String _selectedCategory = 'DEBUG';
+  List<WellnessActivity> _allActivities = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadActivities();
+  }
+
+  Future<void> _loadActivities() async {
+    setState(() => _isLoading = true);
+    final acts = ActivityService.getActivities();
+    setState(() {
+      _allActivities = acts;
+      _isLoading = false;
+    });
+  }
+
+  List<WellnessActivity> get _filteredActivities {
+    if (_selectedCategory == 'DEBUG') return _allActivities.where((a) => a.category == ActivityCategory.express).toList();
+    if (_selectedCategory == 'LAB') return _allActivities.where((a) => a.category == ActivityCategory.calm || a.category == ActivityCategory.growth).toList();
+    return _allActivities.where((a) => a.category == ActivityCategory.creative).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black87, size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Rekomendasi Aktivitas',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w700, color: Colors.black87, fontSize: 18),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      body: SafeArea(
-        child: ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-          physics: const BouncingScrollPhysics(),
-          itemCount: recommendations.length,
-          itemBuilder: (context, index) {
-            final item = recommendations[index];
-            final color = item['color'] as Color;
-            
-            return Container(
-              margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border(
-                      left: BorderSide(color: color, width: 6),
-                    ),
-                  ),
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: color.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(item['icon'] as IconData, color: color, size: 20),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            item['label'] as String,
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: color,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        item['activity'] as String,
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: Colors.black87,
-                          height: 1.5,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        '"${item['quote']}"',
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          color: Colors.grey.shade500,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ],
+      backgroundColor: const Color(0xFF0F172A),
+      body: _isLoading 
+        ? const Center(child: CircularProgressIndicator(color: Colors.cyanAccent))
+        : CustomScrollView(
+            slivers: [
+              _buildSliverAppBar(),
+              SliverToBoxAdapter(child: _buildCategorySelector()),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => _buildQuestCard(context, _filteredActivities[index]),
+                    childCount: _filteredActivities.length,
                   ),
                 ),
               ),
-            );
-          },
+              const SliverToBoxAdapter(child: SizedBox(height: 100)),
+            ],
+          ),
+    );
+  }
+
+  Widget _buildSliverAppBar() {
+    return SliverAppBar(
+      expandedHeight: 180,
+      pinned: true,
+      backgroundColor: const Color(0xFF0F172A),
+      elevation: 0,
+      flexibleSpace: FlexibleSpaceBar(
+        background: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('BIO-HACKER HUB', style: GoogleFonts.orbitron(color: Colors.cyanAccent, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                    const Icon(Icons.shield_rounded, color: Colors.cyanAccent, size: 28),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Text('SYSTEM STATUS: OPTIMAL', style: GoogleFonts.orbitron(color: Colors.greenAccent, fontSize: 9, letterSpacing: 1)),
+                const SizedBox(height: 8),
+                Container(
+                  height: 6,
+                  width: double.infinity,
+                  decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(10)),
+                  child: FractionallySizedBox(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: 0.75,
+                    child: Container(decoration: BoxDecoration(gradient: const LinearGradient(colors: [Colors.cyanAccent, Colors.blueAccent]), borderRadius: BorderRadius.circular(10))),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text('WELLNESS PERFORMANCE: 75%', style: GoogleFonts.orbitron(color: Colors.white60, fontSize: 8)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategorySelector() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _catItem('DEBUG', Icons.bug_report_rounded),
+          _catItem('LAB', Icons.science_rounded),
+          _catItem('DORM', Icons.nightlight_rounded),
+        ],
+      ),
+    );
+  }
+
+  Widget _catItem(String id, IconData icon) {
+    bool isSel = _selectedCategory == id;
+    return GestureDetector(
+      onTap: () => setState(() => _selectedCategory = id),
+      child: Column(
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isSel ? Colors.cyanAccent : Colors.white.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: isSel ? Colors.cyanAccent : Colors.white10),
+              boxShadow: [if(isSel) BoxShadow(color: Colors.cyanAccent.withOpacity(0.2), blurRadius: 15)],
+            ),
+            child: Icon(icon, color: isSel ? Colors.black : Colors.white60),
+          ),
+          const SizedBox(height: 8),
+          Text(id, style: GoogleFonts.orbitron(fontSize: 10, color: isSel ? Colors.cyanAccent : Colors.white24, fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuestCard(BuildContext context, WellnessActivity act) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E293B),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => act.targetView(context))),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 50, height: 50,
+                decoration: BoxDecoration(color: act.color.withOpacity(0.1), borderRadius: BorderRadius.circular(15)),
+                child: Icon(act.icon, color: act.color, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(act.title.toUpperCase(), style: GoogleFonts.orbitron(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
+                    const SizedBox(height: 4),
+                    Text(act.subtitle, style: GoogleFonts.poppins(fontSize: 11, color: Colors.white54)),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded, color: Colors.white24),
+            ],
+          ),
         ),
       ),
     );
   }
 }
+
+
+

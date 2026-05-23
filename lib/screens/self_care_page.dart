@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -68,6 +69,8 @@ class _SelfCarePageState extends State<SelfCarePage> {
   List<SelfCareModule> _allModules = [];
   List<SelfCareModule> _todayModules = [];
   bool _isLoading = true;
+  int _selectedTab = 0; // 0 for Modules, 1 for Daily Activities
+  Map<String, List<dynamic>> _dailyActivities = {};
 
   @override
   void initState() {
@@ -79,6 +82,7 @@ class _SelfCarePageState extends State<SelfCarePage> {
     await UserService.fetchCurrentUser();
     await _fetchModulesFromApi();
     await _loadSavedProgress();
+    await _loadDailyActivities();
   }
 
   Future<void> _fetchModulesFromApi() async {
@@ -128,33 +132,122 @@ class _SelfCarePageState extends State<SelfCarePage> {
     await UserService.updateUserPoints(_totalPoints);
   }
 
-  Future<void> _confirmReset() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Reset Progres?', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
-        content: Text('Status "Sudah Baca" pada semua modul akan dihapus. Kamu bisa membaca ulang semuanya dari awal.', style: GoogleFonts.poppins()),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Batal')),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Ya, Reset', style: TextStyle(color: Colors.red)),
+  Future<void> _handleRefresh() async {
+    setState(() => _isLoading = true);
+    await _initializeData();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle_rounded, color: Colors.white),
+              const SizedBox(width: 8),
+              Text('Modul dan poin berhasil diperbarui.',
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+            ],
           ),
-        ],
-      ),
-    );
+          backgroundColor: Colors.blue.shade600,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+    }
+  }
 
-    if (confirmed == true) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('self_care_completed_modules_ids');
-      setState(() {
-        _completedModules.clear();
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Progres berhasil direset.'), backgroundColor: Colors.blue),
-        );
+  Future<void> _loadDailyActivities() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? rawJson = prefs.getString('self_care_daily_activities');
+    if (rawJson != null) {
+      try {
+        final decoded = jsonDecode(rawJson);
+        if (decoded is Map<String, dynamic>) {
+          setState(() {
+            _dailyActivities = decoded.map((key, value) {
+              return MapEntry(key, List<dynamic>.from(value));
+            });
+          });
+        }
+      } catch (e) {
+        debugPrint('Error loading daily activities: $e');
       }
+    }
+  }
+
+  Future<void> _recordDailyActivity(SelfCareModule module) async {
+    final prefs = await SharedPreferences.getInstance();
+    final String todayStr = DateTime.now().toIso8601String().substring(0, 10);
+    
+    final String? rawJson = prefs.getString('self_care_daily_activities');
+    Map<String, dynamic> activities = {};
+    if (rawJson != null) {
+      try {
+        activities = jsonDecode(rawJson);
+      } catch (e) {
+        debugPrint('Error decoding daily activities: $e');
+      }
+    }
+    
+    List<dynamic> todayList = activities[todayStr] ?? [];
+    
+    bool alreadyExists = todayList.any((item) {
+      if (item is Map) {
+        return item['id'] == module.id;
+      }
+      return false;
+    });
+    
+    if (!alreadyExists) {
+      todayList.add({
+        'id': module.id,
+        'title': module.title,
+        'timestamp': DateTime.now().toIso8601String(),
+        'points': module.points,
+        'category': module.category,
+      });
+      activities[todayStr] = todayList;
+      await prefs.setString('self_care_daily_activities', jsonEncode(activities));
+      await _loadDailyActivities();
+    }
+  }
+
+  String _formatIndonesianDate(String dateStr) {
+    try {
+      final parts = dateStr.split('-');
+      if (parts.length != 3) return dateStr;
+      final year = parts[0];
+      final month = parts[1];
+      final day = int.tryParse(parts[2])?.toString() ?? parts[2];
+      
+      const months = {
+        '01': 'Januari',
+        '02': 'Februari',
+        '03': 'Maret',
+        '04': 'April',
+        '05': 'Mei',
+        '06': 'Juni',
+        '07': 'Juli',
+        '08': 'Agustus',
+        '09': 'September',
+        '10': 'Oktober',
+        '11': 'November',
+        '12': 'Desember',
+      };
+      
+      final monthName = months[month] ?? month;
+      
+      final todayStr = DateTime.now().toIso8601String().substring(0, 10);
+      if (dateStr == todayStr) {
+        return 'Hari ini';
+      }
+      
+      final yesterdayStr = DateTime.now().subtract(const Duration(days: 1)).toIso8601String().substring(0, 10);
+      if (dateStr == yesterdayStr) {
+        return 'Kemarin';
+      }
+      
+      return '$day $monthName $year';
+    } catch (e) {
+      return dateStr;
     }
   }
 
@@ -166,6 +259,7 @@ class _SelfCarePageState extends State<SelfCarePage> {
       _totalPoints += module.points;
     });
     await _saveProgress();
+    await _recordDailyActivity(module);
     if (mounted) _showSuccessSnackBar(module.points);
   }
 
@@ -220,11 +314,7 @@ class _SelfCarePageState extends State<SelfCarePage> {
                 color: Colors.white)),
         centerTitle: true,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: Colors.white70, size: 20),
-            tooltip: 'Reset Progress Membaca',
-            onPressed: () => _confirmReset(),
-          ),
+
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: Center(
@@ -259,55 +349,168 @@ class _SelfCarePageState extends State<SelfCarePage> {
                     style: GoogleFonts.poppins(color: Colors.grey),
                   ),
                 )
-              : CustomScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  slivers: [
-                    SliverToBoxAdapter(
-                      child: Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: primaryColor,
-                          borderRadius: const BorderRadius.vertical(
-                              bottom: Radius.circular(32)),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Modul Kesehatan Mental',
-                              style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Pelajari cara menjaga kesehatan mentalmu.\nScroll sampai bawah pada setiap modul untuk mendapat poin.',
-                              style: GoogleFonts.poppins(
-                                  color: Colors.white70, fontSize: 13),
-                            ),
-                            const SizedBox(height: 24),
-                            _buildProgressBanner(),
-                          ],
+              : RefreshIndicator(
+                  onRefresh: _handleRefresh,
+                  color: primaryColor,
+                  child: CustomScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(
+                      parent: BouncingScrollPhysics(),
+                    ),
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: Container(
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: primaryColor,
+                            borderRadius: const BorderRadius.vertical(
+                                bottom: Radius.circular(32)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Modul Kesehatan Mental',
+                                style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Pelajari cara menjaga kesehatan mentalmu.\nScroll sampai bawah pada setiap modul untuk mendapat poin.',
+                                style: GoogleFonts.poppins(
+                                    color: Colors.white70, fontSize: 13),
+                              ),
+                              const SizedBox(height: 24),
+                              _buildProgressBanner(),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    SliverPadding(
-                      padding: const EdgeInsets.all(20),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            final module = _todayModules[index];
-                            final isDone =
-                                _completedModules.contains(module.id);
-                            return _buildModuleCard(module, isDone);
-                          },
-                          childCount: _todayModules.length,
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          child: Container(
+                            height: 52,
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.grey.shade200),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: InkWell(
+                                    onTap: () => setState(() => _selectedTab = 0),
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: AnimatedContainer(
+                                      duration: const Duration(milliseconds: 250),
+                                      curve: Curves.easeInOut,
+                                      decoration: BoxDecoration(
+                                        color: _selectedTab == 0 ? Colors.white : Colors.transparent,
+                                        borderRadius: BorderRadius.circular(12),
+                                        boxShadow: _selectedTab == 0
+                                            ? [
+                                                BoxShadow(
+                                                  color: Colors.black.withOpacity(0.05),
+                                                  blurRadius: 10,
+                                                  offset: const Offset(0, 4),
+                                                )
+                                              ]
+                                            : [],
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.menu_book_rounded,
+                                            size: 18,
+                                            color: _selectedTab == 0 ? primaryColor : Colors.grey,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            'Modul',
+                                            style: GoogleFonts.poppins(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                              color: _selectedTab == 0 ? primaryColor : Colors.grey,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: InkWell(
+                                    onTap: () => setState(() => _selectedTab = 1),
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: AnimatedContainer(
+                                      duration: const Duration(milliseconds: 250),
+                                      curve: Curves.easeInOut,
+                                      decoration: BoxDecoration(
+                                        color: _selectedTab == 1 ? Colors.white : Colors.transparent,
+                                        borderRadius: BorderRadius.circular(12),
+                                        boxShadow: _selectedTab == 1
+                                            ? [
+                                                BoxShadow(
+                                                  color: Colors.black.withOpacity(0.05),
+                                                  blurRadius: 10,
+                                                  offset: const Offset(0, 4),
+                                                )
+                                              ]
+                                            : [],
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.history_toggle_off_rounded,
+                                            size: 18,
+                                            color: _selectedTab == 1 ? primaryColor : Colors.grey,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            'Aktivitas Harian',
+                                            style: GoogleFonts.poppins(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                              color: _selectedTab == 1 ? primaryColor : Colors.grey,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                    const SliverToBoxAdapter(child: SizedBox(height: 100)),
-                  ],
+                      if (_selectedTab == 0)
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                final module = _todayModules[index];
+                                final isDone =
+                                    _completedModules.contains(module.id);
+                                return _buildModuleCard(module, isDone);
+                              },
+                              childCount: _todayModules.length,
+                            ),
+                          ),
+                        )
+                      else
+                        _buildDailyActivitiesSliver(primaryColor),
+                      const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                    ],
+                  ),
                 ),
     );
   }
@@ -587,6 +790,245 @@ class _SelfCarePageState extends State<SelfCarePage> {
         behavior: SnackBarBehavior.floating,
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
+  Widget _buildDailyActivitiesSliver(Color primaryColor) {
+    if (_dailyActivities.isEmpty) {
+      return SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: primaryColor.withOpacity(0.05),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.menu_book_rounded,
+                  size: 64,
+                  color: primaryColor.withOpacity(0.4),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Belum Ada Aktivitas',
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF1E293B),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Yuk, baca modul kesehatan mental hari ini untuk melatih self-care dan menambah poin!',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  color: Colors.grey.shade500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final sortedDates = _dailyActivities.keys.toList()
+      ..sort((a, b) => b.compareTo(a));
+
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            final dateStr = sortedDates[index];
+            final modulesList = _dailyActivities[dateStr] ?? [];
+            final count = modulesList.length;
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+                border: Border.all(color: Colors.grey.shade100),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      color: primaryColor.withOpacity(0.05),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.calendar_today_rounded,
+                                size: 16,
+                                color: primaryColor,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                _formatIndonesianDate(dateStr),
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: const Color(0xFF1E293B),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: primaryColor.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              '$count Modul Dibaca',
+                              style: GoogleFonts.poppins(
+                                color: primaryColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: List.generate(count, (idx) {
+                          final item = modulesList[idx];
+                          final title = item['title'] ?? '-';
+                          final category = item['category'] ?? '-';
+                          final points = item['points'] ?? 0;
+                          final timestamp = item['timestamp'] != null
+                              ? DateTime.tryParse(item['timestamp'].toString())
+                              : null;
+                          final timeStr = timestamp != null
+                              ? '${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}'
+                              : '';
+
+                          return Column(
+                            children: [
+                              if (idx > 0)
+                                const Divider(
+                                  height: 24,
+                                  thickness: 0.5,
+                                  color: Color(0xFFE2E8F0),
+                                ),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green.shade50,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.check_rounded,
+                                      color: Colors.green.shade600,
+                                      size: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          title,
+                                          style: GoogleFonts.poppins(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 13,
+                                            color: const Color(0xFF1E293B),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              category,
+                                              style: GoogleFonts.poppins(
+                                                fontSize: 10,
+                                                color: Colors.grey.shade500,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                            if (timeStr.isNotEmpty) ...[
+                                              const SizedBox(width: 8),
+                                              Icon(
+                                                Icons.access_time_rounded,
+                                                size: 10,
+                                                color: Colors.grey.shade400,
+                                              ),
+                                              const SizedBox(width: 3),
+                                              Text(
+                                                timeStr,
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 10,
+                                                  color: Colors.grey.shade400,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.stars_rounded,
+                                        size: 12,
+                                        color: Colors.amber,
+                                      ),
+                                      const SizedBox(width: 2),
+                                      Text(
+                                        '+$points',
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.amber.shade700,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          );
+                        }),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+          childCount: sortedDates.length,
+        ),
       ),
     );
   }

@@ -107,295 +107,195 @@ class _MoodPageState extends State<MoodPage> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Background image
           Image.asset(
             'assets/image/dashbord.png',
             fit: BoxFit.cover,
           ),
-          // Green gradient overlay matching app theme
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Color(0x99556B2F), // dark olive green semi-transparent
-                  Color(0xCC4A5E38), // deeper green bottom
+                  Color(0x99556B2F),
+                  Color(0xCC4A5E38),
                 ],
               ),
             ),
           ),
-          // Main content
           SafeArea(
             child: Column(
               children: [
-            // Top section with search and header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Search bar
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    
-                    
-                  ),
-                  const SizedBox(height: 28),
-
-                  // Header text with name highlighted
-                  RichText(
-                    text: TextSpan(
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                        height: 1.4,
-                      ),
-                      children: [
-                        const TextSpan(
-                          text: 'Pilih emoji yang menggambarkan mood kamu, ',
-                        ),
-                        TextSpan(
-                          text: displayName.isNotEmpty
-                              ? displayName.split(' ').first
-                              : 'Kamu',
-                          style: const TextStyle(
-                            color: Color(0xFFFFC107),
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        const TextSpan(text: '.'),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Description
-                  const Text(
-                    'Pilih emoji di bawah yang paling menggambarkan perasaanmu saat ini, agar kami bisa memberikan bantuan yang tepat.',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      height: 1.5,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // PageView for swipeable moods
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return ListenableBuilder(
-                    listenable: _pageController,
-                    builder: (context, child) {
-                      double rawPage = _pageController.hasClients
-                          ? (_pageController.page ??
-                              _initialPage.toDouble())
-                          : _initialPage.toDouble();
-
-                      // Normalize to 0..moods.length range for visual positioning
-                      double currentPageValue = rawPage % moods.length;
-
-                      List<int> sortedIndices =
-                          List.generate(moods.length, (i) => i);
-                      sortedIndices.sort((a, b) {
-                        // Calculate shortest circular distance
-                        double distA = _circularDistance(a.toDouble(), currentPageValue, moods.length.toDouble());
-                        double distB = _circularDistance(b.toDouble(), currentPageValue, moods.length.toDouble());
-                        return distB.compareTo(distA);
-                      });
-
-                      return Stack(
-                        alignment: Alignment.center,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
                         children: [
-                          ...sortedIndices.map((index) {
-                            final currentMood = moods[index];
-                            double diff = _circularDiff(index.toDouble(), currentPageValue, moods.length.toDouble());
-                            double absDiff = diff.abs();
-
-                            if (absDiff > 2.5) {
-                              return const SizedBox.shrink();
-                            }
-
-                            final cardWidth = constraints.maxWidth * 0.65;
-                            final cardHeight = constraints.maxHeight * 0.85;
-
-                            double scale;
-                            double offsetX;
-                            double opacity = 1.0;
-
-                            if (absDiff < 0.5) {
-                              // Center card (layer 0)
-                              double t = absDiff;
-                              scale = 1.0 - (t * 0.04);
-                              offsetX = diff * cardWidth * 0.2;
-                            } else if (absDiff < 1.5) {
-                              // Layer 1 cards
-                              double t = absDiff - 0.5;
-                              scale = 0.88 - (t * 0.04);
-                              offsetX = diff.sign *
-                                  (cardWidth * 0.25 +
-                                      (absDiff - 0.5) * cardWidth * 0.1);
-                            } else {
-                              // Layer 2 cards
-                              double t = (absDiff - 1.5).clamp(0.0, 1.0);
-                              scale = 0.76 - (t * 0.04);
-                              offsetX = diff.sign *
-                                  (cardWidth * 0.42 +
-                                      (absDiff - 1.5) * cardWidth * 0.1);
-                            }
-
-                            return Transform.translate(
-                              offset: Offset(offsetX, 0),
-                              child: Transform.scale(
-                                scale: scale,
-                                child: Opacity(
-                                  opacity: opacity,
-                                  child: Container(
-                                    width: cardWidth,
-                                    height: cardHeight,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topCenter,
-                                        end: Alignment.bottomCenter,
-                                        colors: [
-                                          currentMood['gradientStart'],
-                                          currentMood['gradientEnd'],
-                                        ],
-                                      ),
-                                      borderRadius: BorderRadius.circular(24),
-                                    ),
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 24,
-                                      horizontal: 16,
-                                    ),
-                                    child: absDiff < 0.5
-                                        // ── CENTER CARD: full content ──
-                                        ? Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              // Solid thick title
-                                              Text(
-                                                currentMood['label'],
-                                                style: GoogleFonts.poppins(
-                                                  fontSize: 38,
-                                                  fontWeight: FontWeight.w900,
-                                                  color: currentMood['textColor'],
-                                                  letterSpacing: -0.5,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 16),
-                                              Image.asset(
-                                                currentMood['image'],
-                                                width: 120,
-                                                height: 120,
-                                                fit: BoxFit.contain,
-                                              ),
-                                              const SizedBox(height: 16),
-                                              Expanded(
-                                                child: SingleChildScrollView(
-                                                  child: Text(
-                                                    currentMood['description'],
-                                                    textAlign: TextAlign.center,
-                                                    style: const TextStyle(
-                                                      fontSize: 12,
-                                                      color: Colors.white,
-                                                      height: 1.5,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          )
-                                        // ── SIDE CARDS: show emoji only ──
-                                        : Center(
-                                            child: Image.asset(
-                                              currentMood['image'],
-                                              width: 80, // slightly smaller emoji for background cards
-                                              height: 80,
-                                              fit: BoxFit.contain,
-                                            ),
-                                          ),
-                                  ),
-                                ),
+                          GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                            );
-                          }),
-
-                          // Invisible PageView to capture gestures (infinite)
-                          Positioned.fill(
-                            child: PageView.builder(
-                              controller: _pageController,
-                              physics: const BouncingScrollPhysics(),
-                               onPageChanged: (index) {
-                                setState(() {
-                                  _selectedMoodIndex = index % moods.length;
-                                });
-                              },
-                              // No itemCount = infinite scrolling
-                              itemBuilder: (context, index) {
-                                return const SizedBox.expand();
-                              },
+                              child: const Icon(
+                                Icons.arrow_back_ios_new,
+                                color: Colors.white,
+                                size: 20,
+                              ),
                             ),
                           ),
                         ],
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-
-            // Bottom section with button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-              child: Center(
-                child: SizedBox(
-                  height: 48,
-                  width: 160,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      String selectedMood =
-                          moods[_selectedMoodIndex]['label'];
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              FeelingPage(selectedMood: selectedMood),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(28),
                       ),
-                      elevation: 4,
-                    ),
-                    child: const Text(
-                      'Lanjutkan',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF2E7D32),
+                      const SizedBox(height: 28),
+                      RichText(
+                        text: TextSpan(
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                            height: 1.4,
+                          ),
+                          children: [
+                            const TextSpan(text: 'Pilih emoji yang menggambarkan mood kamu, '),
+                            TextSpan(
+                              text: displayName.isNotEmpty ? displayName.split(' ').first : 'Kamu',
+                              style: const TextStyle(color: Color(0xFFFFC107), fontWeight: FontWeight.w800),
+                            ),
+                            const TextSpan(text: '.'),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Pilih emoji di bawah yang paling menggambarkan perasaanmu saat ini, agar kami bisa memberikan bantuan yang tepat.',
+                        style: TextStyle(color: Colors.white, fontSize: 13, height: 1.5, fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return ListenableBuilder(
+                        listenable: _pageController,
+                        builder: (context, child) {
+                          double rawPage = _pageController.hasClients ? (_pageController.page ?? _initialPage.toDouble()) : _initialPage.toDouble();
+                          double currentPageValue = rawPage % moods.length;
+                          List<int> sortedIndices = List.generate(moods.length, (i) => i);
+                          sortedIndices.sort((a, b) {
+                            double distA = _circularDistance(a.toDouble(), currentPageValue, moods.length.toDouble());
+                            double distB = _circularDistance(b.toDouble(), currentPageValue, moods.length.toDouble());
+                            return distB.compareTo(distA);
+                          });
+
+                          return Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              ...sortedIndices.map((index) {
+                                final currentMood = moods[index];
+                                double diff = _circularDiff(index.toDouble(), currentPageValue, moods.length.toDouble());
+                                double absDiff = diff.abs();
+                                if (absDiff > 2.5) return const SizedBox.shrink();
+
+                                final cardWidth = constraints.maxWidth * 0.65;
+                                final cardHeight = constraints.maxHeight * 0.85;
+                                double scale, offsetX;
+                                if (absDiff < 0.5) {
+                                  scale = 1.0 - (absDiff * 0.04);
+                                  offsetX = diff * cardWidth * 0.2;
+                                } else if (absDiff < 1.5) {
+                                  scale = 0.88 - ((absDiff - 0.5) * 0.04);
+                                  offsetX = diff.sign * (cardWidth * 0.25 + (absDiff - 0.5) * cardWidth * 0.1);
+                                } else {
+                                  scale = 0.76 - ((absDiff - 1.5).clamp(0.0, 1.0) * 0.04);
+                                  offsetX = diff.sign * (cardWidth * 0.42 + (absDiff - 1.5) * cardWidth * 0.1);
+                                }
+
+                                return Transform.translate(
+                                  offset: Offset(offsetX, 0),
+                                  child: Transform.scale(
+                                    scale: scale,
+                                    child: Container(
+                                      width: cardWidth,
+                                      height: cardHeight,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topCenter,
+                                          end: Alignment.bottomCenter,
+                                          colors: [currentMood['gradientStart'], currentMood['gradientEnd']],
+                                        ),
+                                        borderRadius: BorderRadius.circular(24),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                                      child: absDiff < 0.5
+                                          ? Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  currentMood['label'],
+                                                  style: GoogleFonts.poppins(fontSize: 38, fontWeight: FontWeight.w900, color: currentMood['textColor'], letterSpacing: -0.5),
+                                                ),
+                                                const SizedBox(height: 16),
+                                                Image.asset(currentMood['image'], width: 120, height: 120, fit: BoxFit.contain),
+                                                const SizedBox(height: 16),
+                                                Expanded(
+                                                  child: SingleChildScrollView(
+                                                    child: Text(
+                                                      currentMood['description'],
+                                                      textAlign: TextAlign.center,
+                                                      style: const TextStyle(fontSize: 12, color: Colors.white, height: 1.5, fontWeight: FontWeight.w600),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            )
+                                          : Center(child: Image.asset(currentMood['image'], width: 80, height: 80, fit: BoxFit.contain)),
+                                    ),
+                                  ),
+                                );
+                              }),
+                              Positioned.fill(
+                                child: PageView.builder(
+                                  controller: _pageController,
+                                  physics: const BouncingScrollPhysics(),
+                                  onPageChanged: (index) => setState(() => _selectedMoodIndex = index % moods.length),
+                                  itemBuilder: (context, index) => const SizedBox.expand(),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                  child: Center(
+                    child: SizedBox(
+                      height: 48,
+                      width: 160,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          String selectedMood = moods[_selectedMoodIndex]['label'];
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => FeelingPage(selectedMood: selectedMood)));
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                          elevation: 4,
+                        ),
+                        child: const Text('Lanjutkan', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Color(0xFF2E7D32))),
                       ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
           ),
         ],
       ),

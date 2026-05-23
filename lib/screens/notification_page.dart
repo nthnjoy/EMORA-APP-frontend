@@ -12,12 +12,18 @@ class NotificationPage extends StatefulWidget {
 
 class _NotificationPageState extends State<NotificationPage> {
   bool notificationsEnabled = true;
-  TimeOfDay selectedTime = const TimeOfDay(hour: 08, minute: 30);
+  TimeOfDay selectedTime = const TimeOfDay(hour: 8, minute: 30);
 
   @override
   void initState() {
     super.initState();
+    _initializeNotifications();
     _loadSettings();
+  }
+
+  Future<void> _initializeNotifications() async {
+    await NotificationService().init();
+    await NotificationService().requestPermissions();
   }
 
   Future<void> _loadSettings() async {
@@ -31,6 +37,8 @@ class _NotificationPageState extends State<NotificationPage> {
   }
 
   Future<void> _saveSettings() async {
+    // Ensure notifications initialized
+    await NotificationService().init();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('notifications_enabled', notificationsEnabled);
     await prefs.setInt('notification_hour', selectedTime.hour);
@@ -44,35 +52,136 @@ class _NotificationPageState extends State<NotificationPage> {
   }
 
   Future<void> _pickTime() async {
-    final time = await showTimePicker(
+    final primaryColor = Theme.of(context).primaryColor;
+    
+    int tempHour = selectedTime.hour;
+    int tempMinute = selectedTime.minute;
+
+    showModalBottomSheet(
       context: context,
-      initialTime: selectedTime,
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: Theme.of(context).primaryColor,
-              onPrimary: Colors.white,
-              onSurface: Colors.black,
-            ),
-          ),
-          child: child!,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              padding: const EdgeInsets.all(24),
+              height: 400,
+              child: Column(
+                children: [
+                  Text(
+                    'Pilih Waktu Pengingat',
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Geser untuk mengatur jam dan menit',
+                    style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 32),
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Jam
+                        _buildPickerColumn(
+                          count: 24,
+                          initialValue: tempHour,
+                          onChanged: (val) => tempHour = val,
+                          label: 'Jam',
+                        ),
+                        Text(':', style: GoogleFonts.poppins(fontSize: 32, fontWeight: FontWeight.bold, color: primaryColor)),
+                        // Menit
+                        _buildPickerColumn(
+                          count: 60,
+                          initialValue: tempMinute,
+                          onChanged: (val) => tempMinute = val,
+                          label: 'Menit',
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 54,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          selectedTime = TimeOfDay(hour: tempHour, minute: tempMinute);
+                        });
+                        _saveSettings();
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Pengingat diatur untuk pukul ${selectedTime.format(context)}'),
+                            backgroundColor: primaryColor,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        elevation: 0,
+                      ),
+                      child: Text('Simpan Waktu', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
         );
       },
     );
-    if (time != null) {
-      setState(() {
-        selectedTime = time;
-      });
-      _saveSettings();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Pengingat diatur untuk pukul ${time.format(context)}'),
-          backgroundColor: Theme.of(context).primaryColor,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
+  }
+
+  Widget _buildPickerColumn({
+    required int count,
+    required int initialValue,
+    required ValueChanged<int> onChanged,
+    required String label,
+  }) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(label, style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.grey)),
+          Expanded(
+            child: ListWheelScrollView.useDelegate(
+              itemExtent: 50,
+              perspective: 0.005,
+              diameterRatio: 1.2,
+              physics: const FixedExtentScrollPhysics(),
+              controller: FixedExtentScrollController(initialItem: initialValue),
+              onSelectedItemChanged: onChanged,
+              childDelegate: ListWheelChildBuilderDelegate(
+                childCount: count,
+                builder: (context, index) {
+                  return Center(
+                    child: Text(
+                      index.toString().padLeft(2, '0'),
+                      style: GoogleFonts.poppins(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -121,7 +230,7 @@ class _NotificationPageState extends State<NotificationPage> {
                 onTap: notificationsEnabled ? _pickTime : null,
                 trailing: Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey.shade400),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 24),
               _buildInfoSection(primaryColor),
             ],
           ),

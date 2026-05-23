@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../services/mood_service.dart';
 import '../services/laravel_session_service.dart';
 import '../utils/ai_dialog.dart';
+import '../services/activity_service.dart';
 import 'story_page.dart';
 
 class FeelingPage extends StatefulWidget {
@@ -260,6 +261,9 @@ class _FeelingPageState extends State<FeelingPage> {
     if (result['success'] == true) {
       final feedback = result['ai_feedback'] ?? 'Terima kasih sudah berbagi perasaanmu hari ini!';
       
+      await ActivityService.saveLastMood(widget.selectedMood, selectedFeeling);
+      
+      if (!mounted) return;
       await AiDialog.show(context, feedback);
       
       if (!mounted) return;
@@ -286,6 +290,8 @@ class _FeelingPageState extends State<FeelingPage> {
     setState(() => isSending = false);
 
     if (result['success'] == true) {
+      await ActivityService.saveLastMood(widget.selectedMood, selectedFeeling);
+      
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Mood dan perasaan berhasil disimpan.')),
       );

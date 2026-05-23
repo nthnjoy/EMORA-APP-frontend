@@ -1,6 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
@@ -14,88 +15,137 @@ class NotificationService {
   Future<void> init() async {
     if (kIsWeb) return;
     
-    tz.initializeTimeZones();
-    
-    const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const DarwinInitializationSettings iosSettings = DarwinInitializationSettings();
-    
-    const InitializationSettings settings = InitializationSettings(
-      android: androidSettings,
-      iOS: iosSettings,
-    );
+    try {
+      tz.initializeTimeZones();
+      final String timeZoneName = (await FlutterTimezone.getLocalTimezone()).identifier;
+      tz.setLocalLocation(tz.getLocation(timeZoneName));
+      
+      const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+      const DarwinInitializationSettings iosSettings = DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
+      );
+      
+      const InitializationSettings settings = InitializationSettings(
+        android: androidSettings,
+        iOS: iosSettings,
+      );
 
-    await _notificationsPlugin.initialize(
-      settings,
-      onDidReceiveNotificationResponse: (details) {
-        // Handle notification click
-      },
-    );
+      await _notificationsPlugin.initialize(
+        settings,
+        onDidReceiveNotificationResponse: (details) {
+          debugPrint('Notification clicked: ${details.payload}');
+        },
+      );
 
-    // Request permissions for Android 13+ and iOS
-    await requestPermissions();
+      await requestPermissions();
+    } catch (e) {
+      debugPrint('NotificationService Init Error: $e');
+    }
   }
 
   Future<void> requestPermissions() async {
     if (kIsWeb) return;
     
-    // For iOS
-    await _notificationsPlugin
-        .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
-        ?.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
+    try {
+      // For iOS
+      await _notificationsPlugin
+          .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
+          ?.requestPermissions(
+            alert: true,
+            badge: true,
+            sound: true,
+          );
 
-    // For Android 13+
-    final androidPlugin = _notificationsPlugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
-    if (androidPlugin != null) {
-      await androidPlugin.requestNotificationsPermission();
-      await androidPlugin.requestExactAlarmsPermission();
+      // For Android 13+
+      final androidPlugin = _notificationsPlugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
+      if (androidPlugin != null) {
+        await androidPlugin.requestNotificationsPermission();
+        await androidPlugin.requestExactAlarmsPermission();
+      }
+    } catch (e) {
+      debugPrint('Permission Request Error: $e');
     }
   }
 
   Future<void> scheduleDailyNotification(TimeOfDay time) async {
     if (kIsWeb) return;
 
-    // Cancel existing notifications
-    await _notificationsPlugin.cancelAll();
+    try {
+      await _notificationsPlugin.cancelAll();
 
-    final now = tz.TZDateTime.now(tz.local);
-    var scheduledDate = tz.TZDateTime(
-      tz.local,
-      now.year,
-      now.month,
-      now.day,
-      time.hour,
-      time.minute,
-    );
+      final now = tz.TZDateTime.now(tz.local);
+      var scheduledDate = tz.TZDateTime(
+        tz.local,
+        now.year,
+        now.month,
+        now.day,
+        time.hour,
+        time.minute,
+      );
 
-    if (scheduledDate.isBefore(now)) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
+      if (scheduledDate.isBefore(now)) {
+        scheduledDate = scheduledDate.add(const Duration(days: 1));
+      }
+
+      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+        'daily_reminder_channel',
+        'Pengingat Harian EMORA',
+        channelDescription: 'Mengingatkan Anda untuk mencatat mood harian.',
+        importance: Importance.max,
+        priority: Priority.high,
+        showWhen: true,
+      );
+
+      const NotificationDetails details = NotificationDetails(
+        android: androidDetails,
+        iOS: DarwinNotificationDetails(),
+      );
+
+      await _notificationsPlugin.zonedSchedule(
+        0,
+        'EMORA - Waktunya Check-in!',
+        'Jangan lupa catat mood dan ceritamu hari ini ya.',
+        scheduledDate,
+        details,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time,
+      );
+    } catch (e) {
+      debugPrint('Error scheduling notification: $e');
     }
+  }
 
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      'daily_reminder',
-      'Daily Reminder',
-      channelDescription: 'Reminds you to check your emotional health daily.',
-      importance: Importance.max,
-      priority: Priority.high,
-    );
+  Future<void> showImmediateNotification() async {
+    if (kIsWeb) return;
 
-    const NotificationDetails details = NotificationDetails(android: androidDetails);
+    try {
+      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+        'test_channel_id',
+        'Uji Coba Notifikasi',
+        channelDescription: 'Channel untuk mengetes notifikasi EMORA',
+        importance: Importance.max,
+        priority: Priority.high,
+        icon: '@mipmap/ic_launcher',
+      );
 
-    await _notificationsPlugin.zonedSchedule(
-      0,
-      'EMORA - Waktunya Check-in!',
-      'Jangan lupa catat mood dan ceritamu hari ini ya.',
-      scheduledDate,
-      details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-    );
+      const NotificationDetails details = NotificationDetails(
+        android: androidDetails,
+        iOS: DarwinNotificationDetails(),
+      );
+
+      await _notificationsPlugin.show(
+        99,
+        'EMORA - Test Notifikasi',
+        'Notifikasi berhasil diaktifkan dan berjalan!',
+        details,
+      );
+    } catch (e) {
+      debugPrint('Error showing immediate notification: $e');
+    }
   }
 
   Future<void> cancelAll() async {
