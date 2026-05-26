@@ -11,6 +11,7 @@ import 'streak_page.dart';
 import 'story_page.dart';
 import 'mood_page.dart';
 import 'daily_boost_page.dart';
+import 'activity_hub_page.dart';
 import '../services/theme_manager.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -666,7 +667,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                         _buildLayananCard(title: 'Musik', imagePath: 'assets/image/musik.png', color: themeColor, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MusicPage()))),
                                         _buildLayananCard(title: 'Quotes', imagePath: 'assets/image/quotes.png', color: themeColor, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => QuotesPage(moods: moods, stories: stories)))),
                                         _buildLayananCard(title: 'Notifikasi', imagePath: 'assets/image/notifikasi.png', color: themeColor, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationPage()))),
-                                        _buildLayananCard(title: 'Aktivitas', imagePath: 'assets/image/aktivitas.png', color: themeColor, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ActivityPage()))),
+                                        _buildLayananCard(title: 'Aktivitas', imagePath: 'assets/image/aktivitas.png', color: themeColor, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ActivityHubPage()))),
                                       ],
                                     ),
                                     const SizedBox(height: 50),

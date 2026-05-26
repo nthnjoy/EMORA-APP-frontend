@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'old_activity_page.dart';
 import '../services/activity_service.dart';
 
 class ActivityPage extends StatefulWidget {
@@ -77,7 +78,16 @@ class _ActivityPageState extends State<ActivityPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('BIO-HACKER HUB', style: GoogleFonts.orbitron(color: Colors.cyanAccent, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 2)),
-                    const Icon(Icons.shield_rounded, color: Colors.cyanAccent, size: 28),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.history_rounded, color: Colors.white38, size: 20),
+                          tooltip: 'Lihat Versi Klasik (V1)',
+                          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const OldActivityPage())),
+                        ),
+                        const Icon(Icons.shield_rounded, color: Colors.cyanAccent, size: 28),
+                      ],
+                    ),
                   ],
                 ),
                 const SizedBox(height: 20),
