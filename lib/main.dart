@@ -7,6 +7,8 @@ import 'services/laravel_session_service.dart';
 
 import 'services/notification_service.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await LaravelSessionService.initialize();
@@ -27,6 +29,7 @@ class MyApp extends StatelessWidget {
         final backgroundColor = ThemeManager().backgroundColor;
         
         return MaterialApp(
+          navigatorKey: navigatorKey,
           debugShowCheckedModeBanner: false,
           title: 'Emora App',
           themeMode: ThemeMode.light,

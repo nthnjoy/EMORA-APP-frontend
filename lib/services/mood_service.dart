@@ -16,7 +16,6 @@ class MoodService {
         'data': <Map<String, Object?>>[],
       };
     }
-
     try {
       final response = await http
           .get(
