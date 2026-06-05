@@ -14,15 +14,15 @@ class ApiConfig {
     }
 
     if (kIsWeb) {
-      return 'https://dollar-fiftieth-appease.ngrok-free.dev';
-      // return 'http://127.0.0.1:8000';
+      // Browser berjalan di laptop yang sama → langsung ke localhost, tanpa ngrok
+      return 'http://127.0.0.1:8000';
     }
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
-         return 'https://dollar-fiftieth-appease.ngrok-free.dev';
-        // return 'http://10.0.2.2:8000'; // IP localhost 
+        // Perangkat mobile fisik → butuh ngrok agar bisa reach laptop
+        return 'https://dollar-fiftieth-appease.ngrok-free.dev';
       default:
         return 'http://127.0.0.1:8000';
     }

@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:pdfx/pdfx.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // ──────────────────────────────────────────────────
 // Argument model yang dikirim ke halaman ini
@@ -130,8 +132,28 @@ class _PdfReaderViewState extends State<_PdfReaderView> {
   }
 
   Future<void> _loadPdf() async {
+    final url = widget.module.contentUrl!;
+
+    // Flutter Web: Browser tidak bisa fetch PDF lintas domain (CORS)
+    // Solusi: buka di tab browser baru
+    if (kIsWeb) {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+      // Tandai selesai otomatis karena PDF dibuka di luar app
+      if (mounted && !_hasCompleted) {
+        await Future.delayed(const Duration(seconds: 2));
+        if (mounted && !_hasCompleted) {
+          setState(() => _hasCompleted = true);
+          widget.onCompleted();
+        }
+      }
+      return;
+    }
+
+    // Mobile: fetch langsung via http
     try {
-      final url = widget.module.contentUrl!;
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         final controller = PdfControllerPinch(

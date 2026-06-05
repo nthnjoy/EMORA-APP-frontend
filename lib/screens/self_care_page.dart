@@ -72,6 +72,8 @@ class _SelfCarePageState extends State<SelfCarePage> {
   int _selectedTab = 0; // 0 for Modules, 1 for Daily Activities
   Map<String, List<dynamic>> _dailyActivities = {};
 
+  String? _errorMessage;
+
   @override
   void initState() {
     super.initState();
@@ -86,20 +88,36 @@ class _SelfCarePageState extends State<SelfCarePage> {
   }
 
   Future<void> _fetchModulesFromApi() async {
-    final response = await UserService.fetchModules();
-    if (response['success'] && response['data'] != null) {
-      final List<dynamic> data = response['data'];
+    try {
+      final response = await UserService.fetchModules();
+      if (response['success'] && response['data'] != null) {
+        final List<dynamic> data = response['data'];
+        if (mounted) {
+          setState(() {
+            try {
+              _allModules =
+                  data.map((json) => SelfCareModule.fromJson(json)).toList();
+              _todayModules = List<SelfCareModule>.from(_allModules);
+            } catch (e, stack) {
+              _errorMessage = 'Error parsing data: $e';
+            }
+            _isLoading = false;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _errorMessage = response['message'] ?? 'Gagal memuat API';
+            _isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
       if (mounted) {
         setState(() {
-          _allModules =
-              data.map((json) => SelfCareModule.fromJson(json)).toList();
-          _todayModules = List<SelfCareModule>.from(_allModules);
+          _errorMessage = 'Network error: $e';
           _isLoading = false;
         });
-      }
-    } else {
-      if (mounted) {
-        setState(() => _isLoading = false);
       }
     }
   }
@@ -342,8 +360,19 @@ class _SelfCarePageState extends State<SelfCarePage> {
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator(color: primaryColor))
-          : _todayModules.isEmpty
+          : _errorMessage != null
               ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Text(
+                      _errorMessage!,
+                      style: GoogleFonts.poppins(color: Colors.red),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                )
+              : _todayModules.isEmpty
+                  ? Center(
                   child: Text(
                     'Tidak ada modul tersedia saat ini.',
                     style: GoogleFonts.poppins(color: Colors.grey),
