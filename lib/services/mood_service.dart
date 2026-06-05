@@ -16,7 +16,6 @@ class MoodService {
         'data': <Map<String, Object?>>[],
       };
     }
-
     try {
       final response = await http
           .get(
@@ -108,12 +107,7 @@ class MoodService {
     }
   }
 
-  static Future<Map<String, dynamic>> updateMood({
-    required String moodId,
-    required String moodLabel,
-    required int emotionCode,
-    String? feeling,
-  }) async {
+  static Future<Map<String, dynamic>> deleteMood(String moodId) async {
     if (!LaravelSessionService.isAuthenticated) {
       return {
         'success': false,
@@ -122,30 +116,77 @@ class MoodService {
       };
     }
 
-    final payload = <String, dynamic>{
-      'mood_label': moodLabel,
-      'perasaan': feeling,
-      'emosi_kode': emotionCode,
-    };
-
     try {
       final response = await http
-          .put(
+          .delete(
             Uri.parse(ApiConfig.moodByIdUrl(moodId)),
             headers: _headers(),
-            body: jsonEncode(payload),
           )
           .timeout(const Duration(seconds: 20));
 
       return _parseResponse(
         response,
-        defaultErrorMessage: 'Gagal memperbarui mood.',
+        defaultErrorMessage: 'Gagal menghapus mood.',
       );
     } on TimeoutException {
       return {
         'success': false,
         'status_code': 0,
-        'message': 'Timeout saat memperbarui mood.',
+        'message': 'Timeout saat menghapus mood.',
+      };
+    } catch (_) {
+      return {
+        'success': false,
+        'status_code': 0,
+        'message': 'Tidak dapat terhubung ke backend Laravel.',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> clearMoodsForToday() async {
+    if (!LaravelSessionService.isAuthenticated) {
+      return {
+        'success': false,
+        'status_code': 401,
+        'message': 'Sesi login tidak ditemukan. Silakan login ulang.',
+      };
+    }
+
+    try {
+      final moods = await fetchMoods();
+      if (moods['success'] != true) {
+        return moods;
+      }
+
+      final moodsList = moods['data'] as List? ?? [];
+      final today = DateTime.now();
+      final todayStart = DateTime(today.year, today.month, today.day);
+      final todayEnd = todayStart.add(const Duration(days: 1));
+
+      int deletedCount = 0;
+      for (final mood in moodsList.whereType<Map<String, dynamic>>()) {
+        final createdAt = mood['created_at'];
+        if (createdAt != null) {
+          try {
+            final recordDate = DateTime.parse(createdAt.toString()).toLocal();
+            if (recordDate.isAfter(todayStart) && recordDate.isBefore(todayEnd)) {
+              final moodId = mood['id']?.toString();
+              if (moodId != null) {
+                await deleteMood(moodId);
+                deletedCount++;
+              }
+            }
+          } catch (_) {
+            // Continue if date parsing fails
+          }
+        }
+      }
+
+      return {
+        'success': true,
+        'status_code': 200,
+        'message': 'Berhasil menghapus $deletedCount mood dari hari ini.',
+        'deleted_count': deletedCount,
       };
     } catch (_) {
       return {

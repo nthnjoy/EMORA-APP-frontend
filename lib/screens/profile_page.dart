@@ -6,8 +6,10 @@ import '../utils/gender_dialog.dart';
 import 'login_page.dart';
 import 'daily_boost_page.dart';
 import 'mood_calender_page.dart';
+import 'guide_page.dart';
 import '../utils/theme_colors.dart';
 import '../services/theme_manager.dart';
+import '../widgets/app_avatar.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -528,6 +530,10 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  Widget _buildProfileAvatar(String gender) {
+    return AppAvatar(gender: gender, radius: 40);
+  }
+
   @override
   Widget build(BuildContext context) {
     final displayName = LaravelSessionService.displayName;
@@ -588,26 +594,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   Positioned(
                     top: 130,
-                    child: CircleAvatar(
-                      radius: 40,
-                      backgroundColor: Theme.of(
-                        context,
-                      ).primaryColor.withOpacity(0.2),
-                      child: ClipOval(
-                        child: Image.asset(
-                          'assets/image/boy.png',
-                          width: 60,
-                          height: 60,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              const Icon(
-                                Icons.person,
-                                size: 40,
-                                color: Colors.orange,
-                              ),
-                        ),
-                      ),
-                    ),
+                    child: _buildProfileAvatar(gender),
                   ),
                 ],
               ),
@@ -641,19 +628,9 @@ class _ProfilePageState extends State<ProfilePage> {
               const SizedBox(height: 30),
               _buildMenuButton(Icons.brush, 'Tema', onTap: _showThemeModal),
               _buildMenuButton(Icons.stars, 'Poin', onTap: _showPoinModal),
-              _buildMenuButton(Icons.error_outline, 'Panduan'),
-              _buildMenuButton(
-                Icons.history,
-                'Riwayat',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MoodCalendarPage(),
-                    ),
-                  );
-                },
-              ),
+              _buildMenuButton(Icons.error_outline, 'Panduan', onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const GuidePage()));
+              }),
               const SizedBox(height: 15),
               _buildMenuButton(
                 Icons.logout,

@@ -36,7 +36,7 @@ dev_dependencies:
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/image/emora_logo.png"
+  image_path: "assets/image/emolens_logo_terbaru.jpeg"
 
 flutter:
   uses-material-design: true

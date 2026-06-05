@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../services/story_service.dart';
 import '../services/laravel_session_service.dart';
 import '../utils/ai_dialog.dart';
+import '../widgets/app_avatar.dart';
 
 class StoryPage extends StatefulWidget {
   const StoryPage({super.key});
@@ -45,6 +46,11 @@ class _StoryPageState extends State<StoryPage> {
         SnackBar(content: Text(result['message'] ?? 'Gagal mengirim cerita.')),
       );
     }
+  }
+
+  Widget _buildStoryAvatar() {
+    final gender = LaravelSessionService.user?['jenis_kelamin']?.toString();
+    return AppAvatar(gender: gender, radius: 20);
   }
 
   @override
@@ -119,17 +125,7 @@ class _StoryPageState extends State<StoryPage> {
                         const SizedBox(height: 16),
                         Row(
                           children: [
-                            CircleAvatar(
-                              radius: 20,
-                              backgroundColor: const Color(0xFFFFE0B2),
-                              child: ClipOval(
-                                child: Image.asset(
-                                  'assets/image/boy.png',
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, color: Colors.orange),
-                                ),
-                              ),
-                            ),
+                            _buildStoryAvatar(),
                             const SizedBox(width: 12),
                             Text(
                               displayName,

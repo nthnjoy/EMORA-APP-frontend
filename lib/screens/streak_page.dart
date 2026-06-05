@@ -94,163 +94,166 @@ class _StreakPageState extends State<StreakPage> with SingleTickerProviderStateM
     }
 
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [bgColorStart, bgColorEnd],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Custom Top Bar
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                child: Row(
-                  children: [
-                    // Back Button
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 22),
-                    ),
-                    const SizedBox(width: 15),
-                    
-                    // Flame Icon Circle
-                    Container(
-                      width: 45,
-                      height: 45,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFB100FF), // Bright purple
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4)),
-                        ],
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [bgColorStart, bgColorEnd],
                       ),
-                      child: const Icon(Icons.local_fire_department, color: Colors.white, size: 26),
                     ),
-                    const SizedBox(width: 12),
-                    
-                    // EMORA & Streak Badge
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Column(
                       children: [
-                        Text(
-                          'EMORA',
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFB100FF), // Bright purple pill
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: const [
-                              BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
+                        // Custom Top Bar
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          child: Row(
+                            children: [
+                              GestureDetector(
+                                onTap: () => Navigator.pop(context),
+                                child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 22),
+                              ),
+                              const SizedBox(width: 15),
+                              Container(
+                                width: 45,
+                                height: 45,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFB100FF),
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4)),
+                                  ],
+                                ),
+                                child: const Icon(Icons.local_fire_department, color: Colors.white, size: 26),
+                              ),
+                              const SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'EMOLENS',
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      letterSpacing: 1.2,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFB100FF),
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: const [
+                                        BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
+                                      ],
+                                    ),
+                                    child: Text(
+                                      '$streak Streak',
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.white,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
-                          child: Text(
-                            '$streak Streak',
-                            style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                            ),
+                        ),
+
+                        const SizedBox(height: 50),
+
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 30),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              RichText(
+                                text: TextSpan(
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    height: 1.2,
+                                  ),
+                                  children: [
+                                    TextSpan(text: titleText.split(',')[0] + ',\n'),
+                                    TextSpan(
+                                      text: titleText.split(',')[1].trim(),
+                                      style: TextStyle(
+                                        color: streak == 0 ? Colors.redAccent : (streak < 5 ? Colors.red.shade700 : Colors.yellowAccent),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              Text(
+                                subtitleText,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  color: Colors.white.withOpacity(0.9),
+                                  height: 1.5,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
+
+                        const Spacer(),
+
+                        GestureDetector(
+                          onTap: () {
+                            _animationController.forward(from: 0.5);
+                          },
+                          child: AnimatedBuilder(
+                            animation: _scaleAnimation,
+                            builder: (context, child) {
+                              return Transform.scale(
+                                scale: _scaleAnimation.value,
+                                child: ShaderMask(
+                                  shaderCallback: (bounds) => LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: flameColors,
+                                  ).createShader(bounds),
+                                  child: Icon(
+                                    Icons.local_fire_department,
+                                    size: 280,
+                                    color: Colors.white,
+                                    shadows: [
+                                      Shadow(
+                                        color: Colors.black.withOpacity(0.3),
+                                        blurRadius: 30,
+                                        offset: const Offset(0, 15),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+
+                        const Spacer(flex: 2),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
-
-              const SizedBox(height: 50),
-
-              // Title and Subtitle
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    RichText(
-                      text: TextSpan(
-                        style: GoogleFonts.poppins(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          height: 1.2,
-                        ),
-                        children: [
-                          TextSpan(text: titleText.split(',')[0] + ',\n'),
-                          TextSpan(
-                            text: titleText.split(',')[1].trim(),
-                            style: TextStyle(
-                              color: streak == 0 ? Colors.redAccent : (streak < 5 ? Colors.red.shade700 : Colors.yellowAccent),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      subtitleText,
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        color: Colors.white.withOpacity(0.9),
-                        height: 1.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const Spacer(),
-
-              // Animated Giant Flame
-              GestureDetector(
-                onTap: () {
-                  // Interactive feedback when tapping the flame
-                  _animationController.forward(from: 0.5);
-                },
-                child: AnimatedBuilder(
-                  animation: _scaleAnimation,
-                  builder: (context, child) {
-                    return Transform.scale(
-                      scale: _scaleAnimation.value,
-                      child: ShaderMask(
-                        shaderCallback: (bounds) => LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: flameColors,
-                        ).createShader(bounds),
-                        child: Icon(
-                          Icons.local_fire_department,
-                          size: 280,
-                          color: Colors.white, // Color is ignored due to ShaderMask, but required
-                          shadows: [
-                            Shadow(
-                              color: Colors.black.withOpacity(0.3),
-                              blurRadius: 30,
-                              offset: const Offset(0, 15),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-
-              const Spacer(flex: 2),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );

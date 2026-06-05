@@ -92,7 +92,7 @@ class NotificationService {
 
       const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
         'daily_reminder_channel',
-        'Pengingat Harian EMORA',
+        'Pengingat Harian EMOLENS',
         channelDescription: 'Mengingatkan Anda untuk mencatat mood harian.',
         importance: Importance.max,
         priority: Priority.high,
@@ -106,7 +106,7 @@ class NotificationService {
 
       await _notificationsPlugin.zonedSchedule(
         0,
-        'EMORA - Waktunya Check-in!',
+        'EMOLENS - Waktunya Check-in!',
         'Jangan lupa catat mood dan ceritamu hari ini ya.',
         scheduledDate,
         details,
@@ -126,7 +126,7 @@ class NotificationService {
       const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
         'test_channel_id',
         'Uji Coba Notifikasi',
-        channelDescription: 'Channel untuk mengetes notifikasi EMORA',
+        channelDescription: 'Channel untuk mengetes notifikasi EMOLENS',
         importance: Importance.max,
         priority: Priority.high,
         icon: '@mipmap/ic_launcher',
@@ -139,7 +139,7 @@ class NotificationService {
 
       await _notificationsPlugin.show(
         99,
-        'EMORA - Test Notifikasi',
+        'EMOLENS - Test Notifikasi',
         'Notifikasi berhasil diaktifkan dan berjalan!',
         details,
       );

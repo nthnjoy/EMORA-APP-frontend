@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'screens/login_page.dart';
 import 'screens/main_navigation_page.dart';
+import 'screens/splash_page.dart';
 import 'services/theme_manager.dart';
 import 'services/laravel_session_service.dart';
 
 import 'services/notification_service.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,8 +30,9 @@ class MyApp extends StatelessWidget {
         final backgroundColor = ThemeManager().backgroundColor;
         
         return MaterialApp(
+          navigatorKey: navigatorKey,
           debugShowCheckedModeBanner: false,
-          title: 'Emora App',
+          title: 'Emolens',
           themeMode: ThemeMode.light,
           theme: ThemeData(
             useMaterial3: true,
@@ -45,9 +49,7 @@ class MyApp extends StatelessWidget {
             ),
             textTheme: GoogleFonts.plusJakartaSansTextTheme(),
           ),
-          home: LaravelSessionService.isAuthenticated
-              ? const MainNavigationPage()
-              : const LoginPage(),
+          home: const SplashPage(),
         );
       },
     );

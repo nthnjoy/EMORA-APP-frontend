@@ -70,7 +70,7 @@ class AiPage extends StatelessWidget {
               
               // Description
               Text(
-                'Fitur Konseling AI Emora sedang dalam tahap pengembangan. Nantikan pembaruan selanjutnya untuk bisa curhat dan ngobrol langsung dengan asisten pintar kami!',
+                'Fitur Konseling AI Emolens sedang dalam tahap pengembangan. Nantikan pembaruan selanjutnya untuk bisa curhat dan ngobrol langsung dengan asisten pintar kami!',
                 style: GoogleFonts.poppins(
                   fontSize: 14,
                   color: Colors.black54,

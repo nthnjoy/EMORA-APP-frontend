@@ -46,7 +46,7 @@ class AiDialog {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      "Pesan dari EMORA",
+                      "Pesan dari EMOLENS",
                       style: GoogleFonts.poppins(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

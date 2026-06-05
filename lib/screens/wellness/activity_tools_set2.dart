@@ -61,7 +61,7 @@ class _FutureLetterViewState extends State<FutureLetterView> {
       backgroundColor: const Color(0xFFF3F4F6),
       appBar: AppBar(title: const Text('Surat Masa Depan'), backgroundColor: Colors.transparent, elevation: 0, leading: IconButton(icon: const Icon(Icons.close_rounded), onPressed: () => Navigator.pop(context))),
       body: Padding(padding: const EdgeInsets.all(24), child: Column(children: [
-        const Text('Tulis surat untuk dirimu di masa depan. Kamu akan melihatnya kembali di Emora.'),
+        const Text('Tulis surat untuk dirimu di masa depan. Kamu akan melihatnya kembali di Emolens.'),
         const SizedBox(height: 20),
         const Expanded(child: TextField(maxLines: null, decoration: InputDecoration(hintText: 'Halo diriku, aku ingin bilang...', border: InputBorder.none))),
         const SizedBox(height: 20),

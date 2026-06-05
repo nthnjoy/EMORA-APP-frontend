@@ -5,6 +5,7 @@ import 'mood_calender_page.dart';
 import 'profile_page.dart';
 import '../services/laravel_session_service.dart';
 import '../utils/gender_dialog.dart';
+import '../services/counselor_notification_service.dart';
 
 class MainNavigationPage extends StatefulWidget {
   const MainNavigationPage({super.key});
@@ -31,7 +32,14 @@ class MainNavigationPageState extends State<MainNavigationPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkGender();
+      CounselorNotificationService().startPolling();
     });
+  }
+
+  @override
+  void dispose() {
+    CounselorNotificationService().stopPolling();
+    super.dispose();
   }
 
   Future<void> _checkGender() async {

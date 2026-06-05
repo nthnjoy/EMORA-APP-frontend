@@ -170,7 +170,7 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   // Logo/Title
                   Text(
-                    'Emora',
+                    'Emolens',
                     style: GoogleFonts.poppins(
                       fontSize: 56,
                       fontWeight: FontWeight.bold,
