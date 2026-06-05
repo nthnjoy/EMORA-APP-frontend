@@ -11,7 +11,6 @@ import 'streak_page.dart';
 import 'story_page.dart';
 import 'mood_page.dart';
 import 'daily_boost_page.dart';
-import 'activity_hub_page.dart';
 import '../services/theme_manager.dart';
 import '../services/counselor_notification_service.dart';
 
@@ -316,6 +315,7 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildLayananHeroCard({
+    required String label,
     required String title,
     required String subtitle,
     required String imagePath,
@@ -326,7 +326,7 @@ class _DashboardPageState extends State<DashboardPage> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(24),
       child: Container(
-        height: 110,
+        constraints: const BoxConstraints(minHeight: 110),
         width: double.infinity,
         decoration: BoxDecoration(
           color: color.withOpacity(0.85),
@@ -369,11 +369,11 @@ class _DashboardPageState extends State<DashboardPage> {
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Icon(Icons.flash_on_rounded, color: Colors.amber, size: 14),
-                          SizedBox(width: 4),
+                        children: [
+                          const Icon(Icons.flash_on_rounded, color: Colors.amber, size: 14),
+                          const SizedBox(width: 4),
                           Text(
-                            'TANTANGAN HARIAN',
+                            label,
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -490,7 +490,7 @@ class _DashboardPageState extends State<DashboardPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
-                                'Emora',
+                                'Emolens',
                                 style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 8),
@@ -601,14 +601,9 @@ class _DashboardPageState extends State<DashboardPage> {
                                       color: const Color(0xFFC4D1BD),
                                       icon: Image.asset('assets/image/mood.png', fit: BoxFit.contain),
                                       showBadge: true,
-                                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MoodPage())).then((_) => _reloadDashboard()),
-                                    ),
-                                    const SizedBox(width: 15),
-                                    _buildFeatureTile(
-                                      title: 'Streak',
-                                      color: const Color(0xFFC4D1BD),
-                                      icon: Image.asset('assets/image/streak.png', fit: BoxFit.contain),
-                                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => StreakPage(moods: recentDays))),
+                                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MoodPage())).then((result) {
+                                        if (result == true) _reloadDashboard();
+                                      }),
                                     ),
                                     const SizedBox(width: 15),
                                     _buildFeatureTile(
@@ -628,7 +623,9 @@ class _DashboardPageState extends State<DashboardPage> {
                                             );
                                           },
                                         ),
-                                      ).then((_) => _reloadDashboard()),
+                                      ).then((result) {
+                                        if (result == true) _reloadDashboard();
+                                      }),
                                     ),
                                   ],
                                 ),
@@ -646,13 +643,16 @@ class _DashboardPageState extends State<DashboardPage> {
                                     const Text('Layanan dan hiburan terbaik untukmu', style: TextStyle(fontSize: 12, color: Colors.black45)),
                                     const SizedBox(height: 16),
                                     
-                                    // Hero Card - Daily Boost
+                                    // Hero Card - Streak
                                     _buildLayananHeroCard(
-                                      title: 'Daily Boost', 
-                                      subtitle: 'Tingkatkan motivasimu dengan tantangan harian seru!',
-                                      imagePath: 'assets/image/tantangan.png', 
-                                      color: themeColor, 
-                                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DailyBoostPage())).then((_) => _reloadDashboard()),
+                                      label: 'STREAK',
+                                      title: 'Streak',
+                                      subtitle: 'Ceritakan perasaanmu atau lakukan aktivitas agar streak tetap menyala!',
+                                      imagePath: 'assets/image/streak.png',
+                                      color: themeColor,
+                                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => StreakPage(moods: recentDays))).then((result) {
+                                        if (result == true) _reloadDashboard();
+                                      }),
                                     ),
                                     const SizedBox(height: 16),
                                     
@@ -665,49 +665,12 @@ class _DashboardPageState extends State<DashboardPage> {
                                       crossAxisCount: 2,
                                       childAspectRatio: 1.45,
                                       children: [
-                                        _buildLayananCard(title: 'Musik', imagePath: 'assets/image/musik.png', color: themeColor, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MusicPage()))),
+                                        _buildLayananCard(title: 'Daily Boost', imagePath: 'assets/image/tantangan.png', color: themeColor, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DailyBoostPage())).then((result) {
+                                          if (result == true) _reloadDashboard();
+                                        })),
                                         _buildLayananCard(title: 'Quotes', imagePath: 'assets/image/quotes.png', color: themeColor, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => QuotesPage(moods: moods, stories: stories)))),
-                                        // Badge merah jika ada pesan konselor belum dibaca
-                                        ValueListenableBuilder<int>(
-                                          valueListenable: CounselorNotificationService().unreadCount,
-                                          builder: (context, count, _) {
-                                            return Stack(
-                                              clipBehavior: Clip.none,
-                                              children: [
-                                                _buildLayananCard(
-                                                  title: 'Notifikasi',
-                                                  imagePath: 'assets/image/notifikasi.png',
-                                                  color: themeColor,
-                                                  onTap: () => Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(builder: (_) => const NotificationPage()),
-                                                  ),
-                                                ),
-                                                if (count > 0)
-                                                  Positioned(
-                                                    top: 8,
-                                                    right: 8,
-                                                    child: Container(
-                                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                                      decoration: BoxDecoration(
-                                                        color: Colors.red,
-                                                        borderRadius: BorderRadius.circular(12),
-                                                        border: Border.all(color: Colors.white, width: 1.5),
-                                                        boxShadow: [
-                                                          BoxShadow(color: Colors.red.withOpacity(0.4), blurRadius: 6, offset: const Offset(0, 2)),
-                                                        ],
-                                                      ),
-                                                      child: Text(
-                                                        count > 9 ? '9+' : '$count',
-                                                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                                                      ),
-                                                    ),
-                                                  ),
-                                              ],
-                                            );
-                                          },
-                                        ),
-                                        _buildLayananCard(title: 'Aktivitas', imagePath: 'assets/image/aktivitas.png', color: themeColor, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ActivityHubPage()))),
+                                        _buildLayananCard(title: 'Musik', imagePath: 'assets/image/musik.png', color: themeColor, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MusicPage()))),
+                                        _buildLayananCard(title: 'Notifikasi', imagePath: 'assets/image/notifikasi.png', color: themeColor, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationPage()))),
                                       ],
                                     ),
                                     const SizedBox(height: 50),
