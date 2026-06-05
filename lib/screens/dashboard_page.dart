@@ -13,6 +13,7 @@ import 'mood_page.dart';
 import 'daily_boost_page.dart';
 import 'activity_hub_page.dart';
 import '../services/theme_manager.dart';
+import '../services/counselor_notification_service.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -666,7 +667,46 @@ class _DashboardPageState extends State<DashboardPage> {
                                       children: [
                                         _buildLayananCard(title: 'Musik', imagePath: 'assets/image/musik.png', color: themeColor, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MusicPage()))),
                                         _buildLayananCard(title: 'Quotes', imagePath: 'assets/image/quotes.png', color: themeColor, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => QuotesPage(moods: moods, stories: stories)))),
-                                        _buildLayananCard(title: 'Notifikasi', imagePath: 'assets/image/notifikasi.png', color: themeColor, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationPage()))),
+                                        // Badge merah jika ada pesan konselor belum dibaca
+                                        ValueListenableBuilder<int>(
+                                          valueListenable: CounselorNotificationService().unreadCount,
+                                          builder: (context, count, _) {
+                                            return Stack(
+                                              clipBehavior: Clip.none,
+                                              children: [
+                                                _buildLayananCard(
+                                                  title: 'Notifikasi',
+                                                  imagePath: 'assets/image/notifikasi.png',
+                                                  color: themeColor,
+                                                  onTap: () => Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(builder: (_) => const NotificationPage()),
+                                                  ),
+                                                ),
+                                                if (count > 0)
+                                                  Positioned(
+                                                    top: 8,
+                                                    right: 8,
+                                                    child: Container(
+                                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.red,
+                                                        borderRadius: BorderRadius.circular(12),
+                                                        border: Border.all(color: Colors.white, width: 1.5),
+                                                        boxShadow: [
+                                                          BoxShadow(color: Colors.red.withOpacity(0.4), blurRadius: 6, offset: const Offset(0, 2)),
+                                                        ],
+                                                      ),
+                                                      child: Text(
+                                                        count > 9 ? '9+' : '$count',
+                                                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                                      ),
+                                                    ),
+                                                  ),
+                                              ],
+                                            );
+                                          },
+                                        ),
                                         _buildLayananCard(title: 'Aktivitas', imagePath: 'assets/image/aktivitas.png', color: themeColor, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ActivityHubPage()))),
                                       ],
                                     ),
