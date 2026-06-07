@@ -96,10 +96,6 @@ class _ModuleReaderPageState extends State<ModuleReaderPage> {
   }
 }
 
-// ══════════════════════════════════════════════════
-//  PDF READER VIEW
-//  Render PDF asli — selesai saat halaman terakhir tercapai
-// ══════════════════════════════════════════════════
 class _PdfReaderView extends StatefulWidget {
   final ModuleReaderArgs module;
   final bool hasCompleted;
@@ -236,36 +232,48 @@ class _PdfReaderViewState extends State<_PdfReaderView> {
 
         // ─── PDF Viewer ───────────────────────────────────────────────
         Expanded(
-          child: _hasError
-              ? _buildErrorView(module)
-              : _pdfController == null
-                  ? _buildLoadingView(module)
-                  : PdfViewPinch(
-                      controller: _pdfController!,
-                      onDocumentLoaded: _onDocumentLoaded,
-                      onDocumentError: (error) {
-                        setState(() {
-                          _hasError = true;
-                          _errorMessage = error.toString();
-                        });
-                      },
-                      onPageChanged: _onPageChanged,
-                      builders: PdfViewPinchBuilders<DefaultBuilderOptions>(
-                        options: const DefaultBuilderOptions(),
-                        documentLoaderBuilder: (_) =>
-                            _buildLoadingView(module),
-                        pageLoaderBuilder: (_) =>
-                            Container(
-                          color: const Color(0xFF1A1A2E),
-                          child: const Center(
-                            child: CircularProgressIndicator(
-                                color: Colors.white54),
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification notification) {
+              if (_isLoaded && !_hasCompleted) {
+                // Beri toleransi 50 pixel dari bawah agar tidak harus benar-benar mentok
+                if (notification.metrics.pixels >= notification.metrics.maxScrollExtent - 50) {
+                  setState(() => _hasCompleted = true);
+                  widget.onCompleted();
+                }
+              }
+              return false;
+            },
+            child: _hasError
+                ? _buildErrorView(module)
+                : _pdfController == null
+                    ? _buildLoadingView(module)
+                    : PdfViewPinch(
+                        controller: _pdfController!,
+                        onDocumentLoaded: _onDocumentLoaded,
+                        onDocumentError: (error) {
+                          setState(() {
+                            _hasError = true;
+                            _errorMessage = error.toString();
+                          });
+                        },
+                        onPageChanged: _onPageChanged,
+                        builders: PdfViewPinchBuilders<DefaultBuilderOptions>(
+                          options: const DefaultBuilderOptions(),
+                          documentLoaderBuilder: (_) =>
+                              _buildLoadingView(module),
+                          pageLoaderBuilder: (_) =>
+                              Container(
+                            color: const Color(0xFF1A1A2E),
+                            child: const Center(
+                              child: CircularProgressIndicator(
+                                  color: Colors.white54),
+                            ),
                           ),
+                          errorBuilder: (_, error) =>
+                              _buildErrorView(module),
                         ),
-                        errorBuilder: (_, error) =>
-                            _buildErrorView(module),
                       ),
-                    ),
+          ),
         ),
 
         // ─── Status bar bawah ─────────────────────────────────────────
