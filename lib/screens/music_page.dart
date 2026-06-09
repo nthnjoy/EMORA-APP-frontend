@@ -1,5 +1,8 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart' as yt show YoutubePlayerController, YoutubePlayerFlags, YoutubePlayerBuilder, YoutubePlayer;
+import 'package:url_launcher/url_launcher_string.dart';
 import '../services/mood_service.dart';
 import '../services/laravel_session_service.dart';
 import '../services/theme_manager.dart';
@@ -51,45 +54,165 @@ final List<MusicMood> musicMoods = [
     color: const Color(0xFFFFB347),
     tracks: [
       const MusicTrack(
-        title: 'Pelita Malam',
-        artist: 'Dunia Ceria',
+        title: 'Fade',
+        artist: 'Alan Walker',
         language: 'Indonesia',
-        source: 'YouTube Music',
-        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=60ItHLz5WEA',
         thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
         trending: true,
       ),
       const MusicTrack(
-        title: 'Semangat Kampus',
-        artist: 'Nusa Beats',
+        title: 'Believer',
+        artist: 'Imagine Dragons',
         language: 'Indonesia',
-        source: 'Spotify',
-        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=7wtfhZwyrcc',
         thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
       ),
       const MusicTrack(
-        title: 'Startup Groove',
-        artist: 'CodeHouse',
+        title: 'Havana',
+        artist: 'Camila Cabello',
         language: 'English',
-        source: 'Apple Music',
-        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=HCjNJDNzw8Y',
         thumbnailUrl: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=500&q=80',
       ),
       const MusicTrack(
-        title: 'Focus Drive',
-        artist: 'Future Labs',
+        title: 'Blinding Lights',
+        artist: 'The Weeknd',
         language: 'English',
         source: 'YouTube',
-        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
+        audioUrl: 'https://www.youtube.com/watch?v=fHI8X4OXluQ',
         thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80',
       ),
       const MusicTrack(
-        title: 'Neon Pulse',
-        artist: 'Digital Aura',
+        title: 'Higher Power',
+        artist: 'Coldplay',
         language: 'English',
-        source: 'Free Music',
-        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=s7L2PVdrb_8',
         thumbnailUrl: 'https://images.unsplash.com/photo-1488372765830-1f3fd75c52c9?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Can\'t Stop the Feeling',
+        artist: 'Justin Timberlake',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=ru0K8uYEZWw',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Good Life',
+        artist: 'OneRepublic',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=jZhQOvvV45w',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Sugar',
+        artist: 'Maroon 5',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=09R8_2nJtjg',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Uptown Funk',
+        artist: 'Bruno Mars',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=OPf0YbXqDm0',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1504384308090-c894ddcc538d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Shut Up and Dance',
+        artist: 'Walk The Moon',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=6JCLY0Rlx6Q',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Best Day of My Life',
+        artist: 'American Authors',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=Y66j_BUCBMY',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'I Gotta Feeling',
+        artist: 'Black Eyed Peas',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=uSD4vsh1zDA',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Don\'t Worry Be Happy',
+        artist: 'Bobby McFerrin',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=d-diB65scQU',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1488372765830-1f3fd75c52c9?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Roar',
+        artist: 'Katy Perry',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=CevxZvSJLk8',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Cheap Thrills',
+        artist: 'Sia',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=nYh-n7EOtMA',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Firework',
+        artist: 'Katy Perry',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=QGJuMBdaqIw',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Cake by the Ocean',
+        artist: 'DNCE',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=vWaRiD5ym74',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1504384308090-c894ddcc538d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Happy',
+        artist: 'Pharrell Williams',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=y6Sxv-sUYtM',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Wake Me Up',
+        artist: 'Avicii',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=IcrbM1l_BoI',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1497215842964-222b430dc094?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Counting Stars',
+        artist: 'OneRepublic',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=hT_nvWreIhg',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
       ),
     ],
   ),
@@ -100,45 +223,165 @@ final List<MusicMood> musicMoods = [
     color: const Color(0xFFFF6B6B),
     tracks: [
       const MusicTrack(
-        title: 'Aksi Pagi',
-        artist: 'Nada Harian',
+        title: 'Beautiful Day',
+        artist: 'U2',
         language: 'Indonesia',
-        source: 'Spotify',
-        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=aC6YVdRkNfY',
         thumbnailUrl: 'https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6?auto=format&fit=crop&w=500&q=80',
         trending: true,
       ),
       const MusicTrack(
-        title: 'Semangat Koding',
-        artist: 'Polaris Studio',
+        title: 'Rise Up',
+        artist: 'Andra Day',
         language: 'Indonesia',
-        source: 'YouTube Music',
-        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=k_7b7bIZAyk',
         thumbnailUrl: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=500&q=80',
       ),
       const MusicTrack(
-        title: 'Hype Loop',
-        artist: 'Neon Rush',
+        title: 'Together',
+        artist: 'Sia',
         language: 'English',
-        source: 'Apple Music',
-        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=_0EZq5FHz3E',
         thumbnailUrl: 'https://images.unsplash.com/photo-1519750157634-bf64fd465a4d?auto=format&fit=crop&w=500&q=80',
       ),
       const MusicTrack(
-        title: 'Code Sprint',
-        artist: 'Velocity',
+        title: 'Dynamite',
+        artist: 'BTS',
         language: 'English',
-        source: 'Spotify',
-        audioUrl: 'https://file-examples.com/wp-content/uploads/2017/11/file_example_MP3_700KB.mp3',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=1ZAPwfrtAFY',
         thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80',
       ),
       const MusicTrack(
-        title: 'Pulse Drive',
-        artist: 'Layered Beats',
+        title: 'On Top of the World',
+        artist: 'Imagine Dragons',
         language: 'English',
-        source: 'Free Music',
-        audioUrl: 'https://file-examples.com/wp-content/uploads/2017/11/file_example_MP3_1MG.mp3',
-        thumbnailUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=500&q=80',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=w5tWYmIOWGk',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Eye of the Tiger',
+        artist: 'Survivor',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=btPJPFnesV4',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Titanium',
+        artist: 'David Guetta ft. Sia',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=JRfuAukYTKg',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1488372765830-1f3fd75c52c9?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Can\'t Hold Us',
+        artist: 'Macklemore & Ryan Lewis',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=2zNSgSzhBfM',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Hall of Fame',
+        artist: 'The Script ft. will.i.am',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=mk48xRzuNvA',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1504384308090-c894ddcc538d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'High Hopes',
+        artist: 'Panic! At The Disco',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=IPXIgEAGe4U',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Whatever It Takes',
+        artist: 'Imagine Dragons',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=gOsMchLQwto',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Don\'t Stop Me Now',
+        artist: 'Queen',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=HgzGwKwLmgM',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Remember the Name',
+        artist: 'Fort Minor',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=72QKcF15ChM',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1488372765830-1f3fd75c52c9?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Stronger',
+        artist: 'Kanye West',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=PsO6ZnUZI0g',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'The Man',
+        artist: 'Aloe Blacc',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=Sv6dMFF_yts',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1504384308090-c894ddcc538d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Fight Song',
+        artist: 'Rachel Platten',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=xo1VInw-SKc',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Unstoppable',
+        artist: 'Sia',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=cxjvTXoHc1Y',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Good Feeling',
+        artist: 'Flo Rida',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=2S24-y0Ij3Y',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Uprising',
+        artist: 'Muse',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=w8KQmps-Sog',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1488372765830-1f3fd75c52c9?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Pump It',
+        artist: 'Black Eyed Peas',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=ZaI2IlHwmgQ',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
       ),
     ],
   ),
@@ -149,44 +392,164 @@ final List<MusicMood> musicMoods = [
     color: const Color(0xFF4ECDC4),
     tracks: [
       const MusicTrack(
-        title: 'Rutinitas Tenang',
-        artist: 'Senja Studio',
+        title: 'Heat Waves',
+        artist: 'Glass Animals',
         language: 'Indonesia',
         source: 'YouTube',
-        audioUrl: 'https://file-examples.com/wp-content/uploads/2017/11/file_example_MP3_2MG.mp3',
+        audioUrl: 'https://www.youtube.com/watch?v=0yW7w8F2TVA',
         thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
       ),
       const MusicTrack(
-        title: 'Langkah Pelan',
-        artist: 'Petualang',
+        title: 'Memories',
+        artist: 'Maroon 5',
         language: 'Indonesia',
-        source: 'Apple Music',
-        audioUrl: 'https://file-examples.com/wp-content/uploads/2017/11/file_example_MP3_5MG.mp3',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=NrgmdOz227I',
         thumbnailUrl: 'https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=500&q=80',
       ),
       const MusicTrack(
-        title: 'Study Mode',
-        artist: 'Campus Beats',
+        title: 'Midnight City',
+        artist: 'M83',
         language: 'English',
-        source: 'Spotify',
-        audioUrl: 'https://samplelib.com/lib/preview/mp3/sample-3s.mp3',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=dX3k_QDnzHE',
         thumbnailUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=500&q=80',
       ),
       const MusicTrack(
-        title: 'Cloud Desk',
-        artist: 'Soft Logic',
+        title: 'Lose Yourself',
+        artist: 'Eminem',
         language: 'English',
-        source: 'YouTube Music',
-        audioUrl: 'https://samplelib.com/lib/preview/mp3/sample-6s.mp3',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=_Yhyp-_hX2s',
         thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80',
       ),
       const MusicTrack(
-        title: 'Smooth Flow',
-        artist: 'Aura Lab',
+        title: 'Happy',
+        artist: 'Pharrell Williams',
         language: 'English',
-        source: 'Free Music',
-        audioUrl: 'https://samplelib.com/lib/preview/mp3/sample-12s.mp3',
-        thumbnailUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=500&q=80',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=ZbZSe6N_BXs',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1488372765830-1f3fd75c52c9?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Chasing Cars',
+        artist: 'Snow Patrol',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=GemKqzILV4w',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Let Her Go',
+        artist: 'Passenger',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=RBumgq5yVrA',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Somewhere Only We Know',
+        artist: 'Keane',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=oEu4O90YJRI',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1488372765830-1f3fd75c52c9?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'The Scientist',
+        artist: 'Coldplay',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=RB-RcX5DS5A',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Yellow',
+        artist: 'Coldplay',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=yKNxeF4KMsY',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Stay',
+        artist: 'Rihanna ft. Mikky Ekko',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=JF8BRvqGCNs',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1497215842964-222b430dc094?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Happier',
+        artist: 'Marshmello ft. Bastille',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=m7Bc3pLyij0',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Summertime Sadness',
+        artist: 'Lana Del Rey',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=nVjsGKrE6E8',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1504384308090-c894ddcc538d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Sweater Weather',
+        artist: 'The Neighbourhood',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=GCdwKhTtNNw',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Breathe Me',
+        artist: 'Sia',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=ghPcYqn0p4Y',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'River',
+        artist: 'Leon Bridges',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=K7-BN2m3Wm4',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Budapest',
+        artist: 'George Ezra',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=VHrLPs3_1Fs',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1488372765830-1f3fd75c52c9?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Skinny Love',
+        artist: 'Bon Iver',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=ssdgFoHLwnk',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Sunflower',
+        artist: 'Post Malone & Swae Lee',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=ApXoWvfEYVU',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1497215842964-222b430dc094?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Sunday Morning',
+        artist: 'Maroon 5',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=S4_4sLFoE7I',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
       ),
     ],
   ),
@@ -197,44 +560,188 @@ final List<MusicMood> musicMoods = [
     color: const Color(0xFF6C5CE7),
     tracks: [
       const MusicTrack(
-        title: 'Hujan Malam',
-        artist: 'Senandung',
+        title: 'Senorita',
+        artist: 'Shawn Mendes & Camila Cabello',
         language: 'Indonesia',
-        source: 'YouTube Music',
-        audioUrl: 'https://samplelib.com/lib/preview/mp3/sample-24s.mp3',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=PCgv5O6lddI',
         thumbnailUrl: 'https://images.unsplash.com/photo-1522770179533-24471fcdba45?auto=format&fit=crop&w=500&q=80',
       ),
       const MusicTrack(
-        title: 'Lagu Senja',
-        artist: 'Nada Pelan',
+        title: 'Someone Like You',
+        artist: 'Adele',
         language: 'Indonesia',
-        source: 'Spotify',
-        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=hLQl3WQQoQ0',
         thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
       ),
       const MusicTrack(
-        title: 'Warm Echo',
-        artist: 'Evening Code',
+        title: 'Can\'t Stop the Feeling',
+        artist: 'Justin Timberlake',
         language: 'English',
-        source: 'Apple Music',
-        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=Qz1cMZBtBko',
         thumbnailUrl: 'https://images.unsplash.com/photo-1488372765830-1f3fd75c52c9?auto=format&fit=crop&w=500&q=80',
       ),
       const MusicTrack(
-        title: 'Moonlight Memo',
-        artist: 'Quiet Synth',
+        title: 'Thunder',
+        artist: 'Imagine Dragons',
         language: 'English',
-        source: 'Spotify',
-        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=fKopy74weus',
         thumbnailUrl: 'https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=500&q=80',
       ),
       const MusicTrack(
-        title: 'Soft Space',
-        artist: 'Lunar Studio',
+        title: 'Radioactive',
+        artist: 'Imagine Dragons',
         language: 'English',
-        source: 'Free Music',
-        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=ktvTqknDobU',
         thumbnailUrl: 'https://images.unsplash.com/photo-1497215842964-222b430dc094?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Say You Love Me',
+        artist: 'Jessie Ware',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=OQjE9mz4Sjs',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Fix You',
+        artist: 'Coldplay',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=k4V3Mo61fJM',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1488372765830-1f3fd75c52c9?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'When I Was Your Man',
+        artist: 'Bruno Mars',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=ekzHIouo8Q4',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Stay With Me',
+        artist: 'Sam Smith',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=pB-5XG-DbAA',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1504384308090-c894ddcc538d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'All of Me',
+        artist: 'John Legend',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=450p7goxZqg',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Back to December',
+        artist: 'Taylor Swift',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=QUwxKWT6m7U',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1497215842964-222b430dc094?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Photograph',
+        artist: 'Ed Sheeran',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=nSDgHBxUbVQ',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Hurt',
+        artist: 'Johnny Cash',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=8AHCfZTRGiI',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Shallow',
+        artist: 'Lady Gaga & Bradley Cooper',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=bo_efYhYU2A',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Wrecking Ball',
+        artist: 'Miley Cyrus',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=My2FRPA3Gf8',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Skinny Love',
+        artist: 'Bon Iver',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=ssdgFoHLwnk',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1504384308090-c894ddcc538d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Say Something',
+        artist: 'A Great Big World & Christina Aguilera',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=-2U0Ivkn2Ds',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Too Good at Goodbyes',
+        artist: 'Sam Smith',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=J_ub7Etch2U',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Hallelujah',
+        artist: 'Leonard Cohen',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=YrLk4vdY28Q',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'All I Want',
+        artist: 'Kodaline',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=mtf7hC17IBM',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Breakeven',
+        artist: 'The Script',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=k8V9lYjJ2mQ',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1497215842964-222b430dc094?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'My Immortal',
+        artist: 'Evanescence',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=5anLPw0Efmo',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Someone You Loved',
+        artist: 'Lewis Capaldi',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=zABLecsR5UE',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1504384308090-c894ddcc538d?auto=format&fit=crop&w=500&q=80',
       ),
     ],
   ),
@@ -245,44 +752,164 @@ final List<MusicMood> musicMoods = [
     color: const Color(0xFFB878EE),
     tracks: [
       const MusicTrack(
-        title: 'Spark Moment',
-        artist: 'Shockwave',
+        title: 'Sunset Lover',
+        artist: 'Petit Biscuit',
         language: 'English',
-        source: 'YouTube Music',
-        audioUrl: 'https://file-examples.com/wp-content/uploads/2017/11/file_example_MP3_1MG.mp3',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=AM6X8KX7dFw',
         thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=500&q=80',
       ),
       const MusicTrack(
-        title: 'Flash Drive',
-        artist: 'Neon Pulse',
+        title: 'Electric Feel',
+        artist: 'MGMT',
         language: 'English',
-        source: 'Spotify',
-        audioUrl: 'https://file-examples.com/wp-content/uploads/2017/11/file_example_MP3_700KB.mp3',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=mm-5HEXWfrQ',
         thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
       ),
       const MusicTrack(
-        title: 'Surprise Loop',
-        artist: 'Quantum Beat',
+        title: 'Stolen Dance',
+        artist: 'Milky Chance',
         language: 'Indonesia',
-        source: 'Apple Music',
-        audioUrl: 'https://samplelib.com/lib/preview/mp3/sample-3s.mp3',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=mzvYYf1kI1o',
         thumbnailUrl: 'https://images.unsplash.com/photo-1490077471108-0cad1290d8b3?auto=format&fit=crop&w=500&q=80',
       ),
       const MusicTrack(
-        title: 'Shockwave',
-        artist: 'Impulse Lab',
+        title: 'Ocean Eyes',
+        artist: 'Billie Eilish',
         language: 'English',
-        source: 'Free Music',
-        audioUrl: 'https://samplelib.com/lib/preview/mp3/sample-6s.mp3',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=8wZTLyITW1M',
         thumbnailUrl: 'https://images.unsplash.com/photo-1515871204537-7d92b94b8045?auto=format&fit=crop&w=500&q=80',
       ),
       const MusicTrack(
-        title: 'Bright Alert',
-        artist: 'Velocity Vibe',
+        title: 'Calm Down',
+        artist: 'Rema',
         language: 'Indonesia',
         source: 'YouTube',
-        audioUrl: 'https://samplelib.com/lib/preview/mp3/sample-12s.mp3',
+        audioUrl: 'https://www.youtube.com/watch?v=b5WaFVLZij8',
         thumbnailUrl: 'https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Bad Guy',
+        artist: 'Billie Eilish',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=DyDfgMOUjCI',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Good 4 U',
+        artist: 'Olivia Rodrigo',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=gNi_6U5Pm_o',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Don\'t Start Now',
+        artist: 'Dua Lipa',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=Nz-dPOjZS5Y',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1488372765830-1f3fd75c52c9?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Kings & Queens',
+        artist: 'Ava Max',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=G7KNmW9a75Y',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Blinding Lights',
+        artist: 'The Weeknd',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=fHI8X4OXluQ',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Starboy',
+        artist: 'The Weeknd ft. Daft Punk',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=34Na4j8AVgA',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Believer',
+        artist: 'Imagine Dragons',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=7wtfhZwyrcc',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Feel It Still',
+        artist: 'Portugal. The Man',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=pBkHHoOIIn8',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Radioactive',
+        artist: 'Imagine Dragons',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=ktvTqknDobU',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Happier',
+        artist: 'Marshmello ft. Bastille',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=m7Bc3pLyij0',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'The Less I Know The Better',
+        artist: 'Tame Impala',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=sBzrzS1Ag_g',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Heathens',
+        artist: 'Twenty One Pilots',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=UprcpdwuwCg',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Bad Liar',
+        artist: 'Imagine Dragons',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=Ih0iu80u04Y',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Bad Romance',
+        artist: 'Lady Gaga',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=qrO4YZeyl0I',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1497215842964-222b430dc094?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Chandelier',
+        artist: 'Sia',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=2vjPBrBU-TM',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
       ),
     ],
   ),
@@ -293,44 +920,164 @@ final List<MusicMood> musicMoods = [
     color: const Color(0xFF9CA6B2),
     tracks: [
       const MusicTrack(
-        title: 'Night Watch',
-        artist: 'Shadow Tunes',
+        title: 'The Nights',
+        artist: 'Avicii',
         language: 'English',
-        source: 'Spotify',
-        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=UtF6Jej8yb4',
         thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
       ),
       const MusicTrack(
-        title: 'Whisper Path',
-        artist: 'Misty Code',
-        language: 'Indonesia',
-        source: 'YouTube Music',
-        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3',
+        title: 'Adventure of a Lifetime',
+        artist: 'Coldplay',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=Q0oIoR9mLwc',
         thumbnailUrl: 'https://images.unsplash.com/photo-1522770179533-24471fcdba45?auto=format&fit=crop&w=500&q=80',
       ),
       const MusicTrack(
-        title: 'Dreadflow',
-        artist: 'Hidden Frequency',
+        title: 'Lovely',
+        artist: 'Billie Eilish & Khalid',
         language: 'English',
-        source: 'Apple Music',
-        audioUrl: 'https://samplelib.com/lib/preview/mp3/sample-24s.mp3',
-        thumbnailUrl: 'https://images.unsplash.com/photo-1497215842964-222b430dc094?auto=format&fit=crop&w=500&q=80',
-      ),
-      const MusicTrack(
-        title: 'Veil',
-        artist: 'Lunar Echo',
-        language: 'English',
-        source: 'Free Music',
-        audioUrl: 'https://file-examples.com/wp-content/uploads/2017/11/file_example_MP3_2MG.mp3',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=V1Pl8CzNzCw',
         thumbnailUrl: 'https://images.unsplash.com/photo-1488372765830-1f3fd75c52c9?auto=format&fit=crop&w=500&q=80',
       ),
       const MusicTrack(
-        title: 'Silent Signal',
-        artist: 'Dark Circuit',
+        title: 'Lights',
+        artist: 'Ellie Goulding',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=0NKUpo_xKyQ',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1497215842964-222b430dc094?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Painkiller',
+        artist: 'Ruel',
         language: 'Indonesia',
         source: 'YouTube',
-        audioUrl: 'https://file-examples.com/wp-content/uploads/2017/11/file_example_MP3_1MG.mp3',
+        audioUrl: 'https://www.youtube.com/watch?v=8Epl2w1tJ5w',
         thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'The Hills',
+        artist: 'The Weeknd',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=yzTuBuRdAyA',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Demons',
+        artist: 'Imagine Dragons',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=mWRsgZuwf_8',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Bring Me to Life',
+        artist: 'Evanescence',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=3YxaaGgTQYM',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1522770179533-24471fcdba45?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Numb',
+        artist: 'Linkin Park',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=kXYiU_JCYtU',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Animals',
+        artist: 'Martin Garrix',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=gCYcHz2k5x0',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Believer',
+        artist: 'Imagine Dragons',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=7wtfhZwyrcc',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Radioactive',
+        artist: 'Imagine Dragons',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=ktvTqknDobU',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1497215842964-222b430dc094?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Disturbia',
+        artist: 'Rihanna',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=E3-5YC_oHjE',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Monster',
+        artist: 'Imagine Dragons',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=7d3M2T5NSgA',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'In the End',
+        artist: 'Linkin Park',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=eVTXPUF4Oz4',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Stressed Out',
+        artist: 'Twenty One Pilots',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=pXRviuL6vMY',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1497215842964-222b430dc094?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Natural',
+        artist: 'Imagine Dragons',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=0I647GU3Jsc',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Ghost Town',
+        artist: 'Kanye West',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=PQmE6t4xA2w',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Seven Nation Army',
+        artist: 'The White Stripes',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Madness',
+        artist: 'Muse',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=QYHxGBH6o4M',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1497215842964-222b430dc094?auto=format&fit=crop&w=500&q=80',
       ),
     ],
   ),
@@ -341,43 +1088,163 @@ final List<MusicMood> musicMoods = [
     color: const Color(0xFFDF7B7B),
     tracks: [
       const MusicTrack(
-        title: 'Rage Mode',
-        artist: 'Fury Lab',
+        title: 'Titanium',
+        artist: 'David Guetta ft. Sia',
         language: 'English',
-        source: 'Spotify',
-        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3',
-        thumbnailUrl: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=500&q=80',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=JRfuAukYTKg',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1504384308090-c894ddcc538d?auto=format&fit=crop&w=500&q=80',
       ),
       const MusicTrack(
-        title: 'Firewire',
-        artist: 'Voltage',
-        language: 'Indonesia',
-        source: 'YouTube Music',
-        audioUrl: 'https://samplelib.com/lib/preview/mp3/sample-3s.mp3',
+        title: 'Turn Down for What',
+        artist: 'DJ Snake & Lil Jon',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=HMUDVMiITOU',
         thumbnailUrl: 'https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=500&q=80',
       ),
       const MusicTrack(
-        title: 'Storm Pulse',
-        artist: 'Crimson Synth',
+        title: 'Animals',
+        artist: 'Martin Garrix',
         language: 'English',
-        source: 'Apple Music',
-        audioUrl: 'https://samplelib.com/lib/preview/mp3/sample-6s.mp3',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=gCYcHz2k5x0',
         thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80',
       ),
       const MusicTrack(
-        title: 'Breakout',
-        artist: 'Volt Drive',
+        title: 'Tremor',
+        artist: 'Dimitri Vegas, Martin Garrix, Like Mike',
         language: 'English',
-        source: 'Free Music',
-        audioUrl: 'https://file-examples.com/wp-content/uploads/2017/11/file_example_MP3_5MG.mp3',
-        thumbnailUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=500&q=80',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=xIxgV1HUd3U',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
       ),
       const MusicTrack(
-        title: 'Red Alert',
-        artist: 'Rage Circuit',
-        language: 'Indonesia',
+        title: 'One More Time',
+        artist: 'Daft Punk',
+        language: 'English',
         source: 'YouTube',
-        audioUrl: 'https://file-examples.com/wp-content/uploads/2017/11/file_example_MP3_2MG.mp3',
+        audioUrl: 'https://www.youtube.com/watch?v=FGBhQbmPwH8',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Levels',
+        artist: 'Avicii',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=_ovdm2yX4MA',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1488372765830-1f3fd75c52c9?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Lean On',
+        artist: 'Major Lazer & DJ Snake',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=YqeW9_5kURI',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1497215842964-222b430dc094?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Don\'t You Worry Child',
+        artist: 'Swedish House Mafia',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=1y6smkh6c-0',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Scary Monsters and Nice Sprites',
+        artist: 'Skrillex',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=WSeNSzJ2-Jw',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1504384308090-c894ddcc538d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Clarity',
+        artist: 'Zedd ft. Foxes',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=IxxstCcJlsc',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'This Is What You Came For',
+        artist: 'Calvin Harris ft. Rihanna',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=kOkQ4T5WO9E',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Wake Me Up',
+        artist: 'Avicii',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=IcrbM1l_BoI',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'In the Name of Love',
+        artist: 'Martin Garrix & Bebe Rexha',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=2vPuyALZJfU',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1488372765830-1f3fd75c52c9?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Where Are Ü Now',
+        artist: 'Jack Ü & Justin Bieber',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=BiQIc7fG7X0',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1497215842964-222b430dc094?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Turn Up the Speakers',
+        artist: 'Afrojack & Martin Garrix',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=daTjXgA8nfE',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Reload',
+        artist: 'Sebastian Ingrosso, Tommy Trash ft. John Martin',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=aKcMJZJ0bDY',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'I Could Be the One',
+        artist: 'Avicii vs Nicky Romero',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=R0mt3gNwEEE',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Summer',
+        artist: 'Calvin Harris',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=ebXbLfLACGM',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Sweet Nothing',
+        artist: 'Calvin Harris ft. Florence Welch',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=1P5QOV20WqA',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=500&q=80',
+      ),
+      const MusicTrack(
+        title: 'Get Low',
+        artist: 'Dillon Francis & DJ Snake',
+        language: 'English',
+        source: 'YouTube',
+        audioUrl: 'https://www.youtube.com/watch?v=UZ6V10XJSlo',
         thumbnailUrl: 'https://images.unsplash.com/photo-1497215842964-222b430dc094?auto=format&fit=crop&w=500&q=80',
       ),
     ],
@@ -530,6 +1397,77 @@ class _MusicPageState extends State<MusicPage> {
     } else {
       await _audioPlayer.resume();
     }
+  }
+
+  bool _isYouTubeTrack(MusicTrack track) {
+    final url = track.audioUrl.toLowerCase();
+    return url.contains('youtube.com/watch') || url.contains('youtu.be/');
+  }
+
+  String? _extractYoutubeVideoId(String url) {
+    final uri = Uri.tryParse(url);
+    if (uri == null) return null;
+    if (uri.host.contains('youtu.be')) {
+      return uri.pathSegments.isNotEmpty ? uri.pathSegments.last : null;
+    }
+    if (uri.host.contains('youtube.com')) {
+      return uri.queryParameters['v'];
+    }
+    return null;
+  }
+
+  Future<void> _playYoutubeTrack(MusicTrack track) async {
+    final videoId = _extractYoutubeVideoId(track.audioUrl);
+    if (videoId == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Tidak dapat memutar musik YouTube ini.')),
+        );
+      }
+      return;
+    }
+
+    await _audioPlayer.stop();
+    if (!mounted) return;
+    setState(() {
+      _currentTrack = track;
+      _isPlaying = false;
+      _currentPosition = Duration.zero;
+      _totalDuration = Duration.zero;
+    });
+
+    if (kIsWeb) {
+      final success = await launchUrlString(track.audioUrl, webOnlyWindowName: '_blank');
+      if (!success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Gagal membuka YouTube.')),
+        );
+      }
+      return;
+    }
+
+    if (!mounted) return;
+    await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => YouTubePlayerPopup(
+        track: track,
+        videoId: videoId,
+      ),
+    );
+  }
+
+  String _youtubeThumbnailUrl(String url) {
+    final videoId = _extractYoutubeVideoId(url);
+    return videoId != null ? 'https://img.youtube.com/vi/$videoId/hqdefault.jpg' : '';
+  }
+
+  Future<void> _handleTrackTap(MusicTrack track) async {
+    if (_isYouTubeTrack(track)) {
+      await _playYoutubeTrack(track);
+      return;
+    }
+    await _playTrack(track);
   }
 
   @override
@@ -756,7 +1694,7 @@ class _MusicPageState extends State<MusicPage> {
       borderRadius: BorderRadius.circular(20),
       clipBehavior: Clip.hardEdge,
       child: InkWell(
-        onTap: () => _playTrack(track),
+        onTap: () => _handleTrackTap(track),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -765,7 +1703,7 @@ class _MusicPageState extends State<MusicPage> {
                 children: [
                   Positioned.fill(
                     child: Image.network(
-                      track.thumbnailUrl,
+                      _isYouTubeTrack(track) ? _youtubeThumbnailUrl(track.audioUrl) : track.thumbnailUrl,
                       fit: BoxFit.cover,
                       errorBuilder: (c, e, s) => Container(color: Colors.grey.shade200),
                     ),
@@ -817,6 +1755,16 @@ class _MusicPageState extends State<MusicPage> {
                         child: Text(track.language, style: GoogleFonts.poppins(fontSize: 10, color: mood.color, fontWeight: FontWeight.w700)),
                       ),
                       const SizedBox(width: 6),
+                      if (_isYouTubeTrack(track))
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text('YouTube', style: GoogleFonts.poppins(fontSize: 10, color: Colors.red, fontWeight: FontWeight.w700)),
+                        ),
+                      if (_isYouTubeTrack(track)) const SizedBox(width: 6),
                       Expanded(
                         child: Text(track.source, style: GoogleFonts.poppins(fontSize: 10, color: Colors.black45), maxLines: 1, overflow: TextOverflow.ellipsis),
                       ),
@@ -832,7 +1780,7 @@ class _MusicPageState extends State<MusicPage> {
   }
 
   Widget _buildBottomPlayerLight(MusicMood selectedMood) {
-    if (_currentTrack == null) return const SizedBox.shrink();
+    if (_currentTrack == null || _isYouTubeTrack(_currentTrack!)) return const SizedBox.shrink();
     final progress = _totalDuration.inMilliseconds > 0 ? _currentPosition.inMilliseconds / _totalDuration.inMilliseconds : 0.0;
 
     return Positioned(
@@ -871,6 +1819,143 @@ class _MusicPageState extends State<MusicPage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class YouTubePlayerPopup extends StatefulWidget {
+  final MusicTrack track;
+  final String videoId;
+
+  const YouTubePlayerPopup({super.key, required this.track, required this.videoId});
+
+  @override
+  State<YouTubePlayerPopup> createState() => _YouTubePlayerPopupState();
+}
+
+class _YouTubePlayerPopupState extends State<YouTubePlayerPopup> {
+  late yt.YoutubePlayerController _controller;
+  bool _hasHandledError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = yt.YoutubePlayerController(
+      initialVideoId: widget.videoId,
+      flags: const yt.YoutubePlayerFlags(
+        autoPlay: true,
+        mute: false,
+        controlsVisibleAtStart: true,
+        forceHD: false,
+      ),
+    )..addListener(_youtubeListener);
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_youtubeListener);
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _youtubeListener() {
+    final value = _controller.value;
+    if (!value.hasError || _hasHandledError) return;
+
+    _hasHandledError = true;
+    final errorMessage = (value.errorCode == 150 || value.errorCode == 101)
+        ? 'Video ini dibatasi oleh pemilik. Membuka YouTube...'
+        : 'Terjadi kesalahan pemutaran YouTube. Membuka YouTube...';
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
+      _openYoutubeExternally();
+    }
+  }
+
+  Future<void> _openYoutubeExternally() async {
+    final success = await launchUrlString(
+      widget.track.audioUrl,
+      mode: LaunchMode.externalApplication,
+    );
+    if (!success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Gagal membuka YouTube.')),
+      );
+    }
+    if (mounted) Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return yt.YoutubePlayerBuilder(
+      player: yt.YoutubePlayer(
+        controller: _controller,
+        showVideoProgressIndicator: true,
+        progressIndicatorColor: widget.track.source.contains('YouTube') ? Colors.red : Theme.of(context).primaryColor,
+      ),
+      builder: (context, player) {
+        return Dialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          child: SizedBox(
+            width: double.infinity,
+            height: MediaQuery.of(context).size.height * 0.75,
+            child: Column(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: widget.track.source.contains('YouTube') ? Colors.red : Theme.of(context).primaryColor,
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          widget.track.title,
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.white),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Expanded(child: player),
+                      Padding(
+                        padding: const EdgeInsets.all(18),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(widget.track.title, style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.w800)),
+                            const SizedBox(height: 8),
+                            Text(widget.track.artist, style: GoogleFonts.poppins(fontSize: 14, color: Colors.black54)),
+                            const SizedBox(height: 16),
+                            Text('Memutar dari YouTube', style: GoogleFonts.poppins(fontSize: 14, color: Colors.black87)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

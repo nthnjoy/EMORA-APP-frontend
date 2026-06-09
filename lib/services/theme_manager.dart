@@ -8,6 +8,7 @@ class ThemeManager with ChangeNotifier {
   ThemeManager._internal();
 
   String _currentThemeId = 'default';
+  String _genderBasedTheme = 'default';
 
   String get currentThemeId => _currentThemeId;
   
@@ -22,14 +23,41 @@ class ThemeManager with ChangeNotifier {
 
   void init() {
     final user = LaravelSessionService.user;
+    
+    // Set gender-based theme
+    _setGenderBasedTheme();
+    
+    // Jika user sudah memilih tema, gunakan tema yang dipilih
     if (user != null && user['active_theme'] != null) {
       _currentThemeId = user['active_theme'].toString();
-      notifyListeners();
+    } else {
+      // Jika belum memilih, gunakan tema berdasarkan gender
+      _currentThemeId = _genderBasedTheme;
+    }
+    
+    notifyListeners();
+  }
+
+  /// Mengatur tema berdasarkan jenis kelamin user
+  void _setGenderBasedTheme() {
+    final user = LaravelSessionService.user;
+    final gender = user?['jenis_kelamin']?.toString().toLowerCase() ?? '';
+    
+    if (gender.contains('perempuan') || gender == 'perempuan') {
+      _genderBasedTheme = 'pink'; // Soft Pink untuk perempuan
+    } else {
+      _genderBasedTheme = 'default'; // Green default untuk laki-laki atau belum pilih
     }
   }
 
   void updateTheme(String themeId) {
     _currentThemeId = themeId;
     notifyListeners();
+  }
+
+  /// Dipanggil ketika user mengubah gender
+  void updateGenderAndTheme() {
+    _setGenderBasedTheme();
+    init(); // Re-initialize dengan gender baru
   }
 }

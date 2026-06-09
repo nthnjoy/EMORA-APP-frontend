@@ -7,6 +7,7 @@ import 'services/theme_manager.dart';
 import 'services/laravel_session_service.dart';
 
 import 'services/notification_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -14,8 +15,35 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await LaravelSessionService.initialize();
   await NotificationService().init();
+  
+  // ✅ RESTORE notification schedule saat app startup
+  await _restoreNotificationSchedule();
+  
   ThemeManager().init();
   runApp(const MyApp());
+}
+
+/// ✅ Restore notification schedule dari SharedPreferences
+Future<void> _restoreNotificationSchedule() async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final isEnabled = prefs.getBool('notifications_enabled') ?? false;
+    
+    if (isEnabled) {
+      final hour = prefs.getInt('notification_hour') ?? 8;
+      final minute = prefs.getInt('notification_minute') ?? 30;
+      
+      final time = TimeOfDay(hour: hour, minute: minute);
+      final timeStr = '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
+      debugPrint('🔄 Restoring notification schedule: $timeStr');
+      await NotificationService().scheduleDailyNotification(time);
+      debugPrint('✅ Notification schedule restored!');
+    } else {
+      debugPrint('⏸️ Notifications disabled, skipping restore');
+    }
+  } catch (e) {
+    debugPrint('❌ Error restoring notification: $e');
+  }
 }
 
 class MyApp extends StatelessWidget {

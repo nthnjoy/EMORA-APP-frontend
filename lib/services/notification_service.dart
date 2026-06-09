@@ -86,24 +86,43 @@ class NotificationService {
         time.minute,
       );
 
+      // Jika waktu sudah terlewat hari ini, schedule untuk besok
       if (scheduledDate.isBefore(now)) {
         scheduledDate = scheduledDate.add(const Duration(days: 1));
       }
 
+      debugPrint('⏰ Scheduling daily notification for: ${scheduledDate.toString()}');
+      debugPrint('⏰ Current time: ${now.toString()}');
+
+      // Android notification details dengan importance maksimal
       const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
         'daily_reminder_channel',
         'Pengingat Harian EMOLENS',
         channelDescription: 'Mengingatkan Anda untuk mencatat mood harian.',
         importance: Importance.max,
-        priority: Priority.high,
+        priority: Priority.max,
         showWhen: true,
+        enableVibration: true,
+        playSound: true,
+        fullScreenIntent: true,
+        autoCancel: true,
+      );
+
+      // iOS notification details
+      const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        threadIdentifier: 'daily_reminder_channel',
       );
 
       const NotificationDetails details = NotificationDetails(
         android: androidDetails,
-        iOS: DarwinNotificationDetails(),
+        iOS: iosDetails,
       );
 
+      // Schedule dengan inexactAllowWhileIdle dan matchDateTimeComponents untuk daily recurring
+      // matchDateTimeComponents.time = repeat every hari di jam yang sama
       await _notificationsPlugin.zonedSchedule(
         0,
         'EMOLENS - Waktunya Check-in!',
@@ -114,8 +133,10 @@ class NotificationService {
         uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
         matchDateTimeComponents: DateTimeComponents.time,
       );
+
+      debugPrint('✅ Notifikasi berhasil dijadwalkan!');
     } catch (e) {
-      debugPrint('Error scheduling notification: $e');
+      debugPrint('❌ Error scheduling notification: $e');
     }
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/user_service.dart';
+import '../services/theme_manager.dart';
 
 class GenderDialog {
   static Future<void> show(BuildContext context) async {
@@ -129,12 +130,28 @@ class GenderDialog {
                           ? null 
                           : () async {
                               final result = await UserService.updateGender(selectedGender!);
+                              
+                              // Check if dialog still mounted before proceeding
+                              if (!context.mounted) return;
+                              
                               if (result['success']) {
+                                // Refresh user data dari server agar LaravelSessionService ter-update
+                                await UserService.fetchCurrentUser();
+                                
+                                // Check mounted again after async operation
+                                if (!context.mounted) return;
+                                
+                                // Sekarang theme manager bisa membaca gender yang sudah ter-update
+                                ThemeManager().updateGenderAndTheme();
+                                
+                                // Close dialog
                                 Navigator.of(context).pop();
                               } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(result['message'])),
-                                );
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(result['message'])),
+                                  );
+                                }
                               }
                             },
                         style: ElevatedButton.styleFrom(

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../services/theme_manager.dart';
 import '../services/laravel_session_service.dart';
 import '../services/user_service.dart';
 
@@ -97,17 +97,30 @@ class _DailyBoostPageState extends State<DailyBoostPage> with SingleTickerProvid
     _loadData();
   }
 
+  static const String _dailyBoostDoneIdsKey = 'daily_boost_done_ids';
+  static const String _dailyBoostDoneDateKey = 'daily_boost_done_date';
+
   Future<void> _loadData() async {
     await UserService.fetchCurrentUser();
     final prefs = await SharedPreferences.getInstance();
-    final savedDone = prefs.getStringList('daily_boost_done_ids') ?? [];
-    
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    final savedDate = prefs.getString(_dailyBoostDoneDateKey) ?? '';
+    final savedDone = prefs.getStringList(_dailyBoostDoneIdsKey) ?? [];
+
+    final shouldReset = savedDate != today;
+    if (shouldReset) {
+      await prefs.setString(_dailyBoostDoneDateKey, today);
+      await prefs.setStringList(_dailyBoostDoneIdsKey, []);
+    }
+
     final user = LaravelSessionService.user;
     if (mounted) {
       setState(() {
         DailyBoostData.doneChallenges.clear();
-        DailyBoostData.doneChallenges.addAll(savedDone.map(int.parse));
-        
+        if (!shouldReset) {
+          DailyBoostData.doneChallenges.addAll(savedDone.map(int.parse));
+        }
+
         final rawPoint = user?['point'] ?? 0;
         _totalPoints = rawPoint is int ? rawPoint : int.tryParse(rawPoint.toString()) ?? 0;
       });
@@ -116,9 +129,11 @@ class _DailyBoostPageState extends State<DailyBoostPage> with SingleTickerProvid
 
   Future<void> _saveProgress() async {
     final prefs = await SharedPreferences.getInstance();
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    await prefs.setString(_dailyBoostDoneDateKey, today);
     await prefs.setStringList(
-      'daily_boost_done_ids', 
-      DailyBoostData.doneChallenges.map((id) => id.toString()).toList()
+      _dailyBoostDoneIdsKey,
+      DailyBoostData.doneChallenges.map((id) => id.toString()).toList(),
     );
     await UserService.updateUserPoints(_totalPoints);
   }
@@ -397,17 +412,74 @@ class _DailyBoostDetailSheetState extends State<_DailyBoostDetailSheet> {
   int? _remainingSeconds;
   bool _isRunning = false;
   Timer? _timer;
-  @override void dispose() { _timer?.cancel(); super.dispose(); }
+  final AudioPlayer _alarmPlayer = AudioPlayer();
+
+  @override
+  void initState() {
+    super.initState();
+    _alarmPlayer.setReleaseMode(ReleaseMode.stop);
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _alarmPlayer.dispose();
+    super.dispose();
+  }
+
   void _startTimer() {
-    setState(() { _remainingSeconds ??= widget.item.durationSeconds; _isRunning = true; });
+    setState(() {
+      _remainingSeconds ??= widget.item.durationSeconds;
+      _isRunning = true;
+    });
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_remainingSeconds != null && _remainingSeconds! > 0) { setState(() => _remainingSeconds = _remainingSeconds! - 1); } else { timer.cancel(); _complete(); }
+      if (_remainingSeconds != null && _remainingSeconds! > 0) {
+        setState(() => _remainingSeconds = _remainingSeconds! - 1);
+      } else {
+        timer.cancel();
+        _complete();
+      }
     });
   }
-  void _pauseTimer() { _timer?.cancel(); setState(() => _isRunning = false); }
-  void _complete() { if (!widget.isDone) widget.onToggle(); Navigator.pop(context); _showSuccessOverlay(); }
+
+  void _pauseTimer() {
+    _timer?.cancel();
+    setState(() => _isRunning = false);
+  }
+
+  Future<void> _playAlarm() async {
+    try {
+      await _alarmPlayer.play(UrlSource('https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg'));
+    } catch (_) {
+      // Ignore if alarm sound fails to play.
+    }
+  }
+
+  void _complete() {
+    if (!widget.isDone) widget.onToggle();
+    _playAlarm();
+    Navigator.pop(context);
+    _showSuccessOverlay();
+  }
+
   void _showSuccessOverlay() {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(backgroundColor: Colors.transparent, elevation: 0, content: Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(16)), child: Row(children: const [Icon(Icons.check_circle_rounded, color: Colors.white), SizedBox(width: 12), Text('Keren! +50 Poin Berhasil Diraih!', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))]))));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        content: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(16)),
+          child: Row(
+            children: const [
+              Icon(Icons.check_circle_rounded, color: Colors.white),
+              SizedBox(width: 12),
+              Text('Keren! +50 Poin Berhasil Diraih!', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ),
+      ),
+    );
   }
   String _formatTime(int seconds) { final m = (seconds / 60).floor(); final s = seconds % 60; return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}'; }
   @override Widget build(BuildContext context) {
@@ -431,7 +503,69 @@ class _DailyBoostDetailSheetState extends State<_DailyBoostDetailSheet> {
           const SizedBox(height: 24),
           if (isStarted) Text(_formatTime(_remainingSeconds!), style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, letterSpacing: 2, fontFamily: 'monospace')),
           const SizedBox(height: 32),
-          widget.isDone ? SizedBox(width: double.infinity, height: 60, child: TextButton(onPressed: () { widget.onToggle(); Navigator.pop(context); }, child: const Text('Batalkan Penyelesaian Misi', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)))) : !isStarted ? SizedBox(width: double.infinity, height: 60, child: ElevatedButton(onPressed: _startTimer, style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)), elevation: 8, shadowColor: primaryColor.withOpacity(0.4)), child: const Text('MULAI MISI SEKARANG', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)))) : Row(children: [Expanded(child: SizedBox(height: 60, child: OutlinedButton(onPressed: () => Navigator.pop(context), style: OutlinedButton.styleFrom(side: BorderSide(color: Colors.grey.shade200), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))), child: const Text('Batal', style: TextStyle(color: Colors.black54))))), const SizedBox(width: 16), Expanded(flex: 2, child: SizedBox(height: 60, child: ElevatedButton(onPressed: _isRunning ? _pauseTimer : _startTimer, style: ElevatedButton.styleFrom(backgroundColor: _isRunning ? Colors.amber : Colors.green, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))), child: Text(_isRunning ? 'JEDA MISI' : 'LANJUTKAN', style: const TextStyle(fontWeight: FontWeight.bold)))))]),
+          widget.isDone
+              ? SizedBox(
+                  width: double.infinity,
+                  height: 60,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey.shade300,
+                      foregroundColor: Colors.grey.shade700,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    ),
+                    child: const Text('Sudah selesai untuk hari ini', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                )
+              : !isStarted
+                  ? SizedBox(
+                      width: double.infinity,
+                      height: 60,
+                      child: ElevatedButton(
+                        onPressed: _startTimer,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                          elevation: 8,
+                          shadowColor: primaryColor.withOpacity(0.4),
+                        ),
+                        child: const Text('MULAI MISI SEKARANG', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
+                      ),
+                    )
+                  : Row(
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: 60,
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.pop(context),
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(color: Colors.grey.shade200),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                              ),
+                              child: const Text('Batal', style: TextStyle(color: Colors.black54)),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          flex: 2,
+                          child: SizedBox(
+                            height: 60,
+                            child: ElevatedButton(
+                              onPressed: _isRunning ? _pauseTimer : _startTimer,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _isRunning ? Colors.amber : Colors.green,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                              ),
+                              child: Text(_isRunning ? 'JEDA MISI' : 'LANJUTKAN', style: const TextStyle(fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
         ],
       ),
     );
