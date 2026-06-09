@@ -133,21 +133,26 @@ class _SelfCarePageState extends State<SelfCarePage> {
     int backendPoints = sessionPoints is int
         ? sessionPoints
         : int.tryParse(sessionPoints.toString()) ?? 0;
+        
+    final backendCompletedModules = (sessionUser?['completed_modules'] as List?)
+        ?.map((e) => e.toString())
+        .toList() ?? [];
 
     if (!mounted) return;
 
     setState(() {
       _completedModules.clear();
       _completedModules.addAll(savedModules);
+      _completedModules.addAll(backendCompletedModules);
       _totalPoints = backendPoints;
     });
   }
 
-  Future<void> _saveProgress() async {
+  Future<void> _saveProgress(String? newModuleId) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(
         'self_care_completed_modules_ids', _completedModules.toList());
-    await UserService.updateUserPoints(_totalPoints);
+    await UserService.updateUserPoints(_totalPoints, moduleId: newModuleId);
   }
 
   Future<void> _handleRefresh() async {
@@ -276,7 +281,7 @@ class _SelfCarePageState extends State<SelfCarePage> {
       _completedModules.add(module.id);
       _totalPoints += module.points;
     });
-    await _saveProgress();
+    await _saveProgress(module.id);
     await _recordDailyActivity(module);
     if (mounted) _showSuccessSnackBar(module.points);
   }

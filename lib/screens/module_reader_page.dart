@@ -137,6 +137,13 @@ class _PdfReaderViewState extends State<_PdfReaderView> {
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
+      
+      if (mounted) {
+        setState(() {
+          _isLoaded = true; // Tandai loaded agar tidak loading terus
+        });
+      }
+
       // Tandai selesai otomatis karena PDF dibuka di luar app
       if (mounted && !_hasCompleted) {
         await Future.delayed(const Duration(seconds: 2));
@@ -182,8 +189,9 @@ class _PdfReaderViewState extends State<_PdfReaderView> {
   void _onPageChanged(int page) {
     setState(() => _currentPage = page);
 
-    // Selesai jika halaman terakhir tercapai
-    if (_totalPages > 0 && page >= _totalPages) {
+    // Selesai jika halaman mencapai akhir atau 1 halaman sebelum akhir
+    // (Workaround untuk bug pdfx dimana halaman terakhir kadang sulit di-scroll)
+    if (_totalPages > 0 && page >= _totalPages - 1) {
       if (!_hasCompleted) {
         setState(() => _hasCompleted = true);
         widget.onCompleted();
@@ -232,52 +240,53 @@ class _PdfReaderViewState extends State<_PdfReaderView> {
 
         // ─── PDF Viewer ───────────────────────────────────────────────
         Expanded(
-          child: NotificationListener<ScrollNotification>(
-            onNotification: (ScrollNotification notification) {
-              if (_isLoaded && !_hasCompleted) {
-                // Beri toleransi 50 pixel dari bawah agar tidak harus benar-benar mentok
-                if (notification.metrics.pixels >= notification.metrics.maxScrollExtent - 50) {
-                  setState(() => _hasCompleted = true);
-                  widget.onCompleted();
-                }
-              }
-              return false;
-            },
-            child: _hasError
-                ? _buildErrorView(module)
-                : _pdfController == null
-                    ? _buildLoadingView(module)
-                    : PdfViewPinch(
-                        controller: _pdfController!,
-                        onDocumentLoaded: _onDocumentLoaded,
-                        onDocumentError: (error) {
-                          setState(() {
-                            _hasError = true;
-                            _errorMessage = error.toString();
-                          });
-                        },
-                        onPageChanged: _onPageChanged,
-                        builders: PdfViewPinchBuilders<DefaultBuilderOptions>(
-                          options: const DefaultBuilderOptions(),
-                          documentLoaderBuilder: (_) =>
-                              _buildLoadingView(module),
-                          pageLoaderBuilder: (_) =>
-                              Container(
-                            color: const Color(0xFF1A1A2E),
-                            child: const Center(
-                              child: CircularProgressIndicator(
-                                  color: Colors.white54),
+          child: kIsWeb 
+            ? _buildWebView(module)
+            : Stack(
+                children: [
+                  _hasError
+                      ? _buildErrorView(module)
+                      : _pdfController == null
+                          ? _buildLoadingView(module)
+                          : PdfViewPinch(
+                              controller: _pdfController!,
+                              onDocumentLoaded: _onDocumentLoaded,
+                              onDocumentError: (error) {
+                                setState(() {
+                                  _hasError = true;
+                                  _errorMessage = error.toString();
+                                });
+                              },
+                              onPageChanged: _onPageChanged,
+                              builders: PdfViewPinchBuilders<DefaultBuilderOptions>(
+                                options: const DefaultBuilderOptions(),
+                                documentLoaderBuilder: (_) =>
+                                    _buildLoadingView(module),
+                                pageLoaderBuilder: (_) =>
+                                    Container(
+                                  color: const Color(0xFF1A1A2E),
+                                  child: const Center(
+                                    child: CircularProgressIndicator(
+                                        color: Colors.white54),
+                                  ),
+                                ),
+                                errorBuilder: (_, error) =>
+                                    _buildErrorView(module),
+                              ),
                             ),
-                          ),
-                          errorBuilder: (_, error) =>
-                              _buildErrorView(module),
-                        ),
-                      ),
-          ),
+                  
+                  // Status bar bawah ditampilkan sebagai overlay (Stack) 
+                  // agar tidak mengubah ukuran PdfViewPinch yang bisa membuatnya blank
+                  if (_hasCompleted && _isLoaded)
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: _buildCompletedBanner(module),
+                    ),
+                ],
+              ),
         ),
-
-        // ─── Status bar bawah ─────────────────────────────────────────
-        if (_hasCompleted && _isLoaded) _buildCompletedBanner(module),
       ],
     );
   }
@@ -443,6 +452,55 @@ class _PdfReaderViewState extends State<_PdfReaderView> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildWebView(ModuleReaderArgs module) {
+    return Container(
+      color: const Color(0xFF1A1A2E),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.open_in_new_rounded, size: 64, color: module.color),
+            const SizedBox(height: 16),
+            Text(
+              'PDF dibuka di tab baru',
+              style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Browser tidak dapat menampilkan PDF secara langsung.\nSilakan baca PDF di tab baru yang telah terbuka.',
+              style: GoogleFonts.poppins(
+                  color: Colors.white54, fontSize: 12),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: module.color,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 20, vertical: 12),
+              ),
+              onPressed: () async {
+                final uri = Uri.parse(module.contentUrl!);
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                }
+              },
+              icon: const Icon(Icons.refresh_rounded),
+              label: Text('Buka PDF Lagi',
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -46,12 +46,17 @@ class UserService {
     }
   }
 
-  static Future<Map<String, dynamic>> updateUserPoints(int points) async {
+  static Future<Map<String, dynamic>> updateUserPoints(int points, {String? moduleId}) async {
     try {
+      final body = <String, dynamic>{'points': points};
+      if (moduleId != null) {
+        body['completed_module_id'] = moduleId;
+      }
+      
       final response = await http.post(
         Uri.parse(ApiConfig.updatePointsUrl),
         headers: _headers(),
-        body: jsonEncode({'points': points}),
+        body: jsonEncode(body),
       ).timeout(const Duration(seconds: 10));
 
       final result = jsonDecode(response.body);

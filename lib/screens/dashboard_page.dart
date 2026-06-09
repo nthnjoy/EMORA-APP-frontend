@@ -552,8 +552,8 @@ class _DashboardPageState extends State<DashboardPage> {
                                     children: [
                                       Row(
                                         children: [
-                                          const Text('Rekapitulasi Mood', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87)),
-                                          const Spacer(),
+                                          const Expanded(child: Text('Rekapitulasi Mood', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                                          const SizedBox(width: 8),
                                           Container(
                                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                             decoration: BoxDecoration(color: Colors.white.withOpacity(0.5), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.black12)),
