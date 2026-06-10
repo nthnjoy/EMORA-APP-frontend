@@ -38,6 +38,23 @@ class _StoryPageState extends State<StoryPage> {
       
       await AiDialog.show(context, feedback);
       
+      final int aiLevel = result['ai_level'] is int 
+          ? result['ai_level'] 
+          : int.tryParse(result['ai_level']?.toString() ?? '0') ?? 0;
+          
+      // Force trigger untuk akun testing Whisnu
+      final String? userNim = LaravelSessionService.user?['nim']?.toString();
+      final String? username = LaravelSessionService.user?['username']?.toString();
+      final bool isTestingUser = userNim == '11423045' || username == 'whisnu';
+          
+      if (aiLevel == 3 || isTestingUser) {
+        if (!mounted) return;
+        await AiDialog.showWarning(
+          context,
+          'Sepertinya kamu tidak baik-baik saja. Coba lakukan konseling untuk membantu meredakan perasaanmu.',
+        );
+      }
+      
       if (!mounted) return;
       _storyController.clear();
       Navigator.of(context).pop(true);

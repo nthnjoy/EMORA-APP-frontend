@@ -6,6 +6,7 @@ import 'profile_page.dart';
 import '../services/laravel_session_service.dart';
 import '../utils/gender_dialog.dart';
 import '../services/counselor_notification_service.dart';
+import '../widgets/mini_player_widget.dart';
 
 class MainNavigationPage extends StatefulWidget {
   const MainNavigationPage({super.key});
@@ -71,9 +72,16 @@ class MainNavigationPageState extends State<MainNavigationPage> {
       },
       child: Scaffold(
         backgroundColor: Colors.grey.shade100,
-        body: IndexedStack(
-          index: _selectedIndex,
-          children: _pages,
+        body: Column(
+          children: [
+            Expanded(
+              child: IndexedStack(
+                index: _selectedIndex,
+                children: _pages,
+              ),
+            ),
+            const MiniPlayerWidget(),
+          ],
         ),
         bottomNavigationBar: Container(
           decoration: BoxDecoration(

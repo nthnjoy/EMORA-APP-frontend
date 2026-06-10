@@ -1,4 +1,4 @@
-﻿import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart' as yt show YoutubePlayerController, YoutubePlayerFlags, YoutubePlayerBuilder, YoutubePlayer;
@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 import '../services/mood_service.dart';
 import '../services/laravel_session_service.dart';
 import '../services/theme_manager.dart';
+import '../services/music_player_manager.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class MusicMood {
@@ -1259,14 +1260,10 @@ class MusicPage extends StatefulWidget {
 }
 
 class _MusicPageState extends State<MusicPage> {
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  final MusicPlayerManager _playerManager = MusicPlayerManager();
   int _selectedMoodIndex = 0;
   int _selectedLanguageIndex = 0;
-  MusicTrack? _currentTrack;
-  bool _isPlaying = false;
   bool _isLoading = true;
-  Duration _currentPosition = Duration.zero;
-  Duration _totalDuration = Duration.zero;
 
   // Compute a darker and lighter variant for a base color
   Map<String, Color> _colorVariants(Color base) {
@@ -1279,42 +1276,14 @@ class _MusicPageState extends State<MusicPage> {
   @override
   void initState() {
     super.initState();
-    _initializeAudioPlayer();
+    _playerManager.addListener(_onPlayerStateChanged);
     _loadLastMood();
   }
 
-  void _initializeAudioPlayer() {
-    _audioPlayer.setReleaseMode(ReleaseMode.stop);
-    _audioPlayer.setVolume(1.0);
-
-    _audioPlayer.onPlayerStateChanged.listen((state) {
-      if (!mounted) return;
-      setState(() {
-        _isPlaying = state == PlayerState.playing;
-      });
-    });
-
-    _audioPlayer.onDurationChanged.listen((duration) {
-      if (!mounted) return;
-      setState(() {
-        _totalDuration = duration;
-      });
-    });
-
-    _audioPlayer.onPositionChanged.listen((position) {
-      if (!mounted) return;
-      setState(() {
-        _currentPosition = position;
-      });
-    });
-
-    _audioPlayer.onPlayerComplete.listen((event) {
-      if (!mounted) return;
-      setState(() {
-        _isPlaying = false;
-        _currentPosition = _totalDuration;
-      });
-    });
+  void _onPlayerStateChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _loadLastMood() async {
@@ -1349,7 +1318,7 @@ class _MusicPageState extends State<MusicPage> {
 
   @override
   void dispose() {
-    _audioPlayer.dispose();
+    _playerManager.removeListener(_onPlayerStateChanged);
     super.dispose();
   }
 
@@ -1361,42 +1330,11 @@ class _MusicPageState extends State<MusicPage> {
   }
 
   Future<void> _playTrack(MusicTrack track) async {
-    if (_currentTrack?.audioUrl == track.audioUrl) {
-      if (_isPlaying) {
-        await _audioPlayer.pause();
-      } else {
-        await _audioPlayer.resume();
-      }
-      return;
-    }
-
-    await _audioPlayer.stop();
-    setState(() {
-      _currentTrack = track;
-      _isPlaying = true;
-      _currentPosition = Duration.zero;
-      _totalDuration = Duration.zero;
-    });
-
-    try {
-      await _audioPlayer.play(UrlSource(track.audioUrl), volume: 1.0);
-    } catch (e) {
-      debugPrint('Audio playback error: $e');
-      if (mounted) {
-        setState(() {
-          _isPlaying = false;
-        });
-      }
-    }
+    await _playerManager.playTrack(track);
   }
 
   Future<void> _togglePlayPause() async {
-    if (_currentTrack == null) return;
-    if (_isPlaying) {
-      await _audioPlayer.pause();
-    } else {
-      await _audioPlayer.resume();
-    }
+    await _playerManager.togglePlayPause();
   }
 
   bool _isYouTubeTrack(MusicTrack track) {
@@ -1427,14 +1365,7 @@ class _MusicPageState extends State<MusicPage> {
       return;
     }
 
-    await _audioPlayer.stop();
-    if (!mounted) return;
-    setState(() {
-      _currentTrack = track;
-      _isPlaying = false;
-      _currentPosition = Duration.zero;
-      _totalDuration = Duration.zero;
-    });
+    await _playerManager.stopTrack();
 
     if (kIsWeb) {
       final success = await launchUrlString(track.audioUrl, webOnlyWindowName: '_blank');
@@ -1593,7 +1524,7 @@ class _MusicPageState extends State<MusicPage> {
                           ),
                         ],
                       ),
-                      if (_currentTrack != null) _buildBottomPlayerLight(selectedMood),
+                      if (_playerManager.currentTrack != null) _buildBottomPlayerLight(selectedMood),
                     ],
                   ),
                 );
@@ -1688,7 +1619,7 @@ class _MusicPageState extends State<MusicPage> {
   }
 
   Widget _buildTrackGridCard(MusicTrack track, MusicMood mood) {
-    final isCurrent = _currentTrack?.audioUrl == track.audioUrl;
+    final isCurrent = _playerManager.currentTrack?.audioUrl == track.audioUrl;
     return Material(
       color: Colors.white,
       borderRadius: BorderRadius.circular(20),
@@ -1780,8 +1711,16 @@ class _MusicPageState extends State<MusicPage> {
   }
 
   Widget _buildBottomPlayerLight(MusicMood selectedMood) {
-    if (_currentTrack == null || _isYouTubeTrack(_currentTrack!)) return const SizedBox.shrink();
-    final progress = _totalDuration.inMilliseconds > 0 ? _currentPosition.inMilliseconds / _totalDuration.inMilliseconds : 0.0;
+    final currentTrack = _playerManager.currentTrack;
+    if (currentTrack == null || _isYouTubeTrack(currentTrack)) return const SizedBox.shrink();
+    
+    final currentPosition = _playerManager.currentPosition;
+    final totalDuration = _playerManager.totalDuration;
+    final isPlaying = _playerManager.isPlaying;
+    
+    final progress = totalDuration.inMilliseconds > 0 
+        ? currentPosition.inMilliseconds / totalDuration.inMilliseconds 
+        : 0.0;
 
     return Positioned(
       left: 16,
@@ -1793,24 +1732,17 @@ class _MusicPageState extends State<MusicPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            LinearProgressIndicator(value: progress, color: selectedMood.color, backgroundColor: Colors.grey.shade200, minHeight: 4),
+            LinearProgressIndicator(value: progress.clamp(0.0, 1.0), color: selectedMood.color, backgroundColor: Colors.grey.shade200, minHeight: 4),
             const SizedBox(height: 8),
             Row(
               children: [
-                ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.network(_currentTrack!.thumbnailUrl, width: 48, height: 48, fit: BoxFit.cover, errorBuilder: (c, e, s) => Container(width: 48, height: 48, color: Colors.grey.shade200))),
+                ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.network(currentTrack.thumbnailUrl, width: 48, height: 48, fit: BoxFit.cover, errorBuilder: (c, e, s) => Container(width: 48, height: 48, color: Colors.grey.shade200))),
                 const SizedBox(width: 12),
-                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(_currentTrack!.title, style: GoogleFonts.outfit(fontWeight: FontWeight.w700)), Text(_currentTrack!.artist, style: GoogleFonts.poppins(fontSize: 12, color: Colors.black54))])),
-                IconButton(onPressed: _togglePlayPause, icon: Icon(_isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill, color: selectedMood.color, size: 36)),
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(currentTrack.title, style: GoogleFonts.outfit(fontWeight: FontWeight.w700)), Text(currentTrack.artist, style: GoogleFonts.poppins(fontSize: 12, color: Colors.black54))])),
+                IconButton(onPressed: _togglePlayPause, icon: Icon(isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill, color: selectedMood.color, size: 36)),
                 IconButton(
                   onPressed: () async {
-                    await _audioPlayer.stop();
-                    if (!mounted) return;
-                    setState(() {
-                      _currentTrack = null;
-                      _isPlaying = false;
-                      _currentPosition = Duration.zero;
-                      _totalDuration = Duration.zero;
-                    });
+                    await _playerManager.stopTrack();
                   },
                   icon: const Icon(Icons.close, color: Colors.black54),
                 ),

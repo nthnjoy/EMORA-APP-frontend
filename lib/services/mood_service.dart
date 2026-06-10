@@ -234,6 +234,7 @@ class MoodService {
           (bodyJson['message'] ?? (success ? 'OK' : defaultErrorMessage))
               .toString(),
       'ai_feedback': bodyJson['ai_feedback'],
+      'ai_level': bodyJson['ai_level'] ?? 0,
       'data': bodyJson['data'],
       'raw': bodyJson,
     };
