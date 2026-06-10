@@ -621,7 +621,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 'Jenis Kelamin',
                 gender,
                 onTap: () async {
-                  await GenderDialog.show(context);
+                  await GenderDialog.show(context, isProfileEdit: true);
                   refreshProfile();
                 },
               ),

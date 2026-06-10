@@ -84,6 +84,21 @@ class _DashboardPageState extends State<DashboardPage> {
     return DateTime.tryParse(text)?.toLocal();
   }
 
+  bool get _isFemaleUser {
+    final gender = LaravelSessionService.gender?.toString().toLowerCase() ?? '';
+    return gender.contains('perempuan');
+  }
+
+  String get _dashboardBackgroundAsset {
+    return _isFemaleUser
+        ? 'assets/image/backgournd_dashboard_cewe/backgournd_dashboard_cewe.png'
+        : 'assets/image/dashbord.png';
+  }
+
+  String _featureIconPath(String maleAsset, String femaleAsset) {
+    return _isFemaleUser ? femaleAsset : maleAsset;
+  }
+
   List<Map<String, Object?>> _extractRecentDays(
     List<Map<String, Object?>> moods,
     List<Map<String, Object?>> stories,
@@ -118,7 +133,9 @@ class _DashboardPageState extends State<DashboardPage> {
     }).toList();
   }
 
-  Map<String, dynamic> _calculateRekapitulasiMood(List<Map<String, dynamic>> moods) {
+  Map<String, dynamic> _calculateRekapitulasiMood(
+    List<Map<String, dynamic>> moods,
+  ) {
     final today = _cleanDate(DateTime.now());
     final last14 = List.generate(
       14,
@@ -134,16 +151,25 @@ class _DashboardPageState extends State<DashboardPage> {
       final date = _cleanDate(dateTime);
       if (!last14.contains(date)) continue;
 
-      final moodName = (item['mood'] ?? item['name'] ?? '').toString().toLowerCase();
-      
+      final moodName = (item['mood'] ?? item['name'] ?? '')
+          .toString()
+          .toLowerCase();
+
       int score = 3; // default netral
-      if (moodName.contains('senang')) score = 5;
-      else if (moodName.contains('antusias')) score = 4;
-      else if (moodName.contains('netral') || moodName.contains('biasa')) score = 3;
-      else if (moodName.contains('terkejut')) score = 3;
-      else if (moodName.contains('sedih')) score = 2;
-      else if (moodName.contains('takut')) score = 2;
-      else if (moodName.contains('marah')) score = 1;
+      if (moodName.contains('senang'))
+        score = 5;
+      else if (moodName.contains('antusias'))
+        score = 4;
+      else if (moodName.contains('netral') || moodName.contains('biasa'))
+        score = 3;
+      else if (moodName.contains('terkejut'))
+        score = 3;
+      else if (moodName.contains('sedih'))
+        score = 2;
+      else if (moodName.contains('takut'))
+        score = 2;
+      else if (moodName.contains('marah'))
+        score = 1;
 
       totalScore += score;
       count++;
@@ -171,8 +197,22 @@ class _DashboardPageState extends State<DashboardPage> {
 
     final startDay = last14.first;
     final endDay = last14.last;
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    final dateRangeStr = '${startDay.day} ${months[startDay.month - 1]} ${startDay.year} - ${endDay.day} ${months[endDay.month - 1]} ${endDay.year}';
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Agu',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des',
+    ];
+    final dateRangeStr =
+        '${startDay.day} ${months[startDay.month - 1]} ${startDay.year} - ${endDay.day} ${months[endDay.month - 1]} ${endDay.year}';
 
     return {
       'kondisi': kondisi,
@@ -201,9 +241,12 @@ class _DashboardPageState extends State<DashboardPage> {
                 height: 75,
                 width: 75,
                 decoration: BoxDecoration(
-                  color: color, 
+                  color: color,
                   borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: Colors.black.withOpacity(0.3), width: 1.5),
+                  border: Border.all(
+                    color: Colors.black.withOpacity(0.3),
+                    width: 1.5,
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.1),
@@ -213,11 +256,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   ],
                 ),
                 child: Center(
-                  child: SizedBox(
-                    width: 50,
-                    height: 50,
-                    child: icon,
-                  ),
+                  child: SizedBox(width: 50, height: 50, child: icon),
                 ),
               ),
               if (showBadge)
@@ -230,10 +269,18 @@ class _DashboardPageState extends State<DashboardPage> {
                       color: Colors.white,
                       shape: BoxShape.circle,
                       boxShadow: [
-                        BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 1)),
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 4,
+                          offset: Offset(0, 1),
+                        ),
                       ],
                     ),
-                    child: const Icon(Icons.add_circle, color: Color(0xFF9E9E9E), size: 18),
+                    child: const Icon(
+                      Icons.add_circle,
+                      color: Color(0xFF9E9E9E),
+                      size: 18,
+                    ),
                   ),
                 ),
             ],
@@ -264,7 +311,7 @@ class _DashboardPageState extends State<DashboardPage> {
       borderRadius: BorderRadius.circular(20),
       child: Container(
         decoration: BoxDecoration(
-          color: color.withOpacity(0.85), 
+          color: color.withOpacity(0.85),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: Colors.black12, width: 0.5),
           boxShadow: [
@@ -303,7 +350,11 @@ class _DashboardPageState extends State<DashboardPage> {
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
                   shadows: [
-                    Shadow(color: Colors.black45, offset: Offset(0, 1), blurRadius: 3),
+                    Shadow(
+                      color: Colors.black45,
+                      offset: Offset(0, 1),
+                      blurRadius: 3,
+                    ),
                   ],
                 ),
               ),
@@ -349,20 +400,23 @@ class _DashboardPageState extends State<DashboardPage> {
                 right: -10,
                 bottom: -10,
                 top: -10,
-                child: Image.asset(
-                  imagePath,
-                  fit: BoxFit.contain,
-                ),
+                child: Image.asset(imagePath, fit: BoxFit.contain),
               ),
               // Left Content
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(12),
@@ -370,7 +424,11 @@ class _DashboardPageState extends State<DashboardPage> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.flash_on_rounded, color: Colors.amber, size: 14),
+                          const Icon(
+                            Icons.flash_on_rounded,
+                            color: Colors.amber,
+                            size: 14,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             label,
@@ -392,7 +450,11 @@ class _DashboardPageState extends State<DashboardPage> {
                         fontWeight: FontWeight.w900,
                         fontSize: 18,
                         shadows: [
-                          Shadow(color: Colors.black38, offset: Offset(0, 1), blurRadius: 4),
+                          Shadow(
+                            color: Colors.black38,
+                            offset: Offset(0, 1),
+                            blurRadius: 4,
+                          ),
                         ],
                       ),
                     ),
@@ -404,7 +466,11 @@ class _DashboardPageState extends State<DashboardPage> {
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
                         shadows: const [
-                          Shadow(color: Colors.black38, offset: Offset(0, 1), blurRadius: 4),
+                          Shadow(
+                            color: Colors.black38,
+                            offset: Offset(0, 1),
+                            blurRadius: 4,
+                          ),
                         ],
                       ),
                     ),
@@ -432,14 +498,18 @@ class _DashboardPageState extends State<DashboardPage> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final moods = (snapshot.data?['moods'] as List?)
+          final moods =
+              (snapshot.data?['moods'] as List?)
                   ?.whereType<Map>()
                   .map((item) => Map<String, dynamic>.from(item))
-                  .toList() ?? [];
-          final stories = (snapshot.data?['stories'] as List?)
+                  .toList() ??
+              [];
+          final stories =
+              (snapshot.data?['stories'] as List?)
                   ?.whereType<Map>()
                   .map((item) => Map<String, dynamic>.from(item))
-                  .toList() ?? [];
+                  .toList() ??
+              [];
           final recentDays = _extractRecentDays(
             moods.map((e) => Map<String, Object?>.from(e)).toList(),
             stories.map((e) => Map<String, Object?>.from(e)).toList(),
@@ -457,9 +527,9 @@ class _DashboardPageState extends State<DashboardPage> {
                   Container(
                     height: 480,
                     width: double.infinity,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       image: DecorationImage(
-                        image: AssetImage('assets/image/dashbord.png'),
+                        image: AssetImage(_dashboardBackgroundAsset),
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -485,20 +555,31 @@ class _DashboardPageState extends State<DashboardPage> {
                       children: [
                         // Title
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 25,
+                            vertical: 20,
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
                                 'Emolens',
-                                style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               const SizedBox(height: 8),
                               const SizedBox(
                                 width: 300,
                                 child: Text(
                                   'Laporan harian membantu kami untuk mendukung kesejahteraan mental Anda.',
-                                  style: TextStyle(color: Colors.white, fontSize: 16, height: 1.4),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    height: 1.4,
+                                  ),
                                 ),
                               ),
                               const SizedBox(height: 15),
@@ -507,21 +588,51 @@ class _DashboardPageState extends State<DashboardPage> {
                                   context,
                                   PageRouteBuilder(
                                     opaque: false,
-                                    pageBuilder: (context, animation, secondaryAnimation) => const StoryPage(),
-                                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                      return SlideTransition(
-                                        position: animation.drive(Tween(begin: const Offset(0, 1), end: Offset.zero).chain(CurveTween(curve: Curves.easeOutQuart))),
-                                        child: child,
-                                      );
-                                    },
+                                    pageBuilder:
+                                        (
+                                          context,
+                                          animation,
+                                          secondaryAnimation,
+                                        ) => const StoryPage(),
+                                    transitionsBuilder:
+                                        (
+                                          context,
+                                          animation,
+                                          secondaryAnimation,
+                                          child,
+                                        ) {
+                                          return SlideTransition(
+                                            position: animation.drive(
+                                              Tween(
+                                                begin: const Offset(0, 1),
+                                                end: Offset.zero,
+                                              ).chain(
+                                                CurveTween(
+                                                  curve: Curves.easeOutQuart,
+                                                ),
+                                              ),
+                                            ),
+                                            child: child,
+                                          );
+                                        },
                                   ),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: const [
-                                    Text('Ceritakan Sekarang', style: TextStyle(color: Colors.white, fontSize: 14)),
+                                    Text(
+                                      'Ceritakan Sekarang',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                      ),
+                                    ),
                                     SizedBox(width: 5),
-                                    Icon(Icons.arrow_forward_ios, color: Colors.white, size: 12),
+                                    Icon(
+                                      Icons.arrow_forward_ios,
+                                      color: Colors.white,
+                                      size: 12,
+                                    ),
                                   ],
                                 ),
                               ),
@@ -541,38 +652,90 @@ class _DashboardPageState extends State<DashboardPage> {
                               color: Colors.white.withOpacity(0.85),
                               borderRadius: BorderRadius.circular(28),
                               boxShadow: [
-                                BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, 10)),
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
+                                ),
                               ],
                             ),
                             child: Row(
                               children: [
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Row(
                                         children: [
-                                          const Expanded(child: Text('Rekapitulasi Mood', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                                          const Expanded(
+                                            child: Text(
+                                              'Rekapitulasi Mood',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 15,
+                                                color: Colors.black87,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
                                           const SizedBox(width: 8),
                                           Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                            decoration: BoxDecoration(color: Colors.white.withOpacity(0.5), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.black12)),
-                                            child: const Text('14 Hari Terakhir', style: TextStyle(fontSize: 9, color: Colors.black54)),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 10,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white.withOpacity(
+                                                0.5,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              border: Border.all(
+                                                color: Colors.black12,
+                                              ),
+                                            ),
+                                            child: const Text(
+                                              '14 Hari Terakhir',
+                                              style: TextStyle(
+                                                fontSize: 9,
+                                                color: Colors.black54,
+                                              ),
+                                            ),
                                           ),
                                         ],
                                       ),
                                       const SizedBox(height: 4),
-                                      Text(rekapData['dateRange'], style: TextStyle(fontSize: 9, color: Colors.grey[600])),
+                                      Text(
+                                        rekapData['dateRange'],
+                                        style: TextStyle(
+                                          fontSize: 9,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
                                       const SizedBox(height: 16),
                                       Text(
                                         'Mood kamu ${rekapData['kondisi']} dalam 7 hari terakhir. Tetap ceritakan perasaanmu setiap hari, agar kami dapat mendukung kesejahteraan mental Anda',
-                                        style: const TextStyle(fontSize: 12, color: Colors.black87, height: 1.5),
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.black87,
+                                          height: 1.5,
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ),
                                 const SizedBox(width: 20),
-                                Image.asset(rekapData['imagePath'], height: 75, errorBuilder: (c, e, s) => const Icon(Icons.face, size: 75, color: Colors.orange)),
+                                Image.asset(
+                                  rekapData['imagePath'],
+                                  height: 75,
+                                  errorBuilder: (c, e, s) => const Icon(
+                                    Icons.face,
+                                    size: 75,
+                                    color: Colors.orange,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -585,47 +748,96 @@ class _DashboardPageState extends State<DashboardPage> {
                           width: double.infinity,
                           decoration: BoxDecoration(
                             color: bgColor,
-                            borderRadius: const BorderRadius.vertical(top: Radius.circular(80)),
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(80),
+                            ),
                           ),
                           child: Column(
                             children: [
                               const SizedBox(height: 8),
                               // Feature Tiles
                               Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 20),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                ),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     _buildFeatureTile(
                                       title: 'Mood & Perasaan',
-                                      color: const Color(0xFFC4D1BD),
-                                      icon: Image.asset('assets/image/mood.png', fit: BoxFit.contain),
+                                      color: themeColor.withOpacity(0.25),
+                                      icon: Image.asset(
+                                        _featureIconPath(
+                                          'assets/image/mood.png',
+                                          'assets/image/backgournd_dashboard_cewe/mood.png',
+                                        ),
+                                        fit: BoxFit.contain,
+                                      ),
                                       showBadge: true,
-                                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MoodPage())).then((result) {
-                                        if (result == true) _reloadDashboard();
-                                      }),
+                                      onTap: () =>
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => const MoodPage(),
+                                            ),
+                                          ).then((result) {
+                                            if (result == true)
+                                              _reloadDashboard();
+                                          }),
                                     ),
                                     const SizedBox(width: 15),
                                     _buildFeatureTile(
                                       title: 'Pojok Cerita',
-                                      color: const Color(0xFFC4D1BD),
-                                      icon: Image.asset('assets/image/pojok_cerita.png', fit: BoxFit.contain),
-                                      showBadge: true,
-                                      onTap: () => Navigator.push(
-                                        context,
-                                        PageRouteBuilder(
-                                          opaque: false,
-                                          pageBuilder: (context, animation, secondaryAnimation) => const StoryPage(),
-                                          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                            return SlideTransition(
-                                              position: animation.drive(Tween(begin: const Offset(0, 1), end: Offset.zero).chain(CurveTween(curve: Curves.easeOutQuart))),
-                                              child: child,
-                                            );
-                                          },
+                                      color: themeColor.withOpacity(0.25),
+                                      icon: Image.asset(
+                                        _featureIconPath(
+                                          'assets/image/pojok_cerita.png',
+                                          'assets/image/backgournd_dashboard_cewe/pojok_cerita.png',
                                         ),
-                                      ).then((result) {
-                                        if (result == true) _reloadDashboard();
-                                      }),
+                                        fit: BoxFit.contain,
+                                      ),
+                                      showBadge: true,
+                                      onTap: () =>
+                                          Navigator.push(
+                                            context,
+                                            PageRouteBuilder(
+                                              opaque: false,
+                                              pageBuilder:
+                                                  (
+                                                    context,
+                                                    animation,
+                                                    secondaryAnimation,
+                                                  ) => const StoryPage(),
+                                              transitionsBuilder:
+                                                  (
+                                                    context,
+                                                    animation,
+                                                    secondaryAnimation,
+                                                    child,
+                                                  ) {
+                                                    return SlideTransition(
+                                                      position: animation.drive(
+                                                        Tween(
+                                                          begin: const Offset(
+                                                            0,
+                                                            1,
+                                                          ),
+                                                          end: Offset.zero,
+                                                        ).chain(
+                                                          CurveTween(
+                                                            curve: Curves
+                                                                .easeOutQuart,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      child: child,
+                                                    );
+                                                  },
+                                            ),
+                                          ).then((result) {
+                                            if (result == true)
+                                              _reloadDashboard();
+                                          }),
                                     ),
                                   ],
                                 ),
@@ -635,42 +847,129 @@ class _DashboardPageState extends State<DashboardPage> {
 
                               // Layanan Section
                               Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 18),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 18,
+                                ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text('Layanan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22, color: Colors.black87)),
-                                    const Text('Layanan dan hiburan terbaik untukmu', style: TextStyle(fontSize: 12, color: Colors.black45)),
+                                    const Text(
+                                      'Layanan',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 22,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    const Text(
+                                      'Layanan dan hiburan terbaik untukmu',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.black45,
+                                      ),
+                                    ),
                                     const SizedBox(height: 16),
-                                    
+
                                     // Hero Card - Streak
                                     _buildLayananHeroCard(
                                       label: 'STREAK',
                                       title: 'Streak',
-                                      subtitle: 'Ceritakan perasaanmu atau lakukan aktivitas agar streak tetap menyala!',
-                                      imagePath: 'assets/image/streak.png',
+                                      subtitle:
+                                          'Ceritakan perasaanmu atau lakukan aktivitas agar streak tetap menyala!',
+                                      imagePath: _featureIconPath(
+                                        'assets/image/streak.png',
+                                        'assets/image/backgournd_dashboard_cewe/streak.png',
+                                      ),
                                       color: themeColor,
-                                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => StreakPage(moods: recentDays))).then((result) {
-                                        if (result == true) _reloadDashboard();
-                                      }),
+                                      onTap: () =>
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  StreakPage(moods: recentDays),
+                                            ),
+                                          ).then((result) {
+                                            if (result == true)
+                                              _reloadDashboard();
+                                          }),
                                     ),
                                     const SizedBox(height: 16),
-                                    
+
                                     // 2x2 Grid for other features
                                     GridView.count(
                                       shrinkWrap: true,
-                                      physics: const NeverScrollableScrollPhysics(),
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
                                       crossAxisSpacing: 12,
                                       mainAxisSpacing: 12,
                                       crossAxisCount: 2,
                                       childAspectRatio: 1.45,
                                       children: [
-                                        _buildLayananCard(title: 'Daily Boost', imagePath: 'assets/image/tantangan.png', color: themeColor, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DailyBoostPage())).then((result) {
-                                          if (result == true) _reloadDashboard();
-                                        })),
-                                        _buildLayananCard(title: 'Quotes', imagePath: 'assets/image/quotes.png', color: themeColor, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => QuotesPage(moods: moods, stories: stories)))),
-                                        _buildLayananCard(title: 'Musik', imagePath: 'assets/image/musik.png', color: themeColor, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MusicPage()))),
-                                        _buildLayananCard(title: 'Notifikasi', imagePath: 'assets/image/notifikasi.png', color: themeColor, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationPage()))),
+                                        _buildLayananCard(
+                                          title: 'Daily Boost',
+                                          imagePath: _featureIconPath(
+                                            'assets/image/tantangan.png',
+                                            'assets/image/backgournd_dashboard_cewe/22.png',
+                                          ),
+                                          color: themeColor,
+                                          onTap: () =>
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      const DailyBoostPage(),
+                                                ),
+                                              ).then((result) {
+                                                if (result == true)
+                                                  _reloadDashboard();
+                                              }),
+                                        ),
+                                        _buildLayananCard(
+                                          title: 'Quotes',
+                                          imagePath: _featureIconPath(
+                                            'assets/image/quotes.png',
+                                            'assets/image/backgournd_dashboard_cewe/33.png',
+                                          ),
+                                          color: themeColor,
+                                          onTap: () => Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => QuotesPage(
+                                                moods: moods,
+                                                stories: stories,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        _buildLayananCard(
+                                          title: 'Musik',
+                                          imagePath: _featureIconPath(
+                                            'assets/image/musik.png',
+                                            'assets/image/backgournd_dashboard_cewe/11.png',
+                                          ),
+                                          color: themeColor,
+                                          onTap: () => Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => const MusicPage(),
+                                            ),
+                                          ),
+                                        ),
+                                        _buildLayananCard(
+                                          title: 'Notifikasi',
+                                          imagePath: _featureIconPath(
+                                            'assets/image/notifikasi.png',
+                                            'assets/image/backgournd_dashboard_cewe/44.png',
+                                          ),
+                                          color: themeColor,
+                                          onTap: () => Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  const NotificationPage(),
+                                            ),
+                                          ),
+                                        ),
                                       ],
                                     ),
                                     const SizedBox(height: 50),

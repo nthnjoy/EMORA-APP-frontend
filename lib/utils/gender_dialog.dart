@@ -2,10 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/user_service.dart';
 import '../services/theme_manager.dart';
+import '../screens/main_navigation_page.dart';
 
 class GenderDialog {
-  static Future<void> show(BuildContext context) async {
+  static Future<void> show(BuildContext context, {bool isProfileEdit = false}) async {
     String? selectedGender;
+    final titleText = isProfileEdit
+        ? 'Mengubah Data Jenis Kelamin Anda?'
+        : 'Halo, Selamat Datang!';
+    final subtitleText = isProfileEdit
+        ? 'Lakukan perubahan sesuai dengan data Jenis Kelamin anda!'
+        : 'Untuk menyesuaikan kenyamanan Anda, bolehkah kami tahu jenis kelamin Anda?';
 
     return showDialog(
       context: context,
@@ -32,7 +39,7 @@ class GenderDialog {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      "Halo, Selamat Datang!",
+                      titleText,
                       style: GoogleFonts.poppins(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -41,7 +48,7 @@ class GenderDialog {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      "Untuk menyesuaikan kenyamanan Anda, bolehkah kami tahu jenis kelamin Anda?",
+                      subtitleText,
                       style: GoogleFonts.poppins(
                         fontSize: 14,
                         color: Colors.grey.shade600,
@@ -146,6 +153,16 @@ class GenderDialog {
                                 
                                 // Close dialog
                                 Navigator.of(context).pop();
+                                
+                                // Refresh seluruh aplikasi dengan full reload
+                                if (context.mounted) {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const MainNavigationPage(),
+                                    ),
+                                  );
+                                }
                               } else {
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
