@@ -670,7 +670,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                         children: [
                                           const Expanded(
                                             child: Text(
-                                              'Rekapitulasi Mood',
+                                              'Mood Summary',
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 15,
@@ -716,7 +716,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                       ),
                                       const SizedBox(height: 16),
                                       Text(
-                                        'Mood kamu ${rekapData['kondisi']} dalam 7 hari terakhir. Tetap ceritakan perasaanmu setiap hari, agar kami dapat mendukung kesejahteraan mental Anda',
+                                        'Mood kamu ${rekapData['kondisi']} dalam 14 hari terakhir. Tetap ceritakan perasaanmu setiap hari, agar kami dapat mendukung kesejahteraan mental Anda',
                                         style: const TextStyle(
                                           fontSize: 12,
                                           color: Colors.black87,
@@ -764,7 +764,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     _buildFeatureTile(
-                                      title: 'Mood & Perasaan',
+                                      title: 'Mood & Feelings',
                                       color: themeColor.withOpacity(0.25),
                                       icon: Image.asset(
                                         _featureIconPath(
@@ -787,7 +787,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                     ),
                                     const SizedBox(width: 15),
                                     _buildFeatureTile(
-                                      title: 'Pojok Cerita',
+                                      title: 'Story Corner',
                                       color: themeColor.withOpacity(0.25),
                                       icon: Image.asset(
                                         _featureIconPath(
@@ -854,7 +854,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const Text(
-                                      'Layanan',
+                                      'Services',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 22,
@@ -909,7 +909,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                           title: 'Daily Boost',
                                           imagePath: _featureIconPath(
                                             'assets/image/tantangan.png',
-                                            'assets/image/backgournd_dashboard_cewe/22.png',
+                                            'assets/image/backgournd_dashboard_cewe/11.png',
                                           ),
                                           color: themeColor,
                                           onTap: () =>
@@ -942,10 +942,10 @@ class _DashboardPageState extends State<DashboardPage> {
                                           ),
                                         ),
                                         _buildLayananCard(
-                                          title: 'Musik',
+                                          title: 'Music',
                                           imagePath: _featureIconPath(
                                             'assets/image/musik.png',
-                                            'assets/image/backgournd_dashboard_cewe/11.png',
+                                            'assets/image/backgournd_dashboard_cewe/22.png',
                                           ),
                                           color: themeColor,
                                           onTap: () => Navigator.push(
@@ -956,7 +956,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                           ),
                                         ),
                                         _buildLayananCard(
-                                          title: 'Notifikasi',
+                                          title: 'Notification',
                                           imagePath: _featureIconPath(
                                             'assets/image/notifikasi.png',
                                             'assets/image/backgournd_dashboard_cewe/44.png',
