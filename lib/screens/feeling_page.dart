@@ -284,7 +284,7 @@ class _FeelingPageState extends State<FeelingPage> {
       }
       
       if (!mounted) return;
-      Navigator.popUntil(context, (route) => route.isFirst);
+      Navigator.pop(context, true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(result['message'] ?? 'Gagal mengirim mood')),
@@ -325,7 +325,12 @@ class _FeelingPageState extends State<FeelingPage> {
             return SlideTransition(position: animation.drive(tween), child: child);
           },
         ),
-      );
+      ).then((result) {
+        if (result == true) {
+          if (!mounted) return;
+          Navigator.pop(context, true);
+        }
+      });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(result['message'] ?? 'Gagal menyimpan mood')),
@@ -431,11 +436,9 @@ class _FeelingPageState extends State<FeelingPage> {
   @override
   Widget build(BuildContext context) {
     final displayName = LaravelSessionService.displayName;
-    
-    double rawPage = _pageController.hasClients
-        ? (_pageController.page ?? _initialPage.toDouble())
-        : (_initialPage != null ? _initialPage.toDouble() : 0);
-    int currentIndex = rawPage.round() % (feelings.isNotEmpty ? feelings.length : 1);
+
+    // Use the selected index (maintained by PageView.onPageChanged) for header
+    int currentIndex = _selectedFeelingIndex % (feelings.isNotEmpty ? feelings.length : 1);
     String currentCategory = feelings.isNotEmpty ? _getFeelingCategory(feelings[currentIndex]) : 'Senang';
 
     return Scaffold(
@@ -523,7 +526,12 @@ class _FeelingPageState extends State<FeelingPage> {
                   return ListenableBuilder(
                     listenable: _pageController,
                     builder: (context, child) {
-                      double currentPageValue = rawPage % feelings.length;
+                      // Recompute the current page here so transforms use the
+                      // live PageController.page value (same approach as MoodPage)
+                      double rawPageLocal = _pageController.hasClients
+                          ? (_pageController.page ?? _initialPage.toDouble())
+                          : _initialPage.toDouble();
+                      double currentPageValue = rawPageLocal % feelings.length;
 
                       // Sort by distance so furthest cards render first (behind)
                       List<int> sortedIndices = List.generate(feelings.length, (i) => i);
@@ -539,8 +547,9 @@ class _FeelingPageState extends State<FeelingPage> {
                         return distB.compareTo(distA);
                       });
 
-                      final cardWidth = constraints.maxWidth * 0.58;
-                      final cardHeight = constraints.maxHeight * 0.95;
+                      // Match mood card sizing: 65% width, 85% height
+                      final cardWidth = constraints.maxWidth * 0.65;
+                      final cardHeight = constraints.maxHeight * 0.85;
 
                       return Stack(
                         alignment: Alignment.center,
@@ -558,11 +567,21 @@ class _FeelingPageState extends State<FeelingPage> {
                               return const SizedBox.shrink();
                             }
 
-                            // Linear scaling and offset for uniform stacking
-                            double scale = 1.0 - (absDiff * 0.08);
+                            // Use same interactive stacking math as MoodPage for
+                            // consistent left/right swipe behavior and scaling.
+                            double scale;
+                            double offsetX;
+                            if (absDiff < 0.5) {
+                              scale = 1.0 - (absDiff * 0.04);
+                              offsetX = diff * cardWidth * 0.2;
+                            } else if (absDiff < 1.5) {
+                              scale = 0.88 - ((absDiff - 0.5) * 0.04);
+                              offsetX = diff.sign * (cardWidth * 0.25 + (absDiff - 0.5) * cardWidth * 0.1);
+                            } else {
+                              scale = 0.76 - ((absDiff - 1.5).clamp(0.0, 1.0) * 0.04);
+                              offsetX = diff.sign * (cardWidth * 0.42 + (absDiff - 1.5) * cardWidth * 0.1);
+                            }
                             scale = scale.clamp(0.5, 1.0);
-                            
-                            double offsetX = diff.sign * (absDiff * cardWidth * 0.18);
                             double opacity = 1.0;
 
                             bool isCenter = absDiff < 0.5;

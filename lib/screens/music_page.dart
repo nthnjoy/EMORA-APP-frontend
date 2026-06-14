@@ -45,8 +45,6 @@ class MusicTrack {
   });
 }
 
-const List<String> languageTabs = ['Semua', 'Indonesia', 'English'];
-
 final List<MusicMood> musicMoods = [
   MusicMood(
     name: 'Senang',
@@ -1262,7 +1260,6 @@ class MusicPage extends StatefulWidget {
 class _MusicPageState extends State<MusicPage> {
   final MusicPlayerManager _playerManager = MusicPlayerManager();
   int _selectedMoodIndex = 0;
-  int _selectedLanguageIndex = 0;
   bool _isLoading = true;
 
   // Compute a darker and lighter variant for a base color
@@ -1323,10 +1320,7 @@ class _MusicPageState extends State<MusicPage> {
   }
 
   List<MusicTrack> get _visibleTracks {
-    final tracks = musicMoods[_selectedMoodIndex].tracks;
-    if (_selectedLanguageIndex == 0) return tracks;
-    final filterLanguage = languageTabs[_selectedLanguageIndex];
-    return tracks.where((track) => track.language == filterLanguage).toList();
+    return musicMoods[_selectedMoodIndex].tracks;
   }
 
   Future<void> _playTrack(MusicTrack track) async {
@@ -1512,8 +1506,6 @@ class _MusicPageState extends State<MusicPage> {
                                   _buildMoodChipsLight(),
                                   const SizedBox(height: 18),
                                   Text('Rekomendasi ${selectedMood.name}', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700)),
-                                  const SizedBox(height: 12),
-                                  _buildLanguageTabs(),
                                   const SizedBox(height: 16),
                                   Expanded(
                                     child: _buildTrackGrid(selectedMood),
@@ -1549,7 +1541,6 @@ class _MusicPageState extends State<MusicPage> {
           return GestureDetector(
             onTap: () => setState(() {
               _selectedMoodIndex = index;
-              _selectedLanguageIndex = 0;
             }),
             child: Container(
               width: 120,
@@ -1574,25 +1565,6 @@ class _MusicPageState extends State<MusicPage> {
           );
         },
       ),
-    );
-  }
-
-  Widget _buildLanguageTabs() {
-    return Wrap(
-      spacing: 10,
-      runSpacing: 10,
-      children: List.generate(languageTabs.length, (index) {
-        final active = index == _selectedLanguageIndex;
-        return ChoiceChip(
-          label: Text(languageTabs[index], style: GoogleFonts.poppins(color: active ? Colors.white : Colors.black87, fontSize: 12, fontWeight: FontWeight.w600)),
-          selected: active,
-          onSelected: (_) => setState(() => _selectedLanguageIndex = index),
-          selectedColor: Theme.of(context).primaryColor,
-          backgroundColor: Colors.grey.shade200,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        );
-      }),
     );
   }
 
@@ -1677,15 +1649,6 @@ class _MusicPageState extends State<MusicPage> {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: mood.color.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(track.language, style: GoogleFonts.poppins(fontSize: 10, color: mood.color, fontWeight: FontWeight.w700)),
-                      ),
-                      const SizedBox(width: 6),
                       if (_isYouTubeTrack(track))
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

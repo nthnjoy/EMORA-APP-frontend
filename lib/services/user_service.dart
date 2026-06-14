@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'api_config.dart';
 import 'laravel_session_service.dart';
+import 'theme_manager.dart';
 
 class UserService {
   const UserService._();
@@ -98,38 +100,73 @@ class UserService {
       ).timeout(const Duration(seconds: 10));
 
       final result = jsonDecode(response.body);
+      // Debug logging for troubleshooting
+      try {
+        debugPrint('[UserService.setActiveTheme] status=${response.statusCode} body=${response.body}');
+      } catch (_) {}
       if (response.statusCode == 200 && result['success'] == true) {
-        await LaravelSessionService.updateUser(result['user']);
+        // Fetch latest user data to ensure consistency
+        final userResult = await fetchCurrentUser();
+        if (userResult['success']) {
+          return {'success': true, 'data': userResult['data']};
+        }
         return {'success': true, 'data': result['user']};
       }
       return {'success': false, 'message': result['message'] ?? 'Gagal ganti tema'};
     } catch (e) {
-      return {'success': false, 'message': 'Kesalahan koneksi'};
+      debugPrint('[UserService.setActiveTheme] exception: ${e.toString()}');
+      return {'success': false, 'message': 'Kesalahan koneksi: ${e.toString()}'};
     }
   }
 
   static Future<Map<String, dynamic>> updateGender(String gender) async {
-    final url = Uri.parse('${ApiConfig.baseUrl}/api/user/update-gender');
-    
-    try {
-      final response = await http.post(
-        url,
-        headers: _headers(),
-        body: jsonEncode({
-          'jenis_kelamin': gender,
-        }),
-      ).timeout(const Duration(seconds: 10));
+    // Try multiple payload formats to be compatible with varying backend expectations
+    final attempts = <Map<String, dynamic>>[
+      {'contentType': 'application/json', 'body': jsonEncode({'jenis_kelamin': gender})},
+      {'contentType': 'application/json', 'body': jsonEncode({'jenis_kelamin': _capitalize(gender)})},
+      {'contentType': 'application/x-www-form-urlencoded', 'body': 'jenis_kelamin=${Uri.encodeComponent(gender)}'},
+      {'contentType': 'application/x-www-form-urlencoded', 'body': 'jenis_kelamin=${Uri.encodeComponent(_capitalize(gender))}'},
+    ];
 
-      final result = jsonDecode(response.body);
-      if (response.statusCode == 200 && result['success'] == true) {
-        await LaravelSessionService.updateUser(result['user']);
-        return {'success': true, 'message': 'Berhasil memperbarui jenis kelamin'};
-      } else {
-        return {'success': false, 'message': result['message'] ?? 'Gagal memperbarui jenis kelamin'};
+    for (final attempt in attempts) {
+      try {
+        final headers = attempt['contentType'] == 'application/json'
+            ? _headers()
+            : {
+                'Content-Type': attempt['contentType'] as String,
+                'Accept': 'application/json',
+                'Authorization': LaravelSessionService.authorizationHeader ?? '',
+              };
+
+        debugPrint('[UserService.updateGender] trying contentType=${attempt['contentType']} body=${attempt['body']}');
+
+        final response = await http
+            .post(
+          Uri.parse(ApiConfig.updateGenderUrl),
+          headers: headers,
+          body: attempt['body'] as String,
+        )
+            .timeout(const Duration(seconds: 10));
+
+        debugPrint('[UserService.updateGender] status=${response.statusCode} body=${response.body}');
+
+        final result = jsonDecode(response.body);
+        if (response.statusCode == 200 && result['success'] == true) {
+          if (result['user'] != null) {
+            await LaravelSessionService.updateUser(result['user']);
+          } else {
+            await fetchCurrentUser();
+          }
+          return {'success': true, 'message': 'Berhasil memperbarui jenis kelamin'};
+        }
+        // if not successful, try next attempt
+      } catch (e) {
+        debugPrint('[UserService.updateGender] attempt exception: ${e.toString()}');
+        // continue to next attempt
       }
-    } catch (e) {
-      return {'success': false, 'message': 'Terjadi kesalahan koneksi'};
     }
+
+    return {'success': false, 'message': 'Gagal memperbarui jenis kelamin setelah beberapa percobaan'};
   }
 
   static Future<Map<String, dynamic>> fetchModules() async {
@@ -147,5 +184,10 @@ class UserService {
     } catch (e) {
       return {'success': false, 'message': 'Kesalahan koneksi'};
     }
+  }
+
+  static String _capitalize(String s) {
+    if (s.isEmpty) return s;
+    return s[0].toUpperCase() + s.substring(1).toLowerCase();
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/laravel_session_service.dart';
+import '../services/theme_manager.dart';
 import '../services/user_service.dart';
 import '../utils/gender_dialog.dart';
 import 'login_page.dart';
@@ -8,7 +9,6 @@ import 'daily_boost_page.dart';
 import 'mood_calender_page.dart';
 import 'guide_page.dart';
 import '../utils/theme_colors.dart';
-import '../services/theme_manager.dart';
 import '../widgets/app_avatar.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -75,6 +75,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     await UserService.logout();
     LaravelSessionService.clear();
+    ThemeManager().init();
 
     if (!mounted) return;
 
@@ -96,6 +97,8 @@ class _ProfilePageState extends State<ProfilePage> {
             final activeThemeId = LaravelSessionService.activeThemeId;
             final purchasedThemes = LaravelSessionService.purchasedThemeIds;
             final currentPoints = totalPoints;
+            final userGender = LaravelSessionService.gender?.toLowerCase() ?? '';
+            final isFemale = userGender.contains('perempuan');
 
             return Container(
               height: MediaQuery.of(context).size.height * 0.7,
@@ -140,8 +143,11 @@ class _ProfilePageState extends State<ProfilePage> {
                       itemCount: ThemeColors.allThemes.length,
                       itemBuilder: (context, index) {
                         final theme = ThemeColors.allThemes[index];
-                        final isOwned = purchasedThemes.contains(theme.id);
+                        final isSoftPinkTheme = theme.id == 'pink';
+                        final isThemeFreForFemale = isSoftPinkTheme && isFemale;
+                        final isOwned = purchasedThemes.contains(theme.id) || isThemeFreForFemale;
                         final isActive = activeThemeId == theme.id;
+                        final themePriceDisplay = isThemeFreForFemale ? 0 : theme.price;
 
                         return Container(
                           decoration: BoxDecoration(
@@ -183,10 +189,10 @@ class _ProfilePageState extends State<ProfilePage> {
                               const SizedBox(height: 4),
                               if (!isOwned)
                                 Text(
-                                  '${theme.price} Poin',
-                                  style: const TextStyle(
+                                  isThemeFreForFemale ? 'Gratis' : '${themePriceDisplay} Poin',
+                                  style: TextStyle(
                                     fontSize: 10,
-                                    color: Colors.grey,
+                                    color: isThemeFreForFemale ? Colors.green : Colors.grey,
                                   ),
                                 ),
                               const SizedBox(height: 8),
@@ -232,48 +238,72 @@ class _ProfilePageState extends State<ProfilePage> {
                                               );
                                             }
                                           } else {
-                                            if (currentPoints < theme.price) {
-                                              ScaffoldMessenger.of(
-                                                context,
-                                              ).showSnackBar(
-                                                const SnackBar(
-                                                  content: Text(
-                                                    'Poin tidak cukup!',
-                                                  ),
-                                                ),
-                                              );
-                                              return;
-                                            }
-
-                                            final res =
-                                                await UserService.buyTheme(
+                                            if (isThemeFreForFemale) {
+                                              // Free for female users, just activate
+                                              final res =
+                                                  await UserService.setActiveTheme(
+                                                    theme.id,
+                                                  );
+                                              if (res['success']) {
+                                                ThemeManager().updateTheme(
                                                   theme.id,
-                                                  theme.price,
                                                 );
-                                            if (res['success']) {
-                                              ThemeManager().updateTheme(
-                                                theme.id,
-                                              );
-                                              await refreshProfile();
-                                              setModalState(() {});
-                                              setState(() {});
-                                              ScaffoldMessenger.of(
-                                                context,
-                                              ).showSnackBar(
-                                                const SnackBar(
-                                                  content: Text(
-                                                    'Berhasil membeli tema!',
+                                                setModalState(() {});
+                                                setState(() {});
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      'Tema soft pink diaktifkan untuk perempuan!',
+                                                    ),
                                                   ),
-                                                ),
-                                              );
+                                                );
+                                              }
                                             } else {
-                                              ScaffoldMessenger.of(
-                                                context,
-                                              ).showSnackBar(
-                                                SnackBar(
-                                                  content: Text(res['message']),
-                                                ),
-                                              );
+                                              if (currentPoints < theme.price) {
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      'Poin tidak cukup!',
+                                                    ),
+                                                  ),
+                                                );
+                                                return;
+                                              }
+
+                                              final res =
+                                                  await UserService.buyTheme(
+                                                    theme.id,
+                                                    theme.price,
+                                                  );
+                                              if (res['success']) {
+                                                ThemeManager().updateTheme(
+                                                  theme.id,
+                                                );
+                                                await refreshProfile();
+                                                setModalState(() {});
+                                                setState(() {});
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      'Berhasil membeli tema!',
+                                                    ),
+                                                  ),
+                                                );
+                                              } else {
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(res['message']),
+                                                  ),
+                                                );
+                                              }
                                             }
                                           }
                                         },
@@ -621,8 +651,17 @@ class _ProfilePageState extends State<ProfilePage> {
                 'Jenis Kelamin',
                 gender,
                 onTap: () async {
-                  await GenderDialog.show(context, isProfileEdit: true);
-                  refreshProfile();
+                  final result = await GenderDialog.show(context, isProfileEdit: true);
+                  if (result == true) {
+                    await refreshProfile();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Jenis kelamin berhasil diperbarui')),
+                    );
+                  } else if (result == false) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Gagal menyimpan jenis kelamin')),
+                    );
+                  }
                 },
               ),
               const SizedBox(height: 30),

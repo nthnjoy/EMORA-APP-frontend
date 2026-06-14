@@ -23,27 +23,24 @@ class ThemeManager with ChangeNotifier {
 
   void init() {
     final user = LaravelSessionService.user;
-    
-    // Set gender-based theme
+
     _setGenderBasedTheme();
-    
-    // Jika user sudah memilih tema, gunakan tema yang dipilih
-    if (user != null && user['active_theme'] != null) {
-      _currentThemeId = user['active_theme'].toString();
+
+    final activeTheme = user?['active_theme']?.toString().trim();
+    if (activeTheme != null && activeTheme.isNotEmpty) {
+      _currentThemeId = activeTheme;
     } else {
-      // Jika belum memilih, gunakan tema berdasarkan gender
       _currentThemeId = _genderBasedTheme;
     }
-    
+
     notifyListeners();
   }
 
   /// Mengatur tema berdasarkan jenis kelamin user
   void _setGenderBasedTheme() {
-    final user = LaravelSessionService.user;
-    final gender = user?['jenis_kelamin']?.toString().toLowerCase() ?? '';
-    
-    if (gender.contains('perempuan') || gender == 'perempuan') {
+    final gender = LaravelSessionService.gender?.toString().toLowerCase().trim() ?? '';
+
+    if (gender.contains('perempuan')) {
       _genderBasedTheme = 'pink'; // Soft Pink untuk perempuan
     } else {
       _genderBasedTheme = 'default'; // Green default untuk laki-laki atau belum pilih
@@ -59,5 +56,12 @@ class ThemeManager with ChangeNotifier {
   void updateGenderAndTheme() {
     _setGenderBasedTheme();
     init(); // Re-initialize dengan gender baru
+  }
+
+  /// Mengembalikan true jika tema soft pink gratis untuk user (perempuan)
+  bool isThemeFreeForUser(String themeId) {
+    if (themeId != 'pink') return false;
+    final gender = LaravelSessionService.gender?.toString().toLowerCase().trim() ?? '';
+    return gender.contains('perempuan');
   }
 }

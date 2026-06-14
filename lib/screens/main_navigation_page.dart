@@ -117,9 +117,9 @@ class MainNavigationPageState extends State<MainNavigationPage> {
               selectedFontSize: 10,
               unselectedFontSize: 10,
               items: const [
-                BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: "Beranda"),
+                BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: "Dashboard"),
                 BottomNavigationBarItem(icon: Icon(Icons.extension), label: "Self-Care"),
-                BottomNavigationBarItem(icon: Icon(Icons.calendar_today_rounded), label: "Riwayat"),
+                BottomNavigationBarItem(icon: Icon(Icons.calendar_today_rounded), label: "History"),
                 BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: "Profil"),
               ],
             ),

@@ -282,7 +282,12 @@ class _MoodPageState extends State<MoodPage> {
                       child: ElevatedButton(
                         onPressed: () {
                           String selectedMood = moods[_selectedMoodIndex]['label'];
-                          Navigator.push(context, MaterialPageRoute(builder: (_) => FeelingPage(selectedMood: selectedMood)));
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => FeelingPage(selectedMood: selectedMood))).then((result) {
+                            if (result == true) {
+                              if (!mounted) return;
+                              Navigator.pop(context, true);
+                            }
+                          });
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,

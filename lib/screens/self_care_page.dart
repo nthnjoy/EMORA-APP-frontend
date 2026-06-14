@@ -122,10 +122,23 @@ class _SelfCarePageState extends State<SelfCarePage> {
     }
   }
 
+  String get _userStorageSuffix {
+    final user = LaravelSessionService.user;
+    final identifier = user?['id']?.toString() ??
+        user?['nim']?.toString() ??
+        user?['username']?.toString() ??
+        user?['email']?.toString() ??
+        'guest';
+    return identifier.replaceAll(RegExp(r'[^A-Za-z0-9_]'), '_').toLowerCase();
+  }
+
+  String get _selfCareCompletedModulesKey => 'self_care_completed_modules_ids_$_userStorageSuffix';
+  String get _selfCareDailyActivitiesKey => 'self_care_daily_activities_$_userStorageSuffix';
+
   Future<void> _loadSavedProgress() async {
     final prefs = await SharedPreferences.getInstance();
     final savedModules =
-        prefs.getStringList('self_care_completed_modules_ids') ?? [];
+        prefs.getStringList(_selfCareCompletedModulesKey) ?? [];
 
     final sessionUser = LaravelSessionService.user;
     final sessionPoints =
@@ -151,7 +164,7 @@ class _SelfCarePageState extends State<SelfCarePage> {
   Future<void> _saveProgress(String? newModuleId) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(
-        'self_care_completed_modules_ids', _completedModules.toList());
+        _selfCareCompletedModulesKey, _completedModules.toList());
     await UserService.updateUserPoints(_totalPoints, moduleId: newModuleId);
   }
 
@@ -179,7 +192,7 @@ class _SelfCarePageState extends State<SelfCarePage> {
 
   Future<void> _loadDailyActivities() async {
     final prefs = await SharedPreferences.getInstance();
-    final String? rawJson = prefs.getString('self_care_daily_activities');
+    final String? rawJson = prefs.getString(_selfCareDailyActivitiesKey);
     if (rawJson != null) {
       try {
         final decoded = jsonDecode(rawJson);
@@ -200,7 +213,7 @@ class _SelfCarePageState extends State<SelfCarePage> {
     final prefs = await SharedPreferences.getInstance();
     final String todayStr = DateTime.now().toIso8601String().substring(0, 10);
     
-    final String? rawJson = prefs.getString('self_care_daily_activities');
+    final String? rawJson = prefs.getString(_selfCareDailyActivitiesKey);
     Map<String, dynamic> activities = {};
     if (rawJson != null) {
       try {
@@ -228,7 +241,7 @@ class _SelfCarePageState extends State<SelfCarePage> {
         'category': module.category,
       });
       activities[todayStr] = todayList;
-      await prefs.setString('self_care_daily_activities', jsonEncode(activities));
+      await prefs.setString(_selfCareDailyActivitiesKey, jsonEncode(activities));
       await _loadDailyActivities();
     }
   }

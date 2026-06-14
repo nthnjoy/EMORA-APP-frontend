@@ -616,7 +616,9 @@ class _DashboardPageState extends State<DashboardPage> {
                                           );
                                         },
                                   ),
-                                ),
+                                ).then((result) {
+                                  if (result == true) _reloadDashboard();
+                                }),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: const [

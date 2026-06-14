@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:emolens_app/screens/main_navigation_page.dart';
 import 'package:emolens_app/services/laravel_auth_service.dart';
 import 'package:emolens_app/services/laravel_session_service.dart';
+import 'package:emolens_app/services/theme_manager.dart';
 import 'package:emolens_app/services/user_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -60,7 +61,8 @@ class _LoginPageState extends State<LoginPage> {
 
       if (result['success'] == true) {
         LaravelSessionService.saveFromLoginResult(result);
-        
+        ThemeManager().init();
+
         final tokenSource = (result['token_source'] ?? '')
             .toString()
             .trim()

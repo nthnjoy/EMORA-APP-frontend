@@ -97,8 +97,18 @@ class _DailyBoostPageState extends State<DailyBoostPage> with SingleTickerProvid
     _loadData();
   }
 
-  static const String _dailyBoostDoneIdsKey = 'daily_boost_done_ids';
-  static const String _dailyBoostDoneDateKey = 'daily_boost_done_date';
+  static String _currentUserKey() {
+    final user = LaravelSessionService.user;
+    final identifier = user?['id']?.toString() ??
+        user?['nim']?.toString() ??
+        user?['username']?.toString() ??
+        user?['email']?.toString() ??
+        'guest';
+    return identifier.replaceAll(RegExp(r'[^A-Za-z0-9_]'), '_').toLowerCase();
+  }
+
+  static String get _dailyBoostDoneIdsKey => 'daily_boost_done_ids_${_currentUserKey()}';
+  static String get _dailyBoostDoneDateKey => 'daily_boost_done_date_${_currentUserKey()}';
 
   Future<void> _loadData() async {
     await UserService.fetchCurrentUser();
