@@ -101,25 +101,34 @@ class _MoodPageState extends State<MoodPage> {
   @override
   Widget build(BuildContext context) {
     final displayName = LaravelSessionService.displayName;
+    final gender = LaravelSessionService.user?['jenis_kelamin']?.toString() ?? '';
+    final isFemale = gender.toLowerCase().contains('perempuan');
+
+    // Background dan overlay warna menyesuaikan jenis kelamin
+    final bgAsset = isFemale
+        ? 'assets/image/backgournd_dashboard_cewe/backgournd_dashboard_cewe.png'
+        : 'assets/image/dashbord.png';
+    final bgScaffoldColor =
+        isFemale ? const Color(0xFFA87888) : const Color(0xFF768266);
+    final overlayColors = isFemale
+        ? [const Color(0x99A06070), const Color(0xCC8C4A5A)]
+        : [const Color(0x99556B2F), const Color(0xCC4A5E38)];
 
     return Scaffold(
-      backgroundColor: const Color(0xFF768266),
+      backgroundColor: bgScaffoldColor,
       body: Stack(
         fit: StackFit.expand,
         children: [
           Image.asset(
-            'assets/image/dashbord.png',
+            bgAsset,
             fit: BoxFit.cover,
           ),
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [
-                  Color(0x99556B2F),
-                  Color(0xCC4A5E38),
-                ],
+                colors: overlayColors,
               ),
             ),
           ),

@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/laravel_session_service.dart';
 import '../services/user_service.dart';
@@ -38,7 +36,7 @@ class DailyBoostItem {
 // ──────────────────────────────────────────────────
 const List<DailyBoostItem> _allDailyBoosts = [
   DailyBoostItem(
-    emoji: '✍️', title: 'Deep Work 5 Menit', description: 'Matikan semua notifikasi, fokus hanya pada satu tugas kuliah tanpa distraksi.', duration: '30 menit', durationSeconds: 1800, category: 'Fokus', color: Color(0xFF6366F1), flavorText: 'Satu langkah kecil untuk IPK impian.',
+    emoji: '✍️', title: 'Deep Work 5 Menit', description: 'Matikan semua notifikasi, fokus hanya pada satu tugas kuliah tanpa distraksi.', duration: '5 menit', durationSeconds: 300, category: 'Fokus', color: Color(0xFF6366F1), flavorText: 'Satu langkah kecil untuk IPK impian.',
   ),
   DailyBoostItem(
     emoji: '🚶‍♂️', title: 'Jalan Santai', description: 'Berjalan perlahan tanpa melihat HP. Perhatikan lingkungan di sekitarmu.', duration: '2 menit', durationSeconds: 120, category: 'Gerak', color: Color(0xFF10B981), flavorText: 'Ajak badan mu berjalan untuk mendapat suasana baru.',
@@ -47,22 +45,22 @@ const List<DailyBoostItem> _allDailyBoosts = [
     emoji: '🧘', title: 'Bernafas tenang', description: 'Atur kembali pola pernapasan kamu selama 1 menit!', duration: '1 menit', durationSeconds: 60, category: 'Pernapasan', color: Color(0xFF8B5CF6), flavorText: 'Tenangkan diri mu ditengah kesibukan.',
   ),
   DailyBoostItem(
-    emoji: '🥤', title: 'Cuci Muka', description: 'Minum air putih satu botol kecil perlahan. Otak butuh air untuk berpikir jernih.', duration: '1 menit', durationSeconds: 60, category: 'Segar', color: Color(0xFF3B82F6), flavorText: 'Air adalah bensin bagi otakmu.',
+    emoji: '😶‍🌫️', title: 'Cuci Muka', description: 'Cuci wajah mu ditengah kesibukan mu, mencuci wajah dapat membuat wajah menjadi bersih dan kembali lebih segar.', duration: '1 menit', durationSeconds: 60, category: 'Segar', color: Color(0xFF3B82F6), flavorText: 'Mencuci wajah dapat menyegarkan pikiran kamu.',
   ),
   DailyBoostItem(
     emoji: '🦒', title: 'Peregangan Leher Nugas', description: 'Putar leher perlahan ke kiri dan kanan. Hilangkan beban nugas di pundakmu.', duration: '1 menit', durationSeconds: 60, category: 'Peregangan', color: Color(0xFFF43F5E), flavorText: 'Leher kaku bukan bagian dari tugas kuliah.',
   ),
   DailyBoostItem(
-    emoji: '☁️', title: 'Melamun Berfaedah', description: 'Tutup laptop, pejamkan mata, bayangkan tempat paling damai selama 2 menit.', duration: '2 menit', durationSeconds: 120, category: 'Pikiran', color: Color(0xFF0EA5E9), flavorText: 'Imajinasi butuh ruang untuk bernapas.',
+    emoji: '☁️', title: 'Asa Imajinasi', description: 'Tutup laptop, pejamkan mata, bayangkan tempat paling damai selama 2 menit.', duration: '2 menit', durationSeconds: 120, category: 'Pikiran', color: Color(0xFF0EA5E9), flavorText: 'Imajinasi butuh ruang untuk bernapas.',
   ),
   DailyBoostItem(
     emoji: '🕺', title: 'Peregangan Badan', description: 'Gerakkan tubuhmu sebebas mungkin. Buang semua stres!', duration: '1 menit', durationSeconds: 60, category: 'Gerak', color: Color(0xFFF59E0B), flavorText: 'Lepaskan hormon endorfinmu sekarang!',
   ),
   DailyBoostItem(
-    emoji: '📝', title: 'Gratitude Journaling', description: 'Tulis satu hal baik yang terjadi di kampus hari ini, sekecil apapun itu.', duration: '5 menit', durationSeconds: 300, category: 'Pikiran', color: Color(0xFF14B8A6), flavorText: 'Selalu ada pelangi setelah hujan revisi.',
+    emoji: '📝', title: 'Rasa Bersyukur', description: 'Tulis satu hal baik yang terjadi di kampus hari ini, sekecil apapun itu.', duration: '5 menit', durationSeconds: 300, category: 'Pikiran', color: Color(0xFF14B8A6), flavorText: 'Selalu ada pelangi setelah hujan revisi.',
   ),
   DailyBoostItem(
-    emoji: '👀', title: 'Istirahat Mata', description: 'Lihat objek sejauh 6 meter selama 20 detik setelah 20 menit menatap layar.', duration: '20 detik', durationSeconds: 20, category: 'Mata', color: Color(0xFFF97316), flavorText: 'Matamu adalah aset masa depanmu.',
+    emoji: '👀', title: 'Istirahat Mata', description: 'Lihat objek sejauh 6 meter selama 20 detik untuk meregangkan penglihatan mata.', duration: '20 detik', durationSeconds: 20, category: 'Mata', color: Color(0xFFF97316), flavorText: 'Matamu adalah aset masa depanmu.',
   ),
   DailyBoostItem(
     emoji: '💤', title: 'Power Nap 15 Menit', description: 'Pejamkan mata sejenak, jangan sampai tertidur lelap. Reset energimu.', duration: '15 menit', durationSeconds: 900, category: 'Pikiran', color: Color(0xFF475569), flavorText: 'Charger tubuhmu sebelum lanjut belajar.',
@@ -427,23 +425,10 @@ class _DailyBoostDetailSheetState extends State<_DailyBoostDetailSheet> {
   Timer? _timer;
   final AudioPlayer _audioPlayer = AudioPlayer();
 
-  // Notifikasi alarm native Android
-  final FlutterLocalNotificationsPlugin _notifPlugin =
-      FlutterLocalNotificationsPlugin();
-  bool _notifInitialized = false;
-
   @override
   void initState() {
     super.initState();
     _audioPlayer.setReleaseMode(ReleaseMode.stop);
-    _initNotifications();
-  }
-
-  Future<void> _initNotifications() async {
-    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const initSettings = InitializationSettings(android: androidInit);
-    final ok = await _notifPlugin.initialize(initSettings);
-    _notifInitialized = ok ?? false;
   }
 
   @override
@@ -474,52 +459,24 @@ class _DailyBoostDetailSheetState extends State<_DailyBoostDetailSheet> {
     setState(() => _isRunning = false);
   }
 
-  /// Membunyikan alarm menggunakan 3 metode sekaligus agar pasti terdengar
-  /// di semua jenis Android.
+  /// Membunyikan alarm — hanya alarm.mp3 via AudioPlayer + vibrasi haptic.
+  /// Notifikasi native dihapus agar tidak muncul dua nada sekaligus.
   Future<void> _triggerAlarm() async {
     // ── 1. Vibrasi haptic ──────────────────────────────────────────────
     HapticFeedback.heavyImpact();
 
-    // ── 2. AudioPlayer dari asset lokal ───────────────────────────────
+    // ── 2. AudioPlayer dari asset lokal (satu-satunya sumber bunyi) ────
     try {
+      await _audioPlayer.stop(); // pastikan tidak ada yang sedang bermain
       await _audioPlayer.play(AssetSource('audio/alarm.mp3'));
     } catch (e) {
       debugPrint('AudioPlayer error: $e');
-    }
-
-    // ── 3. Notifikasi native Android dengan alarm channel ─────────────
-    if (_notifInitialized) {
-      try {
-        final androidDetails = AndroidNotificationDetails(
-          'daily_boost_alarm',
-          'Daily Boost Alarm',
-          channelDescription: 'Notifikasi alarm saat misi selesai',
-          importance: Importance.max,
-          priority: Priority.max,
-          playSound: true,
-          sound: const RawResourceAndroidNotificationSound('alarm'),
-          enableVibration: true,
-          vibrationPattern: Int64List.fromList([0, 300, 200, 300, 200, 500]),
-          fullScreenIntent: false,
-          ticker: 'Misi Selesai!',
-        );
-        final notifDetails = NotificationDetails(android: androidDetails);
-        await _notifPlugin.show(
-          9001,
-          '🎉 Misi Selesai!',
-          '${widget.item.title} berhasil diselesaikan. +50 Poin!',
-          notifDetails,
-        );
-      } catch (e) {
-        debugPrint('Notification error: $e');
-      }
     }
   }
 
   Future<void> _stopAlarm() async {
     try {
       await _audioPlayer.stop();
-      await _notifPlugin.cancel(9001);
     } catch (_) {}
   }
 

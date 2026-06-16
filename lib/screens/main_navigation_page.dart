@@ -24,7 +24,7 @@ class MainNavigationPageState extends State<MainNavigationPage> {
   late final List<Widget> _pages = [
     const DashboardPage(),
     SelfCarePage(onBackToDashboard: () => switchTab(0)),
-    const MoodCalendarPage(),
+    MoodCalendarPage(onBackToDashboard: () => switchTab(0)),
     const ProfilePage(),
   ];
 
@@ -120,7 +120,7 @@ class MainNavigationPageState extends State<MainNavigationPage> {
                 BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: "Dashboard"),
                 BottomNavigationBarItem(icon: Icon(Icons.extension), label: "Self-Care"),
                 BottomNavigationBarItem(icon: Icon(Icons.calendar_today_rounded), label: "History"),
-                BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: "Profil"),
+                BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: "Profile"),
               ],
             ),
           ),

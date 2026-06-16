@@ -3,9 +3,11 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/mood_service.dart';
 import 'package:intl/intl.dart';
+import 'main_navigation_page.dart';
 
 class MoodCalendarPage extends StatefulWidget {
-  const MoodCalendarPage({super.key});
+  final VoidCallback? onBackToDashboard;
+  const MoodCalendarPage({super.key, this.onBackToDashboard});
 
   @override
   State<MoodCalendarPage> createState() => _MoodCalendarPageState();
@@ -168,7 +170,20 @@ class _MoodCalendarPageState extends State<MoodCalendarPage> with TickerProvider
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black87, size: 20),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            // Panggil callback yang dijamin bekerja di semua mode (debug/release)
+            if (widget.onBackToDashboard != null) {
+              widget.onBackToDashboard!();
+            } else {
+              // Fallback: coba lewat ancestor (debug mode / push navigation)
+              final nav = MainNavigationPage.of(context);
+              if (nav != null) {
+                nav.switchTab(0);
+              } else if (Navigator.canPop(context)) {
+                Navigator.pop(context);
+              }
+            }
+          },
         ),
         title: Text(
           "Riwayat Mood",

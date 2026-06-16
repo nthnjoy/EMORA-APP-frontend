@@ -588,42 +588,68 @@ class _ProfilePageState extends State<ProfilePage> {
                 alignment: Alignment.topCenter,
                 clipBehavior: Clip.none,
                 children: [
-                  Container(
-                    height: 180,
+                  // ── Background header profil ────────────────────────────
+                  // Untuk menggeser gambar, ubah nilai _profileBgOffsetX dan
+                  // _profileBgOffsetY di bawah. Nilai positif = geser kanan/bawah.
+                  SizedBox(
+                    height: 200,
                     width: double.infinity,
-                    decoration: BoxDecoration(
-                      image: const DecorationImage(
-                        image: AssetImage('assets/image/dashbord.png'),
-                        fit: BoxFit.cover,
-                      ),
+                    child: ClipRRect(
                       borderRadius: BorderRadius.vertical(
                         bottom: Radius.elliptical(
                           MediaQuery.of(context).size.width,
-                          100,
+                          80,
                         ),
                       ),
-                    ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withOpacity(0.2),
-                            Colors.white.withOpacity(0.4),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.vertical(
-                          bottom: Radius.elliptical(
-                            MediaQuery.of(context).size.width,
-                            100,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          // Gambar background — atur posisi dengan Offset(X, Y):
+                          // X positif = geser kanan, X negatif = geser kiri
+                          // Y positif = geser bawah, Y negatif = geser atas (kepala naik)
+                          OverflowBox(
+                            maxHeight: double.infinity,
+                            alignment: Alignment.topCenter,
+                            child: Transform.translate(
+                              offset: gender.toLowerCase().contains('perempuan')
+                                  ? const Offset(
+                                      0,    // ← perempuan: geser kiri/kanan
+                                      -80,    // ← perempuan: geser atas/bawah (0 = dari atas)
+                                    )
+                                  : const Offset(
+                                      0,    // laki-laki: geser kiri/kanan
+                                      -80,    // laki-laki: geser atas/bawah
+                                    ),
+                              child: Image.asset(
+                                gender.toLowerCase().contains('perempuan')
+                                    ? 'assets/image/backgournd_dashboard_cewe/backgournd_dashboard_cewe.png'
+                                    : 'assets/image/dashbord.png',
+                                fit: BoxFit.fitWidth,
+                                width: double.infinity,
+                              ),
+                            ),
                           ),
-                        ),
+                          // Overlay gradient
+                          Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.black.withOpacity(0.2),
+                                  Colors.white.withOpacity(0.4),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                   Positioned(
-                    top: 130,
+                    // ── Posisi avatar profil ──────────────────────────────
+                    // Ubah nilai top untuk menggeser avatar ke bawah (+) atau atas (-)
+                    top: 150, // ← geser avatar: nilai lebih besar = lebih ke bawah
                     child: _buildProfileAvatar(gender),
                   ),
                 ],
@@ -664,13 +690,13 @@ class _ProfilePageState extends State<ProfilePage> {
                   }
                 },
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 10),
               _buildMenuButton(Icons.brush, 'Tema', onTap: _showThemeModal),
               _buildMenuButton(Icons.stars, 'Poin', onTap: _showPoinModal),
               _buildMenuButton(Icons.error_outline, 'Panduan', onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const GuidePage()));
               }),
-              const SizedBox(height: 15),
+              const SizedBox(height: 0),
               _buildMenuButton(
                 Icons.logout,
                 isLoggingOut ? 'Keluar...' : 'Keluar Akun',

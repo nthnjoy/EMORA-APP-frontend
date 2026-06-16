@@ -138,15 +138,13 @@ class _DashboardPageState extends State<DashboardPage> {
   /// Mengubah string kondisi (mis. "Sangat Senang 😊") → kata natural
   /// yang cocok dipakai dalam kalimat "Mood kamu ___ dalam 14 hari terakhir."
   String _kondisiLabel(String kondisi) {
-    final lower = kondisi.toLowerCase();
-    if (lower.contains('sangat senang')) return 'sangat senang';
-    if (lower.contains('antusias'))      return 'antusias';
-    if (lower.contains('netral'))        return 'netral';
-    if (lower.contains('terkejut'))      return 'terkejut';
-    if (lower.contains('sedih'))         return 'sedih';
-    if (lower.contains('takut'))         return 'takut';
-    if (lower.contains('marah'))         return 'kurang baik';
-    return 'stabil';
+    switch (kondisi.toLowerCase()) {
+      case 'sangat baik':   return 'sangat baik';
+      case 'stabil':        return 'stabil';
+      case 'waspada':       return 'dalam kondisi waspada';
+      case 'bahaya':        return 'dalam kondisi yang perlu perhatian';
+      default:              return 'stabil';
+    }
   }
 
   // ─── Konversi emosi_kode ke skor 1–7 (selaras dengan mood_calender_page) ───
@@ -228,45 +226,37 @@ class _DashboardPageState extends State<DashboardPage> {
     final double overallAvg =
         daysWithData > 0 ? totalAvg / daysWithData : 0;
 
-    // ─── Pemetaan skor → mood emoji (7 kondisi) ────────────────────────────
-    // Skala 1–7: >= 6.5 Senang, >= 5.5 Antusias, >= 4.5 Netral,
-    //            >= 3.5 Terkejut, >= 2.5 Sedih, >= 1.5 Takut, < 1.5 Marah
+    // ─── Pemetaan skor → 4 kategori selaras dengan History ──────────────
+    // Sama persis dengan getCategory() & getColorFromAverage() di mood_calender_page
+    // avg >= 6.5 → Sangat Baik, >= 5.0 → Stabil, >= 3.5 → Waspada, < 3.5 → Bahaya
     String kondisi;
     String imagePath;
     Color kondisiColor;
 
     if (daysWithData == 0) {
-      kondisi    = 'Belum Terpantau';
-      imagePath  = 'assets/image/biasa.png';
+      kondisi      = 'Belum Terpantau';
+      imagePath    = 'assets/image/biasa.png';
       kondisiColor = const Color(0xFF9E9E9E);
     } else if (overallAvg >= 6.5) {
-      kondisi    = 'Sangat Senang';
-      imagePath  = 'assets/image/senang.png';
-      kondisiColor = const Color(0xFFF3C766);
-    } else if (overallAvg >= 5.5) {
-      kondisi    = 'Antusias';
-      imagePath  = 'assets/image/antusias.png';
-      kondisiColor = const Color(0xFFC8873B);
-    } else if (overallAvg >= 4.5) {
-      kondisi    = 'Netral';
-      imagePath  = 'assets/image/biasa.png';
-      kondisiColor = const Color(0xFF2C6D30);
+      // Sangat Baik → Senang
+      kondisi      = 'Sangat Baik';
+      imagePath    = 'assets/image/senang.png';
+      kondisiColor = const Color(0xFF10B981); // Emerald — sama dengan History
+    } else if (overallAvg >= 5.0) {
+      // Stabil → Netral/Biasa
+      kondisi      = 'Stabil';
+      imagePath    = 'assets/image/biasa.png';
+      kondisiColor = const Color(0xFF3B82F6); // Biru — sama dengan History
     } else if (overallAvg >= 3.5) {
-      kondisi    = 'Terkejut';
-      imagePath  = 'assets/image/terkejut.png';
-      kondisiColor = const Color(0xFF5E2E88);
-    } else if (overallAvg >= 2.5) {
-      kondisi    = 'Sedih';
-      imagePath  = 'assets/image/sedih.png';
-      kondisiColor = const Color(0xFF2B4791);
-    } else if (overallAvg >= 1.5) {
-      kondisi    = 'Takut';
-      imagePath  = 'assets/image/takut.png';
-      kondisiColor = const Color(0xFF3B4856);
+      // Waspada → Terkejut / was-was
+      kondisi      = 'Waspada';
+      imagePath    = 'assets/image/terkejut.png';
+      kondisiColor = const Color(0xFFF59E0B); // Amber — sama dengan History
     } else {
-      kondisi    = 'Marah';
-      imagePath  = 'assets/image/marah.png';
-      kondisiColor = const Color(0xFFE53935);
+      // Bahaya → Sedih / Takut
+      kondisi      = 'Bahaya';
+      imagePath    = 'assets/image/sedih.png';
+      kondisiColor = const Color(0xFFEF4444); // Merah — sama dengan History
     }
 
     final startDay = last14.first;
@@ -930,8 +920,8 @@ class _DashboardPageState extends State<DashboardPage> {
                                           // Baris 3: Kalimat deskripsi (justified)
                                           Text(
                                             rekapData['daysWithData'] == 0
-                                                ? 'Belum ada data mood dalam 14 hari terakhir. Mulai ceritakan perasaanmu setiap hari!'
-                                                : 'Mood kamu ${_kondisiLabel(rekapData['kondisi'] as String)} dalam 14 hari terakhir. Tetap ceritakan perasaanmu setiap hari, agar kami dapat mendukung kesejahteraan mental Anda.',
+                                                ? 'Belum ada data Emosional kamu dalam 14 hari terakhir. Mulai ceritakan perasaanmu setiap hari!'
+                                                : 'Emosional kamu ${_kondisiLabel(rekapData['kondisi'] as String)} dalam 14 hari terakhir. Tetap ceritakan perasaanmu setiap hari, agar kami dapat mendukung kesejahteraan mental Anda.',
                                             textAlign: TextAlign.justify,
                                             style: const TextStyle(
                                               fontSize: 13,
