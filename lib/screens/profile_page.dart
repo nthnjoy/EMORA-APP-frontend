@@ -691,15 +691,15 @@ class _ProfilePageState extends State<ProfilePage> {
                 },
               ),
               const SizedBox(height: 10),
-              _buildMenuButton(Icons.brush, 'Tema', onTap: _showThemeModal),
-              _buildMenuButton(Icons.stars, 'Poin', onTap: _showPoinModal),
-              _buildMenuButton(Icons.error_outline, 'Panduan', onTap: () {
+              _buildMenuButton(Icons.brush, 'Theme', onTap: _showThemeModal),
+              _buildMenuButton(Icons.stars, 'Point', onTap: _showPoinModal),
+              _buildMenuButton(Icons.error_outline, 'Guide', onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const GuidePage()));
               }),
               const SizedBox(height: 0),
               _buildMenuButton(
                 Icons.logout,
-                isLoggingOut ? 'Keluar...' : 'Keluar Akun',
+                isLoggingOut ? 'Logout...' : 'Logout',
                 onTap: isLoggingOut ? null : logout,
               ),
               const SizedBox(height: 40),

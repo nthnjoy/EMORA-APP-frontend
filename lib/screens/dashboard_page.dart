@@ -759,7 +759,7 @@ class _DashboardPageState extends State<DashboardPage> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                'Laporan harian membantu kami untuk mendukung kesejahteraan mental Anda.',
+                                'Laporan harian membantu kami untuk mendukung kesejahteraan emosional Anda.',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
@@ -977,7 +977,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     _buildFeatureTile(
-                                      title: 'Mood & Feelings',
+                                      title: 'Mood & Feeling',
                                       color: themeColor.withOpacity(0.25),
                                       icon: Image.asset(
                                         _featureIconPath(

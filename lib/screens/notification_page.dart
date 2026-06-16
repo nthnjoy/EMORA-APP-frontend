@@ -596,7 +596,7 @@ class _NotificationPageState extends State<NotificationPage> {
                         ),
                       ),
                       Text(
-                        'Atur jadwal pengingat mood harian',
+                        'Atur jadwal pengingat Daily Check-in',
                         style: GoogleFonts.poppins(
                           fontSize: 11,
                           color: Colors.grey.shade500,
@@ -610,7 +610,7 @@ class _NotificationPageState extends State<NotificationPage> {
               _buildSettingTile(
                 icon: Icons.notifications_active_outlined,
                 title: 'Aktifkan Pengingat',
-                subtitle: 'Dapatkan motivasi harian dari EMORA',
+                subtitle: 'Dapatkan motivasi harian dari EMOLENS',
                 trailing: Switch.adaptive(
                   value: notificationsEnabled,
                   activeColor: primaryColor,

@@ -23,16 +23,16 @@ class _GuideItem {
 
 const List<_GuideSection> _guideSections = [
   _GuideSection(
-    heading: 'Beranda',
+    heading: 'Dashboard',
     items: [
       _GuideItem(
-        title: 'Ringkasan Mood',
+        title: 'Mood Summary',
         description:
-            'Menampilkan ringkasan suasana hati dan perasaan kamu selama 14 hari terakhir dengan emoji yang menyesuaikan kondisi mood-mu.',
+            'Menampilkan ringkasan emosional kamu selama 14 hari terakhir dengan emoji yang menyesuaikan kondisi emosional-mu.',
         icon: Icons.mood_rounded,
       ),
       _GuideItem(
-        title: 'Mood & Feelings',
+        title: 'Mood & Feeling',
         description:
             'Gunakan halaman ini untuk mencatat suasana hati dan perasaan yang sedang kamu alami setiap harinya.',
         icon: Icons.favorite_rounded,
@@ -68,7 +68,7 @@ const List<_GuideSection> _guideSections = [
         icon: Icons.music_note_rounded,
       ),
       _GuideItem(
-        title: 'Notifikasi',
+        title: 'Notification',
         description:
             'Gunakan halaman ini untuk mengatur jadwal notifikasi pengingat harian sesuai dengan waktu yang kamu tentukan.',
         icon: Icons.notifications_rounded,
@@ -76,18 +76,18 @@ const List<_GuideSection> _guideSections = [
     ],
   ),
   _GuideSection(
-    heading: 'Self Care',
+    heading: 'Self-Care',
     items: [
       _GuideItem(
-        title: 'Modul Kesehatan Mental',
+        title: 'Modul Kesehatan Emosional',
         description:
-            'Halaman Self Care menyediakan berbagai informasi dan materi mengenai kesehatan mental. Modul yang tersedia dipilih dan disusun oleh konselor. Kamu akan memperoleh poin setelah membaca dan menyelesaikan modul.',
+            'Halaman Self Care menyediakan berbagai informasi dan materi mengenai kesehatan emosional. Modul yang tersedia dipilih dan disusun oleh konselor. Kamu akan memperoleh poin setelah membaca dan menyelesaikan modul.',
         icon: Icons.extension_rounded,
       ),
     ],
   ),
   _GuideSection(
-    heading: 'Kalender / History',
+    heading: 'History',
     items: [
       _GuideItem(
         title: 'Riwayat Mood',
@@ -98,16 +98,16 @@ const List<_GuideSection> _guideSections = [
     ],
   ),
   _GuideSection(
-    heading: 'Profil',
+    heading: 'Profile',
     items: [
       _GuideItem(
-        title: 'Tema',
+        title: 'Theme',
         description:
             'Kamu dapat membeli dan menggunakan berbagai tema tampilan dengan menukarkan poin yang telah dikumpulkan.',
         icon: Icons.palette_rounded,
       ),
       _GuideItem(
-        title: 'Poin',
+        title: 'Point',
         description:
             'Poin merupakan hadiah yang dapat diperoleh dengan menyelesaikan aktivitas pada halaman Daily Boost dan membaca modul pada halaman Self Care.',
         icon: Icons.stars_rounded,

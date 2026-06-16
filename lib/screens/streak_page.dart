@@ -76,21 +76,21 @@ class _StreakPageState extends State<StreakPage> with SingleTickerProviderStateM
       bgColorEnd = const Color(0xFF374151);
       flameColors = [Colors.grey.shade300, Colors.grey.shade500, Colors.grey.shade700];
       titleText = 'Streaknya padam, \n$firstName...';
-      subtitleText = 'Laporan perasaanmu sekarang untuk membantu kami mendukung kesejahteraan mental Anda.';
+      subtitleText = 'Laporan emosional mu sekarang untuk membantu kami mendukung kesejahteraan emosional Anda.';
     } else if (streak < 5) {
       // Sedang (Orange/Kuning)
       bgColorStart = const Color(0xFFFFB347);
       bgColorEnd = const Color(0xFFFF7B00);
       flameColors = [Colors.yellow.shade300, Colors.orange.shade500, Colors.deepOrange.shade600];
       titleText = 'Lencana Streak ditingkatkan, \n$firstName...';
-      subtitleText = 'Laporan perasaanmu dalam 7 hari ini sudah sebanyak $totalInput, terus laporkan perasaanmu untuk membantu kami mendukung kesejahteraan mental Anda.';
+      subtitleText = 'Laporan emosional mu dalam 7 hari ini sudah sebanyak $totalInput, terus laporkan emosional mu untuk membantu kami mendukung kesejahteraan emosional Anda.';
     } else {
       // Tinggi (Merah)
       bgColorStart = const Color(0xFFFF4B4B);
       bgColorEnd = const Color(0xFFB90000);
       flameColors = [Colors.orange.shade300, Colors.red.shade600, Colors.red.shade900];
       titleText = 'Lencana Streak ditingkatkan, \n$firstName...';
-      subtitleText = 'Luar biasa! Laporan perasaanmu sangat konsisten. Terus laporkan perasaanmu untuk membantu kami mendukung kesejahteraan mental Anda.';
+      subtitleText = 'Luar biasa! Laporan emosional mu sangat konsisten. Terus laporkan emosional mu untuk membantu kami mendukung kesejahteraan emosional Anda.';
     }
 
     return Scaffold(

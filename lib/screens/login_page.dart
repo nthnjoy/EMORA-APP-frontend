@@ -182,7 +182,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Pantau kesejahteraan mentalmu setiap hari',
+                    'Pantau kesejahteraan emosional mu setiap hari',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(
                       fontSize: 14,
@@ -209,7 +209,7 @@ class _LoginPageState extends State<LoginPage> {
                     child: Column(
                       children: [
                         Text(
-                          'Masuk',
+                          'Login',
                           style: GoogleFonts.poppins(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -218,7 +218,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Gunakan akun CIS Anda',
+                          'Gunakan Akun CIS Anda',
                           style: GoogleFonts.poppins(
                             fontSize: 12,
                             color: Colors.grey.shade600,
@@ -290,7 +290,7 @@ class _LoginPageState extends State<LoginPage> {
                                     ),
                                   )
                                 : Text(
-                                    "Sign In",
+                                    "Login",
                                     style: GoogleFonts.poppins(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,

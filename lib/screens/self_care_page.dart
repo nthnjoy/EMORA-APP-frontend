@@ -437,7 +437,7 @@ class _SelfCarePageState extends State<SelfCarePage> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                'Pelajari cara menjaga kesehatan mentalmu.\nScroll sampai bawah pada setiap modul untuk mendapat poin.',
+                                'Pelajari cara menjaga kesehatan emosional mu.\nScroll sampai bawah pada setiap modul untuk mendapat poin.',
                                 style: GoogleFonts.poppins(
                                     color: Colors.white70, fontSize: 13),
                               ),
@@ -886,7 +886,7 @@ class _SelfCarePageState extends State<SelfCarePage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Yuk, baca modul kesehatan mental hari ini untuk melatih self-care dan menambah poin!',
+                'Yuk, baca modul kesehatan emosional hari ini untuk melatih self-care dan menambah poin!',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.poppins(
                   fontSize: 13,
