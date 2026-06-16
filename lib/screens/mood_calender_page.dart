@@ -216,24 +216,54 @@ class _MoodCalendarPageState extends State<MoodCalendarPage> with TickerProvider
         child: TableCalendar(
           focusedDay: focusedDay,
           firstDay: DateTime(2020),
-          lastDay: DateTime(2035),
+          // Batasi lastDay ke hari ini — tanggal masa depan tidak bisa dipilih
+          lastDay: DateTime.now(),
           rowHeight: 52,
           selectedDayPredicate: (day) => isSameDay(selectedDay, day),
+          // Tanggal yang boleh dipilih: hanya hari ini dan sebelumnya
+          enabledDayPredicate: (day) {
+            final today = cleanDate(DateTime.now());
+            final d    = cleanDate(day);
+            return !d.isAfter(today);
+          },
+          onPageChanged: (focused) {
+            // Jangan lewat melampaui bulan saat ini
+            final now = DateTime.now();
+            if (focused.year > now.year ||
+                (focused.year == now.year && focused.month > now.month)) {
+              return;
+            }
+            setState(() => focusedDay = focused);
+          },
           headerStyle: HeaderStyle(
             formatButtonVisible: false,
             titleCentered: true,
             titleTextStyle: GoogleFonts.poppins(fontWeight: FontWeight.w700, fontSize: 16),
             leftChevronIcon: Icon(Icons.chevron_left_rounded, color: primaryColor),
-            rightChevronIcon: Icon(Icons.chevron_right_rounded, color: primaryColor),
+            // Sembunyikan panah kanan jika sudah di bulan saat ini
+            rightChevronIcon: () {
+              final now = DateTime.now();
+              final isCurrentMonth = focusedDay.year == now.year &&
+                  focusedDay.month == now.month;
+              return Icon(
+                Icons.chevron_right_rounded,
+                color: isCurrentMonth
+                    ? Colors.grey.shade300
+                    : primaryColor,
+              );
+            }(),
           ),
           daysOfWeekStyle: DaysOfWeekStyle(
             weekdayStyle: GoogleFonts.poppins(color: Colors.grey.shade400, fontWeight: FontWeight.w600, fontSize: 12),
             weekendStyle: GoogleFonts.poppins(color: Colors.red.shade200, fontWeight: FontWeight.w600, fontSize: 12),
           ),
           onDaySelected: (selected, focused) {
+            // Double-check: jangan proses kalau tanggal masa depan
+            final today = cleanDate(DateTime.now());
+            if (cleanDate(selected).isAfter(today)) return;
             setState(() {
               selectedDay = selected;
-              focusedDay = focused;
+              focusedDay  = focused;
             });
           },
           calendarStyle: CalendarStyle(
@@ -252,6 +282,14 @@ class _MoodCalendarPageState extends State<MoodCalendarPage> with TickerProvider
             defaultTextStyle: GoogleFonts.poppins(fontWeight: FontWeight.w500),
             weekendTextStyle: GoogleFonts.poppins(fontWeight: FontWeight.w500, color: Colors.red.shade300),
             outsideDaysVisible: false,
+            // Styling untuk tanggal yang disabled (future dates)
+            disabledTextStyle: GoogleFonts.poppins(
+              fontWeight: FontWeight.w400,
+              color: Colors.grey.shade300,
+            ),
+            disabledDecoration: const BoxDecoration(
+              shape: BoxShape.circle,
+            ),
           ),
           calendarBuilders: CalendarBuilders(
             defaultBuilder: (context, day, _) {
@@ -276,6 +314,21 @@ class _MoodCalendarPageState extends State<MoodCalendarPage> with TickerProvider
                 );
               }
               return null;
+            },
+            // Builder khusus untuk tanggal yang di-disable (masa depan)
+            disabledBuilder: (context, day, _) {
+              return Container(
+                margin: const EdgeInsets.all(8),
+                alignment: Alignment.center,
+                child: Text(
+                  '${day.day}',
+                  style: GoogleFonts.poppins(
+                    color: Colors.grey.shade300,
+                    fontWeight: FontWeight.w400,
+                    fontSize: 13,
+                  ),
+                ),
+              );
             },
           ),
         ),

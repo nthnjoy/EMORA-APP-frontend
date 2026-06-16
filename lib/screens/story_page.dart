@@ -79,7 +79,12 @@ class _StoryPageState extends State<StoryPage> {
   @override
   Widget build(BuildContext context) {
     final displayName = LaravelSessionService.user?['name'] ?? 'Pengguna';
-    
+    final primaryColor = Theme.of(context).primaryColor;
+
+    // Warna background sheet mengikuti tema — dibuat lebih terang dari primaryColor
+    final sheetBg = Color.lerp(primaryColor.withOpacity(0.08), Colors.white, 0.82) ?? const Color(0xFFEDF3ED);
+    final sendBtnColor = primaryColor;
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
@@ -88,7 +93,7 @@ class _StoryPageState extends State<StoryPage> {
       },
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        resizeToAvoidBottomInset: false, // Kita atur manual menggunakan padding viewInsets
+        resizeToAvoidBottomInset: false,
         body: Stack(
           children: [
             // Background gelap yang bisa di-tap untuk tutup
@@ -104,9 +109,9 @@ class _StoryPageState extends State<StoryPage> {
                 child: SingleChildScrollView(
                   physics: const ClampingScrollPhysics(),
                   child: Container(
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFEDF3ED),
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                    decoration: BoxDecoration(
+                      color: sheetBg,
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                     child: Column(
@@ -133,7 +138,7 @@ class _StoryPageState extends State<StoryPage> {
                               width: 48,
                               height: 5,
                               decoration: BoxDecoration(
-                                color: Colors.grey.shade300,
+                                color: primaryColor.withOpacity(0.25),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
@@ -155,7 +160,7 @@ class _StoryPageState extends State<StoryPage> {
                           alignment: Alignment.centerLeft,
                           child: Text(
                             'Ceritakan tentang perasaanmu..',
-                            style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                            style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -165,7 +170,7 @@ class _StoryPageState extends State<StoryPage> {
                           decoration: BoxDecoration(
                             color: const Color(0xFFFAFBFA),
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.grey.shade300, width: 1.0),
+                            border: Border.all(color: primaryColor.withOpacity(0.18), width: 1.2),
                           ),
                           child: TextField(
                             controller: _storyController,
@@ -175,14 +180,14 @@ class _StoryPageState extends State<StoryPage> {
                             style: GoogleFonts.poppins(fontSize: 14, color: Colors.black87),
                             decoration: InputDecoration(
                               hintText: 'Ceritakan apa yang kamu rasakan saat ini',
-                              hintStyle: GoogleFonts.poppins(fontSize: 12, color: const Color(0xFFAAAFA8), fontWeight: FontWeight.w400),
+                              hintStyle: GoogleFonts.poppins(fontSize: 12, color: Colors.black38, fontWeight: FontWeight.w400),
                               border: InputBorder.none,
                               contentPadding: const EdgeInsets.all(16),
                             ),
                           ),
                         ),
                         const SizedBox(height: 24),
-                        // Bottom Buttons
+                        // Tombol Kirim
                         Align(
                           alignment: Alignment.centerRight,
                           child: SizedBox(
@@ -191,9 +196,11 @@ class _StoryPageState extends State<StoryPage> {
                             child: ElevatedButton(
                               onPressed: _isSending ? null : _submitStory,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF008000),
+                                backgroundColor: sendBtnColor,
+                                foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                                elevation: 0,
+                                elevation: 3,
+                                shadowColor: sendBtnColor.withOpacity(0.4),
                               ),
                               child: _isSending
                                   ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))

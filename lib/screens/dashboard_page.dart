@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/mood_service.dart';
 import '../services/story_service.dart';
 import '../services/laravel_session_service.dart';
+import '../services/notification_badge_service.dart';
 import 'activity_page.dart';
 import 'music_page.dart';
 import 'notification_page.dart';
@@ -133,6 +134,51 @@ class _DashboardPageState extends State<DashboardPage> {
     }).toList();
   }
 
+  // ─── Helper: ambil label kondisi untuk kalimat deskripsi ───────────────────
+  /// Mengubah string kondisi (mis. "Sangat Senang 😊") → kata natural
+  /// yang cocok dipakai dalam kalimat "Mood kamu ___ dalam 14 hari terakhir."
+  String _kondisiLabel(String kondisi) {
+    final lower = kondisi.toLowerCase();
+    if (lower.contains('sangat senang')) return 'sangat senang';
+    if (lower.contains('antusias'))      return 'antusias';
+    if (lower.contains('netral'))        return 'netral';
+    if (lower.contains('terkejut'))      return 'terkejut';
+    if (lower.contains('sedih'))         return 'sedih';
+    if (lower.contains('takut'))         return 'takut';
+    if (lower.contains('marah'))         return 'kurang baik';
+    return 'stabil';
+  }
+
+  // ─── Konversi emosi_kode ke skor 1–7 (selaras dengan mood_calender_page) ───
+  int _moodCodeToScore(int code) {
+    switch (code) {
+      case 1: return 7; // senang    → tertinggi
+      case 2: return 2; // marah
+      case 3: return 4; // sedih
+      case 4: return 3; // takut
+      case 5: return 6; // netral/biasa
+      case 6: return 5; // terkejut
+      case 7: return 1; // jijik     → terendah
+      default: return 6;
+    }
+  }
+
+  // ─── Konversi mood_label → emosi_kode (fallback jika kode tidak tersedia) ──
+  int _moodLabelToCode(String label) {
+    switch (label.toLowerCase().trim()) {
+      case 'senang':    return 1;
+      case 'marah':     return 2;
+      case 'sedih':     return 3;
+      case 'takut':     return 4;
+      case 'netral':
+      case 'biasa':     return 5;
+      case 'terkejut':
+      case 'kaget':     return 6;
+      case 'antusias':  return 1; // antusias setara senang
+      default:          return 5;
+    }
+  }
+
   Map<String, dynamic> _calculateRekapitulasiMood(
     List<Map<String, dynamic>> moods,
   ) {
@@ -142,8 +188,8 @@ class _DashboardPageState extends State<DashboardPage> {
       (index) => today.subtract(Duration(days: 13 - index)),
     );
 
-    int totalScore = 0;
-    int count = 0;
+    // Kumpulkan rata-rata per hari terlebih dahulu (sama dengan calendar logic)
+    final Map<DateTime, List<int>> dailyScores = {};
 
     for (final item in moods) {
       final dateTime = _parseDate(item['recorded_at'] ?? item['created_at']);
@@ -151,73 +197,96 @@ class _DashboardPageState extends State<DashboardPage> {
       final date = _cleanDate(dateTime);
       if (!last14.contains(date)) continue;
 
-      final moodName = (item['mood'] ?? item['name'] ?? '')
-          .toString()
-          .toLowerCase();
+      // Prioritaskan emosi_kode, fallback ke mood_label
+      final rawCode = item['emosi_kode'];
+      int code;
+      if (rawCode != null) {
+        code = rawCode is num
+            ? rawCode.toInt()
+            : int.tryParse(rawCode.toString()) ?? 5;
+      } else {
+        final label = (item['mood_label'] ??
+                item['mood'] ??
+                item['name'] ??
+                '')
+            .toString();
+        code = _moodLabelToCode(label);
+      }
 
-      int score = 3; // default netral
-      if (moodName.contains('senang'))
-        score = 5;
-      else if (moodName.contains('antusias'))
-        score = 4;
-      else if (moodName.contains('netral') || moodName.contains('biasa'))
-        score = 3;
-      else if (moodName.contains('terkejut'))
-        score = 3;
-      else if (moodName.contains('sedih'))
-        score = 2;
-      else if (moodName.contains('takut'))
-        score = 2;
-      else if (moodName.contains('marah'))
-        score = 1;
-
-      totalScore += score;
-      count++;
+      final score = _moodCodeToScore(code);
+      dailyScores.putIfAbsent(date, () => []).add(score);
     }
 
-    String kondisi = 'stabil';
-    String imagePath = 'assets/image/senang.png';
+    // Hitung rata-rata keseluruhan dari rata-rata harian
+    double totalAvg = 0;
+    int daysWithData = dailyScores.length;
 
-    if (count > 0) {
-      double average = totalScore / count;
-      if (average > 4.0) {
-        kondisi = 'sangat baik';
-        imagePath = 'assets/image/senang.png';
-      } else if (average >= 3.0) {
-        kondisi = 'stabil';
-        imagePath = 'assets/image/biasa.png';
-      } else {
-        kondisi = 'kurang baik';
-        imagePath = 'assets/image/sedih.png';
-      }
+    dailyScores.forEach((_, scores) {
+      totalAvg += scores.reduce((a, b) => a + b) / scores.length;
+    });
+
+    final double overallAvg =
+        daysWithData > 0 ? totalAvg / daysWithData : 0;
+
+    // ─── Pemetaan skor → mood emoji (7 kondisi) ────────────────────────────
+    // Skala 1–7: >= 6.5 Senang, >= 5.5 Antusias, >= 4.5 Netral,
+    //            >= 3.5 Terkejut, >= 2.5 Sedih, >= 1.5 Takut, < 1.5 Marah
+    String kondisi;
+    String imagePath;
+    Color kondisiColor;
+
+    if (daysWithData == 0) {
+      kondisi    = 'Belum Terpantau';
+      imagePath  = 'assets/image/biasa.png';
+      kondisiColor = const Color(0xFF9E9E9E);
+    } else if (overallAvg >= 6.5) {
+      kondisi    = 'Sangat Senang';
+      imagePath  = 'assets/image/senang.png';
+      kondisiColor = const Color(0xFFF3C766);
+    } else if (overallAvg >= 5.5) {
+      kondisi    = 'Antusias';
+      imagePath  = 'assets/image/antusias.png';
+      kondisiColor = const Color(0xFFC8873B);
+    } else if (overallAvg >= 4.5) {
+      kondisi    = 'Netral';
+      imagePath  = 'assets/image/biasa.png';
+      kondisiColor = const Color(0xFF2C6D30);
+    } else if (overallAvg >= 3.5) {
+      kondisi    = 'Terkejut';
+      imagePath  = 'assets/image/terkejut.png';
+      kondisiColor = const Color(0xFF5E2E88);
+    } else if (overallAvg >= 2.5) {
+      kondisi    = 'Sedih';
+      imagePath  = 'assets/image/sedih.png';
+      kondisiColor = const Color(0xFF2B4791);
+    } else if (overallAvg >= 1.5) {
+      kondisi    = 'Takut';
+      imagePath  = 'assets/image/takut.png';
+      kondisiColor = const Color(0xFF3B4856);
     } else {
-      kondisi = 'belum terpantau sepenuhnya';
-      imagePath = 'assets/image/biasa.png'; // fallback default
+      kondisi    = 'Marah';
+      imagePath  = 'assets/image/marah.png';
+      kondisiColor = const Color(0xFFE53935);
     }
 
     final startDay = last14.first;
     final endDay = last14.last;
     const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'Mei',
-      'Jun',
-      'Jul',
-      'Agu',
-      'Sep',
-      'Okt',
-      'Nov',
-      'Des',
+      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
     ];
     final dateRangeStr =
-        '${startDay.day} ${months[startDay.month - 1]} ${startDay.year} - ${endDay.day} ${months[endDay.month - 1]} ${endDay.year}';
+        '${startDay.day} ${months[startDay.month - 1]} ${startDay.year}'
+        ' - '
+        '${endDay.day} ${months[endDay.month - 1]} ${endDay.year}';
 
     return {
-      'kondisi': kondisi,
-      'imagePath': imagePath,
-      'dateRange': dateRangeStr,
+      'kondisi':      kondisi,
+      'imagePath':    imagePath,
+      'kondisiColor': kondisiColor,
+      'dateRange':    dateRangeStr,
+      'daysWithData': daysWithData,
+      'overallAvg':   overallAvg,
     };
   }
 
@@ -297,6 +366,134 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         ],
       ),
+    );
+  }
+
+  /// Kartu Notification dengan badge angka dari NotificationBadgeService
+  Widget _buildNotificationCard(Color themeColor) {
+    return ValueListenableBuilder<int>(
+      valueListenable: NotificationBadgeService().totalBadge,
+      builder: (context, badgeCount, _) {
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // ── Kartu utama ──────────────────────────────────────────────
+            InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const NotificationPage(),
+                  ),
+                ).then((_) {
+                  // Reset badge alarm setelah halaman ditutup
+                  NotificationBadgeService().markNotificationPageOpened();
+                  NotificationBadgeService().refresh();
+                });
+              },
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: themeColor.withOpacity(0.85),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.black12, width: 0.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      right: 0,
+                      bottom: 0,
+                      left: 0,
+                      top: 0,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Image.asset(
+                          _featureIconPath(
+                            'assets/image/notifikasi.png',
+                            'assets/image/backgournd_dashboard_cewe/44.png',
+                          ),
+                          fit: BoxFit.contain,
+                          alignment: Alignment.bottomRight,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 12,
+                      left: 12,
+                      child: const Text(
+                        'Notification',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black45,
+                              offset: Offset(0, 1),
+                              blurRadius: 3,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // ── Badge angka (merah) ──────────────────────────────────────
+            if (badgeCount > 0)
+              Positioned(
+                top: -6,
+                right: -6,
+                child: Container(
+                  constraints: const BoxConstraints(
+                    minWidth: 22,
+                    minHeight: 22,
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    shape: badgeCount < 10
+                        ? BoxShape.circle
+                        : BoxShape.rectangle,
+                    borderRadius: badgeCount < 10
+                        ? null
+                        : BorderRadius.circular(11),
+                    border: Border.all(color: Colors.white, width: 2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.red.withOpacity(0.5),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    badgeCount > 99 ? '99+' : '$badgeCount',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      height: 1,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 
@@ -571,15 +768,12 @@ class _DashboardPageState extends State<DashboardPage> {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              const SizedBox(
-                                width: 300,
-                                child: Text(
-                                  'Laporan harian membantu kami untuk mendukung kesejahteraan mental Anda.',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    height: 1.4,
-                                  ),
+                              Text(
+                                'Laporan harian membantu kami untuk mendukung kesejahteraan mental Anda.',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  height: 1.4,
                                 ),
                               ),
                               const SizedBox(height: 15),
@@ -649,96 +843,123 @@ class _DashboardPageState extends State<DashboardPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 25),
                           child: Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.all(22),
+                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.85),
-                              borderRadius: BorderRadius.circular(28),
+                              color: Colors.white.withOpacity(0.92),
+                              borderRadius: BorderRadius.circular(24),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 10),
+                                  color: Colors.black.withOpacity(0.07),
+                                  blurRadius: 18,
+                                  offset: const Offset(0, 8),
                                 ),
                               ],
                             ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                // Ukuran emoji responsif: 20% lebar card, min 70, max 100
+                                final emojiSize = (constraints.maxWidth * 0.20)
+                                    .clamp(70.0, 100.0);
+                                return Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    // ── Kolom kiri: semua teks ─────────────
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          const Expanded(
-                                            child: Text(
-                                              'Mood Summary',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 15,
-                                                color: Colors.black87,
+                                          // Baris 1: Judul + badge "14 Hari Terakhir"
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              const Flexible(
+                                                child: Text(
+                                                  'Mood Summary',
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 15,
+                                                    color: Colors.black87,
+                                                  ),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
                                               ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
+                                              const SizedBox(width: 8),
+                                              // Badge dengan ukuran text lebih kecil
+                                              // agar tidak overflow di layar sempit
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                  horizontal: 9,
+                                                  vertical: 5,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius:
+                                                      BorderRadius.circular(20),
+                                                  border: Border.all(
+                                                    color: Colors.black54,
+                                                    width: 1.2,
+                                                  ),
+                                                ),
+                                                child: const Text(
+                                                  '14 Hari Terakhir',
+                                                  style: TextStyle(
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: Colors.black87,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 3),
+
+                                          // Baris 2: Rentang tanggal
+                                          Text(
+                                            rekapData['dateRange'],
+                                            style: const TextStyle(
+                                              fontSize: 10,
+                                              color: Colors.black45,
                                             ),
                                           ),
-                                          const SizedBox(width: 8),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 10,
-                                              vertical: 4,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: Colors.white.withOpacity(
-                                                0.5,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                              border: Border.all(
-                                                color: Colors.black12,
-                                              ),
-                                            ),
-                                            child: const Text(
-                                              '14 Hari Terakhir',
-                                              style: TextStyle(
-                                                fontSize: 9,
-                                                color: Colors.black54,
-                                              ),
+                                          const SizedBox(height: 14),
+
+                                          // Baris 3: Kalimat deskripsi (justified)
+                                          Text(
+                                            rekapData['daysWithData'] == 0
+                                                ? 'Belum ada data mood dalam 14 hari terakhir. Mulai ceritakan perasaanmu setiap hari!'
+                                                : 'Mood kamu ${_kondisiLabel(rekapData['kondisi'] as String)} dalam 14 hari terakhir. Tetap ceritakan perasaanmu setiap hari, agar kami dapat mendukung kesejahteraan mental Anda.',
+                                            textAlign: TextAlign.justify,
+                                            style: const TextStyle(
+                                              fontSize: 13,
+                                              color: Colors.black87,
+                                              height: 1.65,
                                             ),
                                           ),
                                         ],
                                       ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        rekapData['dateRange'],
-                                        style: TextStyle(
-                                          fontSize: 9,
-                                          color: Colors.grey[600],
-                                        ),
+                                    ),
+
+                                    const SizedBox(width: 10),
+
+                                    // ── Kolom kanan: Emoji responsif ────────
+                                    Image.asset(
+                                      rekapData['imagePath'],
+                                      height: emojiSize,
+                                      width: emojiSize,
+                                      fit: BoxFit.contain,
+                                      errorBuilder: (c, e, s) => Icon(
+                                        Icons.face_rounded,
+                                        size: emojiSize,
+                                        color: Colors.orange,
                                       ),
-                                      const SizedBox(height: 16),
-                                      Text(
-                                        'Mood kamu ${rekapData['kondisi']} dalam 14 hari terakhir. Tetap ceritakan perasaanmu setiap hari, agar kami dapat mendukung kesejahteraan mental Anda',
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.black87,
-                                          height: 1.5,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 20),
-                                Image.asset(
-                                  rekapData['imagePath'],
-                                  height: 75,
-                                  errorBuilder: (c, e, s) => const Icon(
-                                    Icons.face,
-                                    size: 75,
-                                    color: Colors.orange,
-                                  ),
-                                ),
-                              ],
+                                    ),
+                                  ],
+                                );
+                              },
                             ),
                           ),
                         ),
@@ -957,21 +1178,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                             ),
                                           ),
                                         ),
-                                        _buildLayananCard(
-                                          title: 'Notification',
-                                          imagePath: _featureIconPath(
-                                            'assets/image/notifikasi.png',
-                                            'assets/image/backgournd_dashboard_cewe/44.png',
-                                          ),
-                                          color: themeColor,
-                                          onTap: () => Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) =>
-                                                  const NotificationPage(),
-                                            ),
-                                          ),
-                                        ),
+                                        _buildNotificationCard(themeColor),
                                       ],
                                     ),
                                     const SizedBox(height: 50),

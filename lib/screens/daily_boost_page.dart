@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/laravel_session_service.dart';
 import '../services/user_service.dart';
@@ -35,16 +38,16 @@ class DailyBoostItem {
 // ──────────────────────────────────────────────────
 const List<DailyBoostItem> _allDailyBoosts = [
   DailyBoostItem(
-    emoji: '✍️', title: 'Deep Work 5 Menit', description: 'Matikan semua notifikasi, fokus hanya pada satu tugas kuliah tanpa distraksi.', duration: '5 menit', durationSeconds: 300, category: 'Fokus', color: Color(0xFF6366F1), flavorText: 'Satu langkah kecil untuk IPK impian.',
+    emoji: '✍️', title: 'Deep Work 5 Menit', description: 'Matikan semua notifikasi, fokus hanya pada satu tugas kuliah tanpa distraksi.', duration: '30 menit', durationSeconds: 1800, category: 'Fokus', color: Color(0xFF6366F1), flavorText: 'Satu langkah kecil untuk IPK impian.',
   ),
   DailyBoostItem(
-    emoji: '🚶‍♂️', title: 'Jalan Santai ke Kantin', description: 'Berjalan perlahan tanpa melihat HP. Perhatikan lingkungan kampus di sekitarmu.', duration: '2 menit', durationSeconds: 120, category: 'Gerak', color: Color(0xFF10B981), flavorText: 'Beri matamu istirahat dari cahaya biru.',
+    emoji: '🚶‍♂️', title: 'Jalan Santai', description: 'Berjalan perlahan tanpa melihat HP. Perhatikan lingkungan di sekitarmu.', duration: '2 menit', durationSeconds: 120, category: 'Gerak', color: Color(0xFF10B981), flavorText: 'Ajak badan mu berjalan untuk mendapat suasana baru.',
   ),
   DailyBoostItem(
-    emoji: '🧘', title: 'Napas Anti-Insecure', description: 'Tarik napas dalam 4 hitungan, tahan 4, hembuskan 4. Kamu berharga dan mampu!', duration: '1 menit', durationSeconds: 60, category: 'Pernapasan', color: Color(0xFF8B5CF6), flavorText: 'Tenangkan diri sebelum presentasi.',
+    emoji: '🧘', title: 'Bernafas tenang', description: 'Atur kembali pola pernapasan kamu selama 1 menit!', duration: '1 menit', durationSeconds: 60, category: 'Pernapasan', color: Color(0xFF8B5CF6), flavorText: 'Tenangkan diri mu ditengah kesibukan.',
   ),
   DailyBoostItem(
-    emoji: '🥤', title: 'Hidrasi di Kelas', description: 'Minum air putih satu botol kecil perlahan. Otak butuh air untuk berpikir jernih.', duration: '1 menit', durationSeconds: 60, category: 'Segar', color: Color(0xFF3B82F6), flavorText: 'Air adalah bensin bagi otakmu.',
+    emoji: '🥤', title: 'Cuci Muka', description: 'Minum air putih satu botol kecil perlahan. Otak butuh air untuk berpikir jernih.', duration: '1 menit', durationSeconds: 60, category: 'Segar', color: Color(0xFF3B82F6), flavorText: 'Air adalah bensin bagi otakmu.',
   ),
   DailyBoostItem(
     emoji: '🦒', title: 'Peregangan Leher Nugas', description: 'Putar leher perlahan ke kiri dan kanan. Hilangkan beban nugas di pundakmu.', duration: '1 menit', durationSeconds: 60, category: 'Peregangan', color: Color(0xFFF43F5E), flavorText: 'Leher kaku bukan bagian dari tugas kuliah.',
@@ -53,16 +56,16 @@ const List<DailyBoostItem> _allDailyBoosts = [
     emoji: '☁️', title: 'Melamun Berfaedah', description: 'Tutup laptop, pejamkan mata, bayangkan tempat paling damai selama 2 menit.', duration: '2 menit', durationSeconds: 120, category: 'Pikiran', color: Color(0xFF0EA5E9), flavorText: 'Imajinasi butuh ruang untuk bernapas.',
   ),
   DailyBoostItem(
-    emoji: '🕺', title: 'Joget Bebas 1 Menit', description: 'Putar satu lagu upbeat, gerakkan tubuhmu sebebas mungkin. Buang semua stres!', duration: '1 menit', durationSeconds: 60, category: 'Gerak', color: Color(0xFFF59E0B), flavorText: 'Lepaskan hormon endorfinmu sekarang!',
+    emoji: '🕺', title: 'Peregangan Badan', description: 'Gerakkan tubuhmu sebebas mungkin. Buang semua stres!', duration: '1 menit', durationSeconds: 60, category: 'Gerak', color: Color(0xFFF59E0B), flavorText: 'Lepaskan hormon endorfinmu sekarang!',
   ),
   DailyBoostItem(
-    emoji: '📝', title: 'Gratitude Journaling', description: 'Tulis satu hal baik yang terjadi di kampus hari ini, sekecil apapun itu.', duration: '2 menit', durationSeconds: 120, category: 'Pikiran', color: Color(0xFF14B8A6), flavorText: 'Selalu ada pelangi setelah hujan revisi.',
+    emoji: '📝', title: 'Gratitude Journaling', description: 'Tulis satu hal baik yang terjadi di kampus hari ini, sekecil apapun itu.', duration: '5 menit', durationSeconds: 300, category: 'Pikiran', color: Color(0xFF14B8A6), flavorText: 'Selalu ada pelangi setelah hujan revisi.',
   ),
   DailyBoostItem(
-    emoji: '👀', title: 'Istirahat Mata 20-20-20', description: 'Lihat objek sejauh 6 meter selama 20 detik setelah 20 menit menatap layar.', duration: '20 detik', durationSeconds: 20, category: 'Mata', color: Color(0xFFF97316), flavorText: 'Matamu adalah aset masa depanmu.',
+    emoji: '👀', title: 'Istirahat Mata', description: 'Lihat objek sejauh 6 meter selama 20 detik setelah 20 menit menatap layar.', duration: '20 detik', durationSeconds: 20, category: 'Mata', color: Color(0xFFF97316), flavorText: 'Matamu adalah aset masa depanmu.',
   ),
   DailyBoostItem(
-    emoji: '💤', title: 'Power Nap 10 Menit', description: 'Pejamkan mata sejenak, jangan sampai tertidur lelap. Reset energimu.', duration: '10 menit', durationSeconds: 600, category: 'Pikiran', color: Color(0xFF475569), flavorText: 'Charger tubuhmu sebelum lanjut belajar.',
+    emoji: '💤', title: 'Power Nap 15 Menit', description: 'Pejamkan mata sejenak, jangan sampai tertidur lelap. Reset energimu.', duration: '15 menit', durationSeconds: 900, category: 'Pikiran', color: Color(0xFF475569), flavorText: 'Charger tubuhmu sebelum lanjut belajar.',
   ),
 ];
 
@@ -422,18 +425,32 @@ class _DailyBoostDetailSheetState extends State<_DailyBoostDetailSheet> {
   int? _remainingSeconds;
   bool _isRunning = false;
   Timer? _timer;
-  final AudioPlayer _alarmPlayer = AudioPlayer();
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
+  // Notifikasi alarm native Android
+  final FlutterLocalNotificationsPlugin _notifPlugin =
+      FlutterLocalNotificationsPlugin();
+  bool _notifInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    _alarmPlayer.setReleaseMode(ReleaseMode.stop);
+    _audioPlayer.setReleaseMode(ReleaseMode.stop);
+    _initNotifications();
+  }
+
+  Future<void> _initNotifications() async {
+    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const initSettings = InitializationSettings(android: androidInit);
+    final ok = await _notifPlugin.initialize(initSettings);
+    _notifInitialized = ok ?? false;
   }
 
   @override
   void dispose() {
     _timer?.cancel();
-    _alarmPlayer.dispose();
+    _audioPlayer.stop();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -457,36 +474,141 @@ class _DailyBoostDetailSheetState extends State<_DailyBoostDetailSheet> {
     setState(() => _isRunning = false);
   }
 
-  Future<void> _playAlarm() async {
+  /// Membunyikan alarm menggunakan 3 metode sekaligus agar pasti terdengar
+  /// di semua jenis Android.
+  Future<void> _triggerAlarm() async {
+    // ── 1. Vibrasi haptic ──────────────────────────────────────────────
+    HapticFeedback.heavyImpact();
+
+    // ── 2. AudioPlayer dari asset lokal ───────────────────────────────
     try {
-      await _alarmPlayer.play(UrlSource('https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg'));
-    } catch (_) {
-      // Ignore if alarm sound fails to play.
+      await _audioPlayer.play(AssetSource('audio/alarm.mp3'));
+    } catch (e) {
+      debugPrint('AudioPlayer error: $e');
     }
+
+    // ── 3. Notifikasi native Android dengan alarm channel ─────────────
+    if (_notifInitialized) {
+      try {
+        final androidDetails = AndroidNotificationDetails(
+          'daily_boost_alarm',
+          'Daily Boost Alarm',
+          channelDescription: 'Notifikasi alarm saat misi selesai',
+          importance: Importance.max,
+          priority: Priority.max,
+          playSound: true,
+          sound: const RawResourceAndroidNotificationSound('alarm'),
+          enableVibration: true,
+          vibrationPattern: Int64List.fromList([0, 300, 200, 300, 200, 500]),
+          fullScreenIntent: false,
+          ticker: 'Misi Selesai!',
+        );
+        final notifDetails = NotificationDetails(android: androidDetails);
+        await _notifPlugin.show(
+          9001,
+          '🎉 Misi Selesai!',
+          '${widget.item.title} berhasil diselesaikan. +50 Poin!',
+          notifDetails,
+        );
+      } catch (e) {
+        debugPrint('Notification error: $e');
+      }
+    }
+  }
+
+  Future<void> _stopAlarm() async {
+    try {
+      await _audioPlayer.stop();
+      await _notifPlugin.cancel(9001);
+    } catch (_) {}
   }
 
   void _complete() {
     if (!widget.isDone) widget.onToggle();
-    _playAlarm();
-    Navigator.pop(context);
-    _showSuccessOverlay();
+    _triggerAlarm();
+    _showSuccessDialog();
   }
 
-  void _showSuccessOverlay() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        content: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(16)),
-          child: Row(
-            children: const [
-              Icon(Icons.check_circle_rounded, color: Colors.white),
-              SizedBox(width: 12),
-              Text('Keren! +50 Poin Berhasil Diraih!', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-            ],
-          ),
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        contentPadding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: Colors.green.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.check_circle_rounded,
+                color: Colors.green,
+                size: 48,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Misi Selesai! 🎉',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Kamu berhasil menyelesaikan misi ini.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.amber.shade50,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  Icon(Icons.stars_rounded, color: Colors.amber, size: 20),
+                  SizedBox(width: 8),
+                  Text(
+                    '+50 Poin Berhasil Diraih!',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.orange,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  _stopAlarm();
+                  Navigator.of(dialogCtx).pop();
+                  Navigator.of(context).pop();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                child: const Text(
+                  'Tutup',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

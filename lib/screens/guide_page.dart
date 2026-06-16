@@ -1,117 +1,464 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class GuidePage extends StatefulWidget {
+// ─────────────────────────────────────────────────────────────────────────────
+// DATA MODEL
+// ─────────────────────────────────────────────────────────────────────────────
+class _GuideSection {
+  final String heading;
+  final List<_GuideItem> items;
+  const _GuideSection({required this.heading, required this.items});
+}
+
+class _GuideItem {
+  final String title;
+  final String description;
+  final IconData icon;
+  const _GuideItem({
+    required this.title,
+    required this.description,
+    required this.icon,
+  });
+}
+
+const List<_GuideSection> _guideSections = [
+  _GuideSection(
+    heading: 'Beranda',
+    items: [
+      _GuideItem(
+        title: 'Ringkasan Mood',
+        description:
+            'Menampilkan ringkasan suasana hati dan perasaan kamu selama 14 hari terakhir dengan emoji yang menyesuaikan kondisi mood-mu.',
+        icon: Icons.mood_rounded,
+      ),
+      _GuideItem(
+        title: 'Mood & Feelings',
+        description:
+            'Gunakan halaman ini untuk mencatat suasana hati dan perasaan yang sedang kamu alami setiap harinya.',
+        icon: Icons.favorite_rounded,
+      ),
+      _GuideItem(
+        title: 'Story Corner',
+        description:
+            'Gunakan halaman ini untuk menuliskan cerita, pengalaman, atau hal-hal yang sedang kamu rasakan dalam bentuk jurnal pribadi.',
+        icon: Icons.auto_stories_rounded,
+      ),
+      _GuideItem(
+        title: 'Streak',
+        description:
+            'Menampilkan jumlah hari kamu mencatat suasana hati selama menggunakan aplikasi. Streak akan bertambah apabila kamu melakukan pencatatan setiap hari. Jika tidak mencatat selama satu hari, streak akan terhenti dan ikon api akan padam.',
+        icon: Icons.local_fire_department_rounded,
+      ),
+      _GuideItem(
+        title: 'Daily Boost',
+        description:
+            'Berisi berbagai aktivitas singkat yang dapat membantu meningkatkan suasana hati kamu. Kamu juga akan memperoleh poin setelah berhasil menyelesaikan aktivitas yang tersedia.',
+        icon: Icons.bolt_rounded,
+      ),
+      _GuideItem(
+        title: 'Quotes',
+        description:
+            'Menampilkan kutipan motivasi yang disesuaikan dengan suasana hati terakhir yang kamu pilih.',
+        icon: Icons.format_quote_rounded,
+      ),
+      _GuideItem(
+        title: 'Music',
+        description:
+            'Menyediakan pilihan musik yang dapat kamu dengarkan sesuai dengan suasana hati saat ini.',
+        icon: Icons.music_note_rounded,
+      ),
+      _GuideItem(
+        title: 'Notifikasi',
+        description:
+            'Gunakan halaman ini untuk mengatur jadwal notifikasi pengingat harian sesuai dengan waktu yang kamu tentukan.',
+        icon: Icons.notifications_rounded,
+      ),
+    ],
+  ),
+  _GuideSection(
+    heading: 'Self Care',
+    items: [
+      _GuideItem(
+        title: 'Modul Kesehatan Mental',
+        description:
+            'Halaman Self Care menyediakan berbagai informasi dan materi mengenai kesehatan mental. Modul yang tersedia dipilih dan disusun oleh konselor. Kamu akan memperoleh poin setelah membaca dan menyelesaikan modul.',
+        icon: Icons.extension_rounded,
+      ),
+    ],
+  ),
+  _GuideSection(
+    heading: 'Kalender / History',
+    items: [
+      _GuideItem(
+        title: 'Riwayat Mood',
+        description:
+            'Pada halaman Kalender, kamu dapat melihat riwayat suasana hati dan perasaan yang telah dicatat selama menggunakan Emolens.',
+        icon: Icons.calendar_month_rounded,
+      ),
+    ],
+  ),
+  _GuideSection(
+    heading: 'Profil',
+    items: [
+      _GuideItem(
+        title: 'Tema',
+        description:
+            'Kamu dapat membeli dan menggunakan berbagai tema tampilan dengan menukarkan poin yang telah dikumpulkan.',
+        icon: Icons.palette_rounded,
+      ),
+      _GuideItem(
+        title: 'Poin',
+        description:
+            'Poin merupakan hadiah yang dapat diperoleh dengan menyelesaikan aktivitas pada halaman Daily Boost dan membaca modul pada halaman Self Care.',
+        icon: Icons.stars_rounded,
+      ),
+    ],
+  ),
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GUIDE PAGE
+// ─────────────────────────────────────────────────────────────────────────────
+class GuidePage extends StatelessWidget {
   const GuidePage({super.key});
 
   @override
-  State<GuidePage> createState() => _GuidePageState();
-}
-
-class _GuidePageState extends State<GuidePage> {
-  final PageController _controller = PageController();
-  Timer? _autoTimer;
-  int _index = 0;
-
-  final List<Map<String, String>> _pages = [
-    {'title': 'Selamat Datang', 'text': 'Selamat datang di Emolens — aplikasi untuk mendukung kesejahteraanmu.'},
-    {'title': 'Fitur Musik', 'text': 'Dengarkan lagu berdasarkan mood. Ketuk mood, pilih lagu, lalu mainkan.'},
-    {'title': 'Cerita & Dukungan', 'text': 'Kirim cerita dan dapatkan masukan AI. Cerita bersifat pribadi.'},
-    {'title': 'Pengingat', 'text': 'Aktifkan pengingat harian pada waktu pilihanmu untuk cek-in singkat.'},
-    {'title': 'Tema & Poin', 'text': 'Tukar poin dengan tema tampilan. Kumpulkan poin lewat aktivitas.'},
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _startAutoAdvance();
-  }
-
-  void _startAutoAdvance() {
-    _autoTimer?.cancel();
-    _autoTimer = Timer(const Duration(seconds: 3), () {
-      _next();
-    });
-  }
-
-  void _next() {
-    if (_index < _pages.length - 1) {
-      _index++;
-      _controller.animateToPage(_index, duration: const Duration(milliseconds: 400), curve: Curves.easeInOut);
-      _startAutoAdvance();
-    } else {
-      Navigator.of(context).pop();
-    }
-  }
-
-  void _onPageChanged(int i) {
-    setState(() => _index = i);
-    _startAutoAdvance();
-  }
-
-  @override
-  void dispose() {
-    _autoTimer?.cancel();
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).primaryColor;
+    final isDark  = Theme.of(context).brightness == Brightness.dark;
+
+    final bgColor   = isDark ? const Color(0xFF111827) : const Color(0xFFF8FAFC);
+    final cardColor = isDark ? const Color(0xFF1F2937) : Colors.white;
+    final textDark  = isDark ? Colors.white.withOpacity(0.9) : const Color(0xFF1E293B);
+    final textMuted = isDark ? Colors.white.withOpacity(0.5) : const Color(0xFF64748B);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Panduan Aplikasi')),
-      body: Column(
-        children: [
-          Expanded(
-            child: PageView.builder(
-              controller: _controller,
-              onPageChanged: _onPageChanged,
-              itemCount: _pages.length,
-              itemBuilder: (context, idx) {
-                final item = _pages[idx];
-                return Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(item['title']!, style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.w800)),
-                      const SizedBox(height: 16),
-                      Text(item['text']!, style: GoogleFonts.poppins(fontSize: 16), textAlign: TextAlign.center),
-                    ],
+      backgroundColor: bgColor,
+      // ── App Bar ──────────────────────────────────────────────────────────
+      appBar: AppBar(
+        backgroundColor: primary,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(
+          'Panduan Aplikasi',
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          // ── Hero Banner ─────────────────────────────────────────────────
+          SliverToBoxAdapter(
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: primary,
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(36),
+                ),
+              ),
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+              child: Column(
+                children: [
+                  // Ikon buku
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.menu_book_rounded,
+                      size: 42,
+                      color: Colors.white,
+                    ),
                   ),
-                );
-              },
+                  const SizedBox(height: 14),
+                  Text(
+                    'Guide Book',
+                    style: GoogleFonts.outfit(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Panduan lengkap penggunaan fitur Emolens',
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: Colors.white.withOpacity(0.75),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  // Chip jumlah fitur
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.18),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.white.withOpacity(0.25)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.checklist_rounded, color: Colors.white, size: 16),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${_guideSections.expand((s) => s.items).length} Fitur Dijelaskan',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 18),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(_pages.length, (i) => Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      width: i == _index ? 24 : 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: i == _index ? Theme.of(context).primaryColor : Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    )),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: _next,
-                  child: Text(_index < _pages.length - 1 ? 'Selanjutnya' : 'Selesai'),
-                ),
-              ],
+
+          // ── Daftar Seksi ────────────────────────────────────────────────
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 28, 20, 40),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, secIndex) {
+                  final section = _guideSections[secIndex];
+                  return _SectionCard(
+                    section: section,
+                    primary: primary,
+                    cardColor: cardColor,
+                    textDark: textDark,
+                    textMuted: textMuted,
+                    sectionIndex: secIndex,
+                  );
+                },
+                childCount: _guideSections.length,
+              ),
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WIDGET SEKSI
+// ─────────────────────────────────────────────────────────────────────────────
+class _SectionCard extends StatelessWidget {
+  final _GuideSection section;
+  final Color primary;
+  final Color cardColor;
+  final Color textDark;
+  final Color textMuted;
+  final int sectionIndex;
+
+  const _SectionCard({
+    required this.section,
+    required this.primary,
+    required this.cardColor,
+    required this.textDark,
+    required this.textMuted,
+    required this.sectionIndex,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // ── Heading seksi ────────────────────────────────────────────────
+        Row(
+          children: [
+            Container(
+              width: 4,
+              height: 22,
+              decoration: BoxDecoration(
+                color: primary,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              section.heading,
+              style: GoogleFonts.outfit(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: primary,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        // ── Kartu berisi semua item ──────────────────────────────────────
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: cardColor,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 18,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Column(
+            children: List.generate(section.items.length, (i) {
+              final item = section.items[i];
+              final isLast = i == section.items.length - 1;
+              return _GuideItemTile(
+                item: item,
+                primary: primary,
+                textDark: textDark,
+                textMuted: textMuted,
+                isLast: isLast,
+                itemIndex: i,
+              );
+            }),
+          ),
+        ),
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WIDGET ITEM TUNGGAL
+// ─────────────────────────────────────────────────────────────────────────────
+class _GuideItemTile extends StatefulWidget {
+  final _GuideItem item;
+  final Color primary;
+  final Color textDark;
+  final Color textMuted;
+  final bool isLast;
+  final int itemIndex;
+
+  const _GuideItemTile({
+    required this.item,
+    required this.primary,
+    required this.textDark,
+    required this.textMuted,
+    required this.isLast,
+    required this.itemIndex,
+  });
+
+  @override
+  State<_GuideItemTile> createState() => _GuideItemTileState();
+}
+
+class _GuideItemTileState extends State<_GuideItemTile> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        InkWell(
+          onTap: () => setState(() => _expanded = !_expanded),
+          borderRadius: BorderRadius.vertical(
+            top: widget.itemIndex == 0 ? const Radius.circular(24) : Radius.zero,
+            bottom: widget.isLast && !_expanded ? const Radius.circular(24) : Radius.zero,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Ikon fitur
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: widget.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    widget.item.icon,
+                    color: widget.primary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 14),
+
+                // Judul + deskripsi
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.item.title,
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          color: widget.textDark,
+                        ),
+                      ),
+                      AnimatedCrossFade(
+                        duration: const Duration(milliseconds: 250),
+                        firstChild: const SizedBox.shrink(),
+                        secondChild: Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Text(
+                            widget.item.description,
+                            style: GoogleFonts.poppins(
+                              fontSize: 12.5,
+                              color: widget.textMuted,
+                              height: 1.6,
+                            ),
+                          ),
+                        ),
+                        crossFadeState: _expanded
+                            ? CrossFadeState.showSecond
+                            : CrossFadeState.showFirst,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+
+                // Chevron animasi
+                AnimatedRotation(
+                  duration: const Duration(milliseconds: 250),
+                  turns: _expanded ? 0.5 : 0,
+                  child: Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: widget.primary.withOpacity(0.6),
+                    size: 22,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        // Divider (kecuali item terakhir)
+        if (!widget.isLast)
+          Divider(
+            height: 1,
+            thickness: 0.5,
+            indent: 72,
+            endIndent: 18,
+            color: Colors.grey.withOpacity(0.15),
+          ),
+      ],
     );
   }
 }

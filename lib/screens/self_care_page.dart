@@ -287,6 +287,19 @@ class _SelfCarePageState extends State<SelfCarePage> {
     }
   }
 
+  /// Modul diurutkan: belum dibaca di atas, sudah dibaca di bawah.
+  /// Dalam tiap grup, urutan asli dari API dipertahankan.
+  List<SelfCareModule> get _sortedModules {
+    final unread  = _todayModules.where((m) => !_completedModules.contains(m.id)).toList();
+    final read    = _todayModules.where((m) =>  _completedModules.contains(m.id)).toList();
+    return [...unread, ...read];
+  }
+
+  /// Jumlah modul yang sudah dibaca dari daftar modul yang ada sekarang.
+  /// Tidak terpengaruh oleh id lama yang sudah tidak ada di API.
+  int get _readCount =>
+      _todayModules.where((m) => _completedModules.contains(m.id)).length;
+
   /// Dipanggil oleh ModuleReaderPage setelah scroll selesai
   Future<void> _onModuleCompleted(SelfCareModule module) async {
     if (_completedModules.contains(module.id)) return;
@@ -544,12 +557,13 @@ class _SelfCarePageState extends State<SelfCarePage> {
                           sliver: SliverList(
                             delegate: SliverChildBuilderDelegate(
                               (context, index) {
-                                final module = _todayModules[index];
-                                final isDone =
-                                    _completedModules.contains(module.id);
+                                final sorted = _sortedModules;
+                                if (index >= sorted.length) return null;
+                                final module = sorted[index];
+                                final isDone = _completedModules.contains(module.id);
                                 return _buildModuleCard(module, isDone);
                               },
-                              childCount: _todayModules.length,
+                              childCount: _sortedModules.length,
                             ),
                           ),
                         )
@@ -563,9 +577,9 @@ class _SelfCarePageState extends State<SelfCarePage> {
   }
 
   Widget _buildProgressBanner() {
-    final done = _completedModules.length;
-    final total = _todayModules.length;
-    final progress = total == 0 ? 0.0 : done / total;
+    final done  = _readCount;               // hanya modul yg ada di list saat ini
+    final total = _todayModules.length;     // total modul dari API (termasuk yg baru)
+    final progress = total == 0 ? 0.0 : (done / total).clamp(0.0, 1.0);
 
     return Container(
       padding: const EdgeInsets.all(20),

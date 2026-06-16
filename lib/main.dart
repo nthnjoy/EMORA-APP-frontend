@@ -7,6 +7,7 @@ import 'services/theme_manager.dart';
 import 'services/laravel_session_service.dart';
 
 import 'services/notification_service.dart';
+import 'services/notification_badge_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -18,6 +19,9 @@ void main() async {
   
   // ✅ RESTORE notification schedule saat app startup
   await _restoreNotificationSchedule();
+
+  // ✅ Mulai layanan badge notifikasi
+  NotificationBadgeService().init();
   
   ThemeManager().init();
   runApp(const MyApp());
