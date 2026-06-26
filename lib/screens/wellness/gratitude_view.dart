@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -53,7 +53,7 @@ class _GratitudeViewState extends State<GratitudeView> {
     final primaryColor = Theme.of(context).primaryColor;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFBEB), // Warm beige
+      backgroundColor: const Color(0xFFFFFBEB), 
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,

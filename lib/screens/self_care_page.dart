@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,10 +7,6 @@ import '../services/user_service.dart';
 import '../services/laravel_session_service.dart';
 import 'module_reader_page.dart';
 
-
-// ──────────────────────────────────────────────────
-// Model
-// ──────────────────────────────────────────────────
 class SelfCareModule {
   final String id;
   final String title;
@@ -69,7 +65,7 @@ class _SelfCarePageState extends State<SelfCarePage> {
   List<SelfCareModule> _allModules = [];
   List<SelfCareModule> _todayModules = [];
   bool _isLoading = true;
-  int _selectedTab = 0; // 0 for Modules, 1 for Daily Activities
+  int _selectedTab = 0; 
   Map<String, List<dynamic>> _dailyActivities = {};
 
   String? _errorMessage;
@@ -287,20 +283,20 @@ class _SelfCarePageState extends State<SelfCarePage> {
     }
   }
 
-  /// Modul diurutkan: belum dibaca di atas, sudah dibaca di bawah.
-  /// Dalam tiap grup, urutan asli dari API dipertahankan.
+  
+  
   List<SelfCareModule> get _sortedModules {
     final unread  = _todayModules.where((m) => !_completedModules.contains(m.id)).toList();
     final read    = _todayModules.where((m) =>  _completedModules.contains(m.id)).toList();
     return [...unread, ...read];
   }
 
-  /// Jumlah modul yang sudah dibaca dari daftar modul yang ada sekarang.
-  /// Tidak terpengaruh oleh id lama yang sudah tidak ada di API.
+  
+  
   int get _readCount =>
       _todayModules.where((m) => _completedModules.contains(m.id)).length;
 
-  /// Dipanggil oleh ModuleReaderPage setelah scroll selesai
+  
   Future<void> _onModuleCompleted(SelfCareModule module) async {
     if (_completedModules.contains(module.id)) return;
     setState(() {
@@ -577,8 +573,8 @@ class _SelfCarePageState extends State<SelfCarePage> {
   }
 
   Widget _buildProgressBanner() {
-    final done  = _readCount;               // hanya modul yg ada di list saat ini
-    final total = _todayModules.length;     // total modul dari API (termasuk yg baru)
+    final done  = _readCount;               
+    final total = _todayModules.length;     
     final progress = total == 0 ? 0.0 : (done / total).clamp(0.0, 1.0);
 
     return Container(
@@ -646,7 +642,7 @@ class _SelfCarePageState extends State<SelfCarePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ─── Thumbnail (jika ada) ──────────────────────────────────
+              
               if (hasThumbnail)
                 ClipRRect(
                   borderRadius:
@@ -667,7 +663,7 @@ class _SelfCarePageState extends State<SelfCarePage> {
                                       const TextStyle(fontSize: 48))),
                         ),
                       ),
-                      // Badge selesai di atas gambar
+                      
                       if (isDone)
                         Positioned(
                           top: 10,
@@ -694,7 +690,7 @@ class _SelfCarePageState extends State<SelfCarePage> {
                             ),
                           ),
                         ),
-                      // Badge PDF
+                      
                       if (hasContentUrl)
                         Positioned(
                           top: 10,
@@ -725,12 +721,12 @@ class _SelfCarePageState extends State<SelfCarePage> {
                   ),
                 ),
 
-              // ─── Info bawah kartu ──────────────────────────────────────
+              
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    // Icon (fallback jika tidak ada thumbnail)
+                    
                     if (!hasThumbnail)
                       Container(
                         width: 56,
@@ -774,7 +770,7 @@ class _SelfCarePageState extends State<SelfCarePage> {
                           const SizedBox(height: 8),
                           Row(
                             children: [
-                              // Category chip
+                              
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 8, vertical: 2),
@@ -793,7 +789,7 @@ class _SelfCarePageState extends State<SelfCarePage> {
                                 ),
                               ),
                               const Spacer(),
-                              // Poin
+                              
                               Row(
                                 children: [
                                   Icon(Icons.stars_rounded,

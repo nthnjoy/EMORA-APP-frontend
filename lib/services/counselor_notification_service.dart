@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -18,13 +18,13 @@ class CounselorNotificationService {
   final Set<String> _shownIds = {};
   bool _isDialogOpen = false;
 
-  /// Jumlah pesan konselor yang belum dibaca. Listen ke ini untuk badge di dashboard.
+  
   final ValueNotifier<int> unreadCount = ValueNotifier<int>(0);
 
   void startPolling() {
     _timer?.cancel();
     _checkNotifications();
-    // Cek setiap 30 detik agar tidak membebani server
+    
     _timer = Timer.periodic(const Duration(seconds: 30), (timer) {
       _checkNotifications();
     });
@@ -62,20 +62,20 @@ class CounselorNotificationService {
               if (id.isNotEmpty && !_shownIds.contains(id)) {
                 _shownIds.add(id);
                 _showAwesomeNotificationDialog(id, message);
-                break; // Tampilkan satu pesan pada satu waktu
+                break; 
               }
             }
           }
         }
       } 
-      // Jika 404 atau lainnya, kita abaikan saja diam-diam agar tidak spam log
-      // Kemungkinan Ngrok belum stabil atau server mati sementara.
+      
+      
     } catch (e) {
-      // Abaikan error jaringan diam-diam agar terminal bersih
+      
     }
   }
 
-  /// Ambil semua notifikasi untuk ditampilkan di halaman Notifikasi.
+  
   Future<List<Map<String, dynamic>>> fetchForPage() async {
     if (!LaravelSessionService.isAuthenticated) {
       throw Exception('Belum login / tidak terautentikasi.');
@@ -102,7 +102,7 @@ class CounselorNotificationService {
     throw Exception('Error dari server: HTTP ${response.statusCode}\nBody: ${response.body}');
   }
 
-  /// Tandai notifikasi sebagai sudah dibaca.
+  
   Future<bool> markNotificationRead(String id) async {
     try {
       final response = await http
@@ -123,7 +123,7 @@ class CounselorNotificationService {
         }
       }
     } catch (e) {
-      // Abaikan error
+      
     }
     return false;
   }
@@ -172,7 +172,7 @@ class CounselorNotificationService {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Icon Lonceng / Pesan Animasi
+                    
                     TweenAnimationBuilder<double>(
                       tween: Tween(begin: 0.0, end: 1.0),
                       duration: const Duration(milliseconds: 800),
@@ -296,7 +296,7 @@ class CounselorNotificationService {
                               await markNotificationRead(id);
                               _isDialogOpen = false;
                               Navigator.of(context).pop();
-                              _checkNotifications(); // Cek lagi kalau ada pesan lain
+                              _checkNotifications(); 
                             },
                             child: Text(
                               'Mengerti',
@@ -323,7 +323,7 @@ class CounselorNotificationService {
     final headers = <String, String>{
       'Accept': 'application/json',
       'Content-Type': 'application/json',
-      // Bypass halaman peringatan interstitial Ngrok
+      
       'ngrok-skip-browser-warning': 'true',
     };
     final authHeader = LaravelSessionService.authorizationHeader;

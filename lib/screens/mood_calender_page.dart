@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/mood_service.dart';
@@ -44,13 +44,13 @@ class _MoodCalendarPageState extends State<MoodCalendarPage> with TickerProvider
 
   int convertToScore(int code) {
     switch (code) {
-      case 1: return 7; // senang
-      case 2: return 2; // marah
-      case 3: return 5; // sedih
-      case 4: return 4; // takut
-      case 5: return 6; // biasa
-      case 6: return 3; // terkejut
-      case 7: return 1; // jijik
+      case 1: return 7; 
+      case 2: return 2; 
+      case 3: return 5; 
+      case 4: return 4; 
+      case 5: return 6; 
+      case 6: return 3; 
+      case 7: return 1; 
       default: return 5;
     }
   }
@@ -70,10 +70,10 @@ class _MoodCalendarPageState extends State<MoodCalendarPage> with TickerProvider
   }
 
   Color getColorFromAverage(double avg) {
-    if (avg >= 6.5) return const Color(0xFF10B981); // Emerald
-    if (avg >= 5) return const Color(0xFF3B82F6);   // Blue
-    if (avg >= 3.5) return const Color(0xFFF59E0B); // Amber
-    return const Color(0xFFEF4444);                 // Red
+    if (avg >= 6.5) return const Color(0xFF10B981); 
+    if (avg >= 5) return const Color(0xFF3B82F6);   
+    if (avg >= 3.5) return const Color(0xFFF59E0B); 
+    return const Color(0xFFEF4444);                 
   }
 
   String getCategory(double avg) {
@@ -171,11 +171,11 @@ class _MoodCalendarPageState extends State<MoodCalendarPage> with TickerProvider
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black87, size: 20),
           onPressed: () {
-            // Panggil callback yang dijamin bekerja di semua mode (debug/release)
+            
             if (widget.onBackToDashboard != null) {
               widget.onBackToDashboard!();
             } else {
-              // Fallback: coba lewat ancestor (debug mode / push navigation)
+              
               final nav = MainNavigationPage.of(context);
               if (nav != null) {
                 nav.switchTab(0);
@@ -231,18 +231,18 @@ class _MoodCalendarPageState extends State<MoodCalendarPage> with TickerProvider
         child: TableCalendar(
           focusedDay: focusedDay,
           firstDay: DateTime(2020),
-          // Batasi lastDay ke hari ini — tanggal masa depan tidak bisa dipilih
+          
           lastDay: DateTime.now(),
           rowHeight: 52,
           selectedDayPredicate: (day) => isSameDay(selectedDay, day),
-          // Tanggal yang boleh dipilih: hanya hari ini dan sebelumnya
+          
           enabledDayPredicate: (day) {
             final today = cleanDate(DateTime.now());
             final d    = cleanDate(day);
             return !d.isAfter(today);
           },
           onPageChanged: (focused) {
-            // Jangan lewat melampaui bulan saat ini
+            
             final now = DateTime.now();
             if (focused.year > now.year ||
                 (focused.year == now.year && focused.month > now.month)) {
@@ -255,7 +255,7 @@ class _MoodCalendarPageState extends State<MoodCalendarPage> with TickerProvider
             titleCentered: true,
             titleTextStyle: GoogleFonts.poppins(fontWeight: FontWeight.w700, fontSize: 16),
             leftChevronIcon: Icon(Icons.chevron_left_rounded, color: primaryColor),
-            // Sembunyikan panah kanan jika sudah di bulan saat ini
+            
             rightChevronIcon: () {
               final now = DateTime.now();
               final isCurrentMonth = focusedDay.year == now.year &&
@@ -273,7 +273,7 @@ class _MoodCalendarPageState extends State<MoodCalendarPage> with TickerProvider
             weekendStyle: GoogleFonts.poppins(color: Colors.red.shade200, fontWeight: FontWeight.w600, fontSize: 12),
           ),
           onDaySelected: (selected, focused) {
-            // Double-check: jangan proses kalau tanggal masa depan
+            
             final today = cleanDate(DateTime.now());
             if (cleanDate(selected).isAfter(today)) return;
             setState(() {
@@ -297,7 +297,7 @@ class _MoodCalendarPageState extends State<MoodCalendarPage> with TickerProvider
             defaultTextStyle: GoogleFonts.poppins(fontWeight: FontWeight.w500),
             weekendTextStyle: GoogleFonts.poppins(fontWeight: FontWeight.w500, color: Colors.red.shade300),
             outsideDaysVisible: false,
-            // Styling untuk tanggal yang disabled (future dates)
+            
             disabledTextStyle: GoogleFonts.poppins(
               fontWeight: FontWeight.w400,
               color: Colors.grey.shade300,
@@ -330,7 +330,7 @@ class _MoodCalendarPageState extends State<MoodCalendarPage> with TickerProvider
               }
               return null;
             },
-            // Builder khusus untuk tanggal yang di-disable (masa depan)
+            
             disabledBuilder: (context, day, _) {
               return Container(
                 margin: const EdgeInsets.all(8),

@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+﻿import 'package:flutter/foundation.dart';
 
 class ApiConfig {
   const ApiConfig._();
@@ -14,14 +14,12 @@ class ApiConfig {
     }
 
     if (kIsWeb) {
-      // Browser berjalan di laptop yang sama → langsung ke localhost, tanpa ngrok
       return 'http://127.0.0.1:8000';
     }
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
-        // Perangkat mobile fisik → butuh ngrok agar bisa reach laptop
         return 'https://dollar-fiftieth-appease.ngrok-free.dev';
       default:
         return 'http://127.0.0.1:8000';
@@ -42,7 +40,7 @@ class ApiConfig {
   static String get updateGenderUrl => '$baseUrl/api/user/update-gender';
   static String get modulesUrl => '$baseUrl/api/modules';
 
-  // Counselor notifications endpoints
+  
   static String get notificationsUrl => '$baseUrl/api/counselor/notifications';
   static String markNotificationReadUrl(String id) => '$baseUrl/api/counselor/notifications/$id/read';
 }

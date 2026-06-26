@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/mood_service.dart';
 import '../services/laravel_session_service.dart';
@@ -25,9 +25,9 @@ class _FeelingPageState extends State<FeelingPage> {
   static const int _infiniteMultiplier = 1000;
   late int _initialPage;
 
-  // Feeling descriptions for each feeling
+  
   final Map<String, String> feelingDescriptions = {
-    // Senang
+    
     'Gembira':
         'Gembira adalah emosi menyenangkan yang muncul saat kita mengalami sesuatu yang positif, mencapai tujuan, atau merasa terhubung dengan orang lain.',
     'Bangga':
@@ -36,7 +36,7 @@ class _FeelingPageState extends State<FeelingPage> {
         'Bersyukur adalah perasaan menghargai hal-hal baik yang ada dalam hidup kita, baik besar maupun kecil.',
     'Ceria':
         'Ceria adalah perasaan ringan dan bahagia yang membuat kita ingin tersenyum dan menikmati momen saat ini.',
-    // Antusias
+    
     'Semangat':
         'Semangat adalah dorongan kuat dari dalam diri untuk melakukan sesuatu dengan penuh energi dan tekad.',
     'Energik':
@@ -45,7 +45,7 @@ class _FeelingPageState extends State<FeelingPage> {
         'Kagum adalah perasaan takjub dan menghargai sesuatu yang luar biasa atau mengagumkan.',
     'Bergairah':
         'Bergairah adalah perasaan antusias yang kuat terhadap sesuatu yang sangat kita minati.',
-    // Marah
+    
     'Kesal':
         'Kesal adalah perasaan tidak nyaman yang muncul saat sesuatu tidak berjalan sesuai harapan.',
     'Jengkel':
@@ -54,7 +54,7 @@ class _FeelingPageState extends State<FeelingPage> {
         'Benci adalah perasaan negatif yang kuat terhadap seseorang atau sesuatu yang dianggap merugikan.',
     'Kecewa':
         'Kecewa adalah perasaan sedih karena harapan atau ekspektasi yang tidak terpenuhi.',
-    // Sedih
+    
     'Pilu':
         'Pilu adalah perasaan sedih yang mendalam yang membuat hati terasa berat dan ingin menangis.',
     'Depresi':
@@ -63,7 +63,7 @@ class _FeelingPageState extends State<FeelingPage> {
         'Kesepian adalah perasaan hampa karena kurangnya koneksi sosial atau kedekatan emosional.',
     'Putus Asa':
         'Putus asa adalah perasaan kehilangan harapan dan merasa tidak ada jalan keluar dari masalah.',
-    // Takut
+    
     'Cemas':
         'Cemas adalah perasaan khawatir berlebihan tentang sesuatu yang mungkin terjadi di masa depan.',
     'Khawatir':
@@ -72,7 +72,7 @@ class _FeelingPageState extends State<FeelingPage> {
         'Panik adalah perasaan takut yang intens dan tiba-tiba yang membuat sulit berpikir jernih.',
     'Gelisah':
         'Gelisah adalah perasaan tidak tenang yang membuat sulit untuk diam dan rileks.',
-    // Netral
+    
     'Biasa Saja':
         'Biasa saja adalah kondisi emosi yang stabil tanpa perasaan positif atau negatif yang dominan.',
     'Stabil':
@@ -81,7 +81,7 @@ class _FeelingPageState extends State<FeelingPage> {
         'Tenang adalah perasaan damai dan rileks yang membuat pikiran dan tubuh terasa nyaman.',
     'Santai':
         'Santai adalah perasaan bebas dari tekanan atau stres, menikmati momen dengan ringan.',
-    // Terkejut
+    
     'Tercengang':
         'Tercengang adalah perasaan sangat terkejut hingga sulit berkata-kata atau bereaksi.',
     'Penasaran':
@@ -164,12 +164,12 @@ class _FeelingPageState extends State<FeelingPage> {
     super.initState();
     feelings = [];
     
-    // First, add the feelings of the selected mood
+    
     if (feelingMap.containsKey(widget.selectedMood)) {
       feelings.addAll(feelingMap[widget.selectedMood]!);
     }
     
-    // Then add all other feelings
+    
     feelingMap.forEach((key, list) {
       if (key != widget.selectedMood) {
         feelings.addAll(list);
@@ -270,7 +270,7 @@ class _FeelingPageState extends State<FeelingPage> {
           ? result['ai_level'] 
           : int.tryParse(result['ai_level']?.toString() ?? '0') ?? 0;
           
-      // Force trigger untuk akun testing Whisnu
+      
       final String? userNim = LaravelSessionService.user?['nim']?.toString();
       final String? username = LaravelSessionService.user?['username']?.toString();
       final bool isTestingUser = userNim == '11423045' || username == 'whisnu';
@@ -315,10 +315,10 @@ class _FeelingPageState extends State<FeelingPage> {
       Navigator.push(
         context,
         PageRouteBuilder(
-          opaque: false, // Show FeelingPage underneath for better context
+          opaque: false, 
           pageBuilder: (context, animation, secondaryAnimation) => const StoryPage(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            const begin = Offset(0.0, 1.0); // Slide up from bottom
+            const begin = Offset(0.0, 1.0); 
             const end = Offset.zero;
             const curve = Curves.easeOutQuart;
             var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
@@ -338,7 +338,7 @@ class _FeelingPageState extends State<FeelingPage> {
     }
   }
 
-  /// Calculate the shortest circular distance (always positive)
+  
   double _circularDistance(double a, double b, double length) {
     double diff = (a - b) % length;
     if (diff > length / 2) diff -= length;
@@ -346,7 +346,7 @@ class _FeelingPageState extends State<FeelingPage> {
     return diff.abs();
   }
 
-  /// Calculate the signed circular difference (for positioning left/right)
+  
   double _circularDiff(double a, double b, double length) {
     double diff = (a - b) % length;
     if (diff > length / 2) diff -= length;
@@ -369,7 +369,7 @@ class _FeelingPageState extends State<FeelingPage> {
           
           return GestureDetector(
             onTap: () {
-               // Find index of first feeling in this mood
+               
                int targetIndex = feelings.indexOf(feelingMap[mood]!.first);
                if (targetIndex != -1) {
                   double currentPage = _pageController.page ?? _initialPage.toDouble();
@@ -432,27 +432,26 @@ class _FeelingPageState extends State<FeelingPage> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     final displayName = LaravelSessionService.displayName;
 
-    // Use the selected index (maintained by PageView.onPageChanged) for header
+    
     int currentIndex = _selectedFeelingIndex % (feelings.isNotEmpty ? feelings.length : 1);
     String currentCategory = feelings.isNotEmpty ? _getFeelingCategory(feelings[currentIndex]) : 'Senang';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFB1D86D), // Solid pastel green matching the screenshot
+      backgroundColor: const Color(0xFFB1D86D), 
       body: SafeArea(
         child: Column(
           children: [
-            // Top section with header
+            
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Back button row
+                  
                   Row(
                     children: [
                       GestureDetector(
@@ -474,7 +473,7 @@ class _FeelingPageState extends State<FeelingPage> {
                   ),
                   const SizedBox(height: 4),
 
-                  // Header text
+                  
                   RichText(
                     text: TextSpan(
                       style: GoogleFonts.poppins(
@@ -492,7 +491,7 @@ class _FeelingPageState extends State<FeelingPage> {
                               ? displayName.split(' ').first
                               : 'Kamu',
                           style: GoogleFonts.poppins(
-                            color: const Color(0xFFF39C12), // Vibrant yellow/orange
+                            color: const Color(0xFFF39C12), 
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -502,7 +501,7 @@ class _FeelingPageState extends State<FeelingPage> {
                   ),
                   const SizedBox(height: 4),
 
-                  // Description
+                  
                   Text(
                     'Pilih perasaan di bawah yang paling\nmenggambarkan kamu saat ini, agar kami bisa\nmemberikan bantuan yang tepat.',
                     style: GoogleFonts.poppins(
@@ -516,24 +515,24 @@ class _FeelingPageState extends State<FeelingPage> {
               ),
             ),
 
-            // Horizontal Mood selection row
+            
             _buildMoodRow(currentCategory),
 
-            // Swipeable stacked card carousel
+            
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   return ListenableBuilder(
                     listenable: _pageController,
                     builder: (context, child) {
-                      // Recompute the current page here so transforms use the
-                      // live PageController.page value (same approach as MoodPage)
+                      
+                      
                       double rawPageLocal = _pageController.hasClients
                           ? (_pageController.page ?? _initialPage.toDouble())
                           : _initialPage.toDouble();
                       double currentPageValue = rawPageLocal % feelings.length;
 
-                      // Sort by distance so furthest cards render first (behind)
+                      
                       List<int> sortedIndices = List.generate(feelings.length, (i) => i);
                       sortedIndices.sort((a, b) {
                         double distA = _circularDistance(
@@ -547,7 +546,7 @@ class _FeelingPageState extends State<FeelingPage> {
                         return distB.compareTo(distA);
                       });
 
-                      // Match mood card sizing: 65% width, 85% height
+                      
                       final cardWidth = constraints.maxWidth * 0.65;
                       final cardHeight = constraints.maxHeight * 0.85;
 
@@ -567,8 +566,8 @@ class _FeelingPageState extends State<FeelingPage> {
                               return const SizedBox.shrink();
                             }
 
-                            // Use same interactive stacking math as MoodPage for
-                            // consistent left/right swipe behavior and scaling.
+                            
+                            
                             double scale;
                             double offsetX;
                             if (absDiff < 0.5) {
@@ -631,13 +630,13 @@ class _FeelingPageState extends State<FeelingPage> {
                                                       fontWeight: FontWeight.w900,
                                                       color: primaryColor,
                                                       shadows: [
-                                                        // Deep shadow (shifted slightly more to show behind outline)
+                                                        
                                                         Shadow(
                                                           color: Colors.black.withOpacity(0.25),
                                                           blurRadius: 8,
                                                           offset: const Offset(0, 5),
                                                         ),
-                                                        // Outline effect using multiple shadows (white)
+                                                        
                                                         const Shadow(offset: Offset(-2.0, -2.0), color: Colors.white),
                                                         const Shadow(offset: Offset(2.0, -2.0), color: Colors.white),
                                                         const Shadow(offset: Offset(2.0, 2.0), color: Colors.white),
@@ -671,7 +670,7 @@ class _FeelingPageState extends State<FeelingPage> {
                             );
                           }),
 
-                          // Invisible PageView for swipe gestures
+                          
                           Positioned.fill(
                             child: PageView.builder(
                               controller: _pageController,
@@ -695,13 +694,13 @@ class _FeelingPageState extends State<FeelingPage> {
               ),
             ),
 
-            // Bottom buttons: Kirim and Cerita
+            
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Kirim button (outlined)
+                  
                   SizedBox(
                     height: 40,
                     width: 120,
@@ -737,7 +736,7 @@ class _FeelingPageState extends State<FeelingPage> {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  // Cerita button (filled green)
+                  
                   SizedBox(
                     height: 40,
                     width: 120,

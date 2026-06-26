@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/laravel_session_service.dart';
 import 'feeling_page.dart';
@@ -13,15 +13,15 @@ class MoodPage extends StatefulWidget {
 class _MoodPageState extends State<MoodPage> {
   int _selectedMoodIndex = 0;
   late PageController _pageController;
-  // Large multiplier to allow "infinite" scrolling in both directions
+  
   static const int _infiniteMultiplier = 1000;
   late int _initialPage;
 
   @override
   void initState() {
     super.initState();
-    // Start at a large offset so user can scroll left from the first item
-    _initialPage = _infiniteMultiplier ~/ 2 * 7; // multiple of moods.length
+    
+    _initialPage = _infiniteMultiplier ~/ 2 * 7; 
     _pageController =
         PageController(initialPage: _initialPage, viewportFraction: 0.6);
   }
@@ -38,7 +38,7 @@ class _MoodPageState extends State<MoodPage> {
       'label': 'Senang',
       'description':
           'Rasa Senang adalah reaksi emosional terhadap pencapaian tujuan atau pengalaman yang menyenangkan, yang memotivasi individu untuk mengulangi perilaku yang menimbulkan kepuasan tersebut.',
-      'gradientStart': const Color(0xFFFFF2B2), // Pastel Yellow
+      'gradientStart': const Color(0xFFFFF2B2), 
       'gradientEnd': const Color(0xFFF3C766),
       'textColor': const Color(0xFF8C6415),
     },
@@ -47,7 +47,7 @@ class _MoodPageState extends State<MoodPage> {
       'label': 'Antusias',
       'description':
           'Rasa Antusias adalah perasaan gairah atau minat yang intens terhadap aktivitas tertentu, yang berfungsi memfokuskan perhatian dan meningkatkan keterlibatan dalam aktivitas tersebut.',
-      'gradientStart': const Color(0xFFF6C884), // Pastel Orange/Brown
+      'gradientStart': const Color(0xFFF6C884), 
       'gradientEnd': const Color(0xFFC8873B),
       'textColor': const Color(0xFF6B451A),
     },
@@ -56,7 +56,7 @@ class _MoodPageState extends State<MoodPage> {
       'label': 'Netral',
       'description':
           'Rasa Netral adalah pengalaman emosional yang tidak memicu respons fisiologis atau perilaku yang spesifik.',
-      'gradientStart': const Color(0xFFE2F6E2), // Pastel Green
+      'gradientStart': const Color(0xFFE2F6E2), 
       'gradientEnd': const Color(0xFF8DE191),
       'textColor': const Color(0xFF2C6D30),
     },
@@ -65,7 +65,7 @@ class _MoodPageState extends State<MoodPage> {
       'label': 'Terkejut',
       'description':
           'Rasa Terkejut adalah emosi yang bersifat singkat dan intens, yang dapat bertransformasi menjadi emosi lain (misal takut atau senang), tergantung konteks stimulus.',
-      'gradientStart': const Color(0xFFECD8FB), // Pastel Purple
+      'gradientStart': const Color(0xFFECD8FB), 
       'gradientEnd': const Color(0xFFB878EE),
       'textColor': const Color(0xFF5E2E88),
     },
@@ -74,7 +74,7 @@ class _MoodPageState extends State<MoodPage> {
       'label': 'Sedih',
       'description':
           'Rasa Sedih adalah emosi yang ditandai dengan perasaan duka, kesedihan, atau duka cita terhadap suatu kehilangan.',
-      'gradientStart': const Color(0xFFCED9FA), // Pastel Blue
+      'gradientStart': const Color(0xFFCED9FA), 
       'gradientEnd': const Color(0xFF86A3F3),
       'textColor': const Color(0xFF2B4791),
     },
@@ -83,7 +83,7 @@ class _MoodPageState extends State<MoodPage> {
       'label': 'Takut',
       'description':
           'Rasa Takut adalah emosi yang muncul sebagai respons terhadap ancaman atau bahaya yang dirasakan.',
-      'gradientStart': const Color(0xFFD0D8E1), // Pastel Grey
+      'gradientStart': const Color(0xFFD0D8E1), 
       'gradientEnd': const Color(0xFF9CA6B2),
       'textColor': const Color(0xFF3B4856),
     },
@@ -92,7 +92,7 @@ class _MoodPageState extends State<MoodPage> {
       'label': 'Marah',
       'description':
           'Rasa Marah adalah reaksi emosional negatif yang menunjukkan ketidakpuasan atau frustasi terhadap situasi tertentu.',
-      'gradientStart': const Color(0xFFF9CDCD), // Pastel Pink/Red
+      'gradientStart': const Color(0xFFF9CDCD), 
       'gradientEnd': const Color(0xFFDF7B7B),
       'textColor': const Color(0xFF7A2929),
     },
@@ -104,7 +104,7 @@ class _MoodPageState extends State<MoodPage> {
     final gender = LaravelSessionService.user?['jenis_kelamin']?.toString() ?? '';
     final isFemale = gender.toLowerCase().contains('perempuan');
 
-    // Background dan overlay warna menyesuaikan jenis kelamin
+    
     final bgAsset = isFemale
         ? 'assets/image/backgournd_dashboard_cewe/backgournd_dashboard_cewe.png'
         : 'assets/image/dashbord.png';
@@ -316,7 +316,7 @@ class _MoodPageState extends State<MoodPage> {
     );
   }
 
-  /// Calculate the shortest circular distance (always positive)
+  
   double _circularDistance(double a, double b, double length) {
     double diff = (a - b) % length;
     if (diff > length / 2) diff -= length;
@@ -324,7 +324,7 @@ class _MoodPageState extends State<MoodPage> {
     return diff.abs();
   }
 
-  /// Calculate the signed circular difference (for positioning left/right)
+  
   double _circularDiff(double a, double b, double length) {
     double diff = (a - b) % length;
     if (diff > length / 2) diff -= length;

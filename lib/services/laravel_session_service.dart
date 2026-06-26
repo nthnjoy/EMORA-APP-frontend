@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LaravelSessionService {
@@ -22,7 +22,7 @@ class LaravelSessionService {
         _tokenSource = data['token_source'] as String?;
         _user = data['user'] as Map<String, dynamic>?;
       } catch (_) {
-        // Invalid data, clear it
+        
         await _clearPrefs();
       }
     }

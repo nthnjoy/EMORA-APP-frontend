@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../screens/wellness/breathing_view.dart';
 import '../screens/wellness/vent_view.dart';
@@ -139,7 +139,7 @@ class ActivityService {
       case 'senang':
       case 'antusias':
         targets = [ActivityCategory.reflect, ActivityCategory.energy, ActivityCategory.growth, ActivityCategory.reflect, ActivityCategory.social];
-        // Note: I'll use reflect/energy for energy if social is not defined
+        
         break;
       case 'netral':
       case 'biasa':
@@ -167,7 +167,7 @@ class ActivityService {
       }
     }
     
-    // Fill to 5 if needed
+    
     if (results.length < 5) {
       final remaining = _pool.where((a) => !usedTitles.contains(a.title)).toList();
       remaining.shuffle();

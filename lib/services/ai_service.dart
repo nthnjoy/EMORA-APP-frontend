@@ -1,10 +1,10 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'api_config.dart';
 import 'laravel_session_service.dart';
 
 class AiService {
-  /// Mengirim pesan chat ke AI melalui Laravel backend.
+  
   static Future<Map<String, dynamic>> sendChat(String message, {String? emotion}) async {
     try {
       final token = LaravelSessionService.accessToken;
@@ -39,7 +39,7 @@ class AiService {
     }
   }
 
-  /// Mengecek status AI Engine.
+  
   static Future<bool> checkAiStatus() async {
     try {
       final token = LaravelSessionService.accessToken;
@@ -60,7 +60,7 @@ class AiService {
     }
   }
 
-  /// Mengambil rekomendasi quote dari AI.
+  
   static Future<Map<String, dynamic>> getRecommendation({String? mood, String? feeling}) async {
     try {
       final token = LaravelSessionService.accessToken;

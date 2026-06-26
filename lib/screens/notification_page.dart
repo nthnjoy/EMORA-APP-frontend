@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/notification_service.dart';
 import '../services/counselor_notification_service.dart';
@@ -222,15 +222,15 @@ class _NotificationPageState extends State<NotificationPage> {
     );
   }
 
-  // ─────────────────────────────────────────────
-  // WIDGET: Pesan dari Konselor
-  // ─────────────────────────────────────────────
+  
+  
+  
 
   Widget _buildCounselorSection(Color primaryColor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header
+        
         Row(
           children: [
             Container(
@@ -359,7 +359,7 @@ class _NotificationPageState extends State<NotificationPage> {
     required String createdAt,
     required Color primaryColor,
   }) {
-    // Format tanggal sederhana
+    
     String dateLabel = '';
     try {
       final dt = DateTime.parse(createdAt).toLocal();
@@ -390,7 +390,7 @@ class _NotificationPageState extends State<NotificationPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header pesan
+            
             Row(
               children: [
                 Container(
@@ -434,7 +434,7 @@ class _NotificationPageState extends State<NotificationPage> {
                     ],
                   ),
                 ),
-                // Badge "Baru"
+                
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
@@ -457,7 +457,7 @@ class _NotificationPageState extends State<NotificationPage> {
               ],
             ),
             const SizedBox(height: 12),
-            // Isi pesan
+            
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(12),
@@ -475,7 +475,7 @@ class _NotificationPageState extends State<NotificationPage> {
               ),
             ),
             const SizedBox(height: 12),
-            // Tombol tandai dibaca
+            
             SizedBox(
               width: double.infinity,
               child: TextButton.icon(
@@ -491,7 +491,7 @@ class _NotificationPageState extends State<NotificationPage> {
                   final ok = await CounselorNotificationService()
                       .markNotificationRead(id);
                   if (ok && mounted) {
-                    // Refresh daftar pesan
+                    
                     setState(() {
                       _loadCounselorMessages();
                     });
@@ -526,9 +526,9 @@ class _NotificationPageState extends State<NotificationPage> {
     );
   }
 
-  // ─────────────────────────────────────────────
-  // BUILD
-  // ─────────────────────────────────────────────
+  
+  
+  
 
   @override
   Widget build(BuildContext context) {
@@ -561,14 +561,14 @@ class _NotificationPageState extends State<NotificationPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Pesan dari Konselor ──
+              
               _buildCounselorSection(primaryColor),
               const SizedBox(height: 28),
 
               const Divider(height: 1),
               const SizedBox(height: 28),
 
-              // ── Pengingat Harian ──
+              
               Row(
                 children: [
                   Container(

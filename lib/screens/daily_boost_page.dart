@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -6,9 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/laravel_session_service.dart';
 import '../services/user_service.dart';
 
-// ──────────────────────────────────────────────────
-// Model
-// ──────────────────────────────────────────────────
 class DailyBoostItem {
   final String emoji;
   final String title;
@@ -31,9 +28,6 @@ class DailyBoostItem {
   });
 }
 
-// ──────────────────────────────────────────────────
-// 10 Misi Daily Boost (Pool)
-// ──────────────────────────────────────────────────
 const List<DailyBoostItem> _allDailyBoosts = [
   DailyBoostItem(
     emoji: '✍️', title: 'Deep Work 5 Menit', description: 'Matikan semua notifikasi, fokus hanya pada satu tugas kuliah tanpa distraksi.', duration: '5 menit', durationSeconds: 300, category: 'Fokus', color: Color(0xFF6366F1), flavorText: 'Satu langkah kecil untuk IPK impian.',
@@ -67,16 +61,10 @@ const List<DailyBoostItem> _allDailyBoosts = [
   ),
 ];
 
-// ──────────────────────────────────────────────────
-// Shared State (Simple)
-// ──────────────────────────────────────────────────
 class DailyBoostData {
   static final Set<int> doneChallenges = {};
 }
 
-// ──────────────────────────────────────────────────
-// Main Page
-// ──────────────────────────────────────────────────
 class DailyBoostPage extends StatefulWidget {
   const DailyBoostPage({super.key});
 
@@ -459,15 +447,15 @@ class _DailyBoostDetailSheetState extends State<_DailyBoostDetailSheet> {
     setState(() => _isRunning = false);
   }
 
-  /// Membunyikan alarm — hanya alarm.mp3 via AudioPlayer + vibrasi haptic.
-  /// Notifikasi native dihapus agar tidak muncul dua nada sekaligus.
+  
+  
   Future<void> _triggerAlarm() async {
-    // ── 1. Vibrasi haptic ──────────────────────────────────────────────
+    
     HapticFeedback.heavyImpact();
 
-    // ── 2. AudioPlayer dari asset lokal (satu-satunya sumber bunyi) ────
+    
     try {
-      await _audioPlayer.stop(); // pastikan tidak ada yang sedang bermain
+      await _audioPlayer.stop(); 
       await _audioPlayer.play(AssetSource('audio/alarm.mp3'));
     } catch (e) {
       debugPrint('AudioPlayer error: $e');

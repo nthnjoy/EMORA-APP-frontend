@@ -1,8 +1,6 @@
-import 'dart:math';
+﻿import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-// --- HUB FOR PHYSICAL TOOLS ---
 
 class RubStressView extends StatefulWidget {
   const RubStressView({super.key});

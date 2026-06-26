@@ -1,4 +1,4 @@
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+﻿import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -43,7 +43,7 @@ class NotificationService {
         },
       );
 
-      // Ensure Android channel exists for scheduled reminders
+      
       final androidPlugin = _notificationsPlugin
           .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin
@@ -69,14 +69,14 @@ class NotificationService {
     if (kIsWeb) return;
 
     try {
-      // For iOS
+      
       await _notificationsPlugin
           .resolvePlatformSpecificImplementation<
             IOSFlutterLocalNotificationsPlugin
           >()
           ?.requestPermissions(alert: true, badge: true, sound: true);
 
-      // For Android 13+
+      
       final androidPlugin = _notificationsPlugin
           .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin
@@ -106,7 +106,7 @@ class NotificationService {
         time.minute,
       );
 
-      // Jika waktu sudah terlewat hari ini, schedule untuk besok
+      
       if (scheduledDate.isBefore(now)) {
         scheduledDate = scheduledDate.add(const Duration(days: 1));
       }
@@ -116,7 +116,7 @@ class NotificationService {
       );
       debugPrint('⏰ Current time: ${now.toString()}');
 
-      // Android notification details dengan importance maksimal
+      
       const AndroidNotificationDetails androidDetails =
           AndroidNotificationDetails(
             'daily_reminder_channel',
@@ -131,7 +131,7 @@ class NotificationService {
             autoCancel: true,
           );
 
-      // iOS notification details
+      
       const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
         presentAlert: true,
         presentBadge: true,
@@ -144,8 +144,8 @@ class NotificationService {
         iOS: iosDetails,
       );
 
-      // Schedule dengan inexactAllowWhileIdle dan matchDateTimeComponents untuk daily recurring
-      // matchDateTimeComponents.time = repeat every hari di jam yang sama
+      
+      
       await _notificationsPlugin.zonedSchedule(
         0,
         'EMOLENS - Waktunya Check-in!',

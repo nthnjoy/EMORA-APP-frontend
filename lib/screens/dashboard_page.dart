@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../services/mood_service.dart';
 import '../services/story_service.dart';
 import '../services/laravel_session_service.dart';
@@ -66,7 +66,7 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Future<void> _reloadDashboard() async {
-    // Silent reload to prevent "laggy" spinner appearance when returning
+    
     final newData = await _loadDashboardData();
     if (mounted) {
       setState(() {
@@ -134,9 +134,9 @@ class _DashboardPageState extends State<DashboardPage> {
     }).toList();
   }
 
-  // ─── Helper: ambil label kondisi untuk kalimat deskripsi ───────────────────
-  /// Mengubah string kondisi (mis. "Sangat Senang 😊") → kata natural
-  /// yang cocok dipakai dalam kalimat "Mood kamu ___ dalam 14 hari terakhir."
+  
+  
+  
   String _kondisiLabel(String kondisi) {
     switch (kondisi.toLowerCase()) {
       case 'sangat baik':   return 'sangat baik';
@@ -147,21 +147,21 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
-  // ─── Konversi emosi_kode ke skor 1–7 (selaras dengan mood_calender_page) ───
+  
   int _moodCodeToScore(int code) {
     switch (code) {
-      case 1: return 7; // senang    → tertinggi
-      case 2: return 2; // marah
-      case 3: return 4; // sedih
-      case 4: return 3; // takut
-      case 5: return 6; // netral/biasa
-      case 6: return 5; // terkejut
-      case 7: return 1; // jijik     → terendah
+      case 1: return 7; 
+      case 2: return 2; 
+      case 3: return 4; 
+      case 4: return 3; 
+      case 5: return 6; 
+      case 6: return 5; 
+      case 7: return 1; 
       default: return 6;
     }
   }
 
-  // ─── Konversi mood_label → emosi_kode (fallback jika kode tidak tersedia) ──
+  
   int _moodLabelToCode(String label) {
     switch (label.toLowerCase().trim()) {
       case 'senang':    return 1;
@@ -172,7 +172,7 @@ class _DashboardPageState extends State<DashboardPage> {
       case 'biasa':     return 5;
       case 'terkejut':
       case 'kaget':     return 6;
-      case 'antusias':  return 1; // antusias setara senang
+      case 'antusias':  return 1; 
       default:          return 5;
     }
   }
@@ -186,7 +186,7 @@ class _DashboardPageState extends State<DashboardPage> {
       (index) => today.subtract(Duration(days: 13 - index)),
     );
 
-    // Kumpulkan rata-rata per hari terlebih dahulu (sama dengan calendar logic)
+    
     final Map<DateTime, List<int>> dailyScores = {};
 
     for (final item in moods) {
@@ -195,7 +195,7 @@ class _DashboardPageState extends State<DashboardPage> {
       final date = _cleanDate(dateTime);
       if (!last14.contains(date)) continue;
 
-      // Prioritaskan emosi_kode, fallback ke mood_label
+      
       final rawCode = item['emosi_kode'];
       int code;
       if (rawCode != null) {
@@ -215,7 +215,7 @@ class _DashboardPageState extends State<DashboardPage> {
       dailyScores.putIfAbsent(date, () => []).add(score);
     }
 
-    // Hitung rata-rata keseluruhan dari rata-rata harian
+    
     double totalAvg = 0;
     int daysWithData = dailyScores.length;
 
@@ -226,9 +226,9 @@ class _DashboardPageState extends State<DashboardPage> {
     final double overallAvg =
         daysWithData > 0 ? totalAvg / daysWithData : 0;
 
-    // ─── Pemetaan skor → 4 kategori selaras dengan History ──────────────
-    // Sama persis dengan getCategory() & getColorFromAverage() di mood_calender_page
-    // avg >= 6.5 → Sangat Baik, >= 5.0 → Stabil, >= 3.5 → Waspada, < 3.5 → Bahaya
+    
+    
+    
     String kondisi;
     String imagePath;
     Color kondisiColor;
@@ -238,25 +238,25 @@ class _DashboardPageState extends State<DashboardPage> {
       imagePath    = 'assets/image/biasa.png';
       kondisiColor = const Color(0xFF9E9E9E);
     } else if (overallAvg >= 6.5) {
-      // Sangat Baik → Senang
+      
       kondisi      = 'Sangat Baik';
       imagePath    = 'assets/image/senang.png';
-      kondisiColor = const Color(0xFF10B981); // Emerald — sama dengan History
+      kondisiColor = const Color(0xFF10B981); 
     } else if (overallAvg >= 5.0) {
-      // Stabil → Netral/Biasa
+      
       kondisi      = 'Stabil';
       imagePath    = 'assets/image/biasa.png';
-      kondisiColor = const Color(0xFF3B82F6); // Biru — sama dengan History
+      kondisiColor = const Color(0xFF3B82F6); 
     } else if (overallAvg >= 3.5) {
-      // Waspada → Terkejut / was-was
+      
       kondisi      = 'Waspada';
       imagePath    = 'assets/image/terkejut.png';
-      kondisiColor = const Color(0xFFF59E0B); // Amber — sama dengan History
+      kondisiColor = const Color(0xFFF59E0B); 
     } else {
-      // Bahaya → Sedih / Takut
+      
       kondisi      = 'Bahaya';
       imagePath    = 'assets/image/sedih.png';
-      kondisiColor = const Color(0xFFEF4444); // Merah — sama dengan History
+      kondisiColor = const Color(0xFFEF4444); 
     }
 
     final startDay = last14.first;
@@ -359,7 +359,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  /// Kartu Notification dengan badge angka dari NotificationBadgeService
+  
   Widget _buildNotificationCard(Color themeColor) {
     return ValueListenableBuilder<int>(
       valueListenable: NotificationBadgeService().totalBadge,
@@ -367,7 +367,7 @@ class _DashboardPageState extends State<DashboardPage> {
         return Stack(
           clipBehavior: Clip.none,
           children: [
-            // ── Kartu utama ──────────────────────────────────────────────
+            
             InkWell(
               onTap: () {
                 Navigator.push(
@@ -376,7 +376,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     builder: (_) => const NotificationPage(),
                   ),
                 ).then((_) {
-                  // Reset badge alarm setelah halaman ditutup
+                  
                   NotificationBadgeService().markNotificationPageOpened();
                   NotificationBadgeService().refresh();
                 });
@@ -438,7 +438,7 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
             ),
 
-            // ── Badge angka (merah) ──────────────────────────────────────
+            
             if (badgeCount > 0)
               Positioned(
                 top: -6,
@@ -511,7 +511,7 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
         child: Stack(
           children: [
-            // Character Image
+            
             Positioned(
               right: 0,
               bottom: 0,
@@ -526,7 +526,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
               ),
             ),
-            // Title
+            
             Positioned(
               bottom: 12,
               left: 12,
@@ -582,14 +582,14 @@ class _DashboardPageState extends State<DashboardPage> {
           borderRadius: BorderRadius.circular(24),
           child: Stack(
             children: [
-              // Character / Mascot Image aligned to right
+              
               Positioned(
                 right: -10,
                 bottom: -10,
                 top: -10,
                 child: Image.asset(imagePath, fit: BoxFit.contain),
               ),
-              // Left Content
+              
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -710,7 +710,7 @@ class _DashboardPageState extends State<DashboardPage> {
               physics: const AlwaysScrollableScrollPhysics(),
               child: Stack(
                 children: [
-                  // 1. Header Section
+                  
                   Container(
                     height: 480,
                     width: double.infinity,
@@ -735,12 +735,12 @@ class _DashboardPageState extends State<DashboardPage> {
                     ),
                   ),
 
-                  // 2. Content Section
+                  
                   SafeArea(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Title
+                        
                         Padding(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 25,
@@ -828,7 +828,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
                         const SizedBox(height: 10),
 
-                        // Mood Rekap Card
+                        
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 25),
                           child: Container(
@@ -847,19 +847,19 @@ class _DashboardPageState extends State<DashboardPage> {
                             ),
                             child: LayoutBuilder(
                               builder: (context, constraints) {
-                                // Ukuran emoji responsif: 20% lebar card, min 70, max 100
+                                
                                 final emojiSize = (constraints.maxWidth * 0.20)
                                     .clamp(70.0, 100.0);
                                 return Row(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    // ── Kolom kiri: semua teks ─────────────
+                                    
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          // Baris 1: Judul + badge "14 Hari Terakhir"
+                                          
                                           Row(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.center,
@@ -877,8 +877,8 @@ class _DashboardPageState extends State<DashboardPage> {
                                                 ),
                                               ),
                                               const SizedBox(width: 8),
-                                              // Badge dengan ukuran text lebih kecil
-                                              // agar tidak overflow di layar sempit
+                                              
+                                              
                                               Container(
                                                 padding:
                                                     const EdgeInsets.symmetric(
@@ -907,7 +907,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                           ),
                                           const SizedBox(height: 3),
 
-                                          // Baris 2: Rentang tanggal
+                                          
                                           Text(
                                             rekapData['dateRange'],
                                             style: const TextStyle(
@@ -917,7 +917,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                           ),
                                           const SizedBox(height: 14),
 
-                                          // Baris 3: Kalimat deskripsi (justified)
+                                          
                                           Text(
                                             rekapData['daysWithData'] == 0
                                                 ? 'Belum ada data Emosional kamu dalam 14 hari terakhir. Mulai ceritakan perasaanmu setiap hari!'
@@ -935,7 +935,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
                                     const SizedBox(width: 10),
 
-                                    // ── Kolom kanan: Emoji responsif ────────
+                                    
                                     Image.asset(
                                       rekapData['imagePath'],
                                       height: emojiSize,
@@ -956,7 +956,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
                         const SizedBox(height: 20),
 
-                        // Main Feature Section (White container with huge radius)
+                        
                         Container(
                           width: double.infinity,
                           decoration: BoxDecoration(
@@ -968,7 +968,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           child: Column(
                             children: [
                               const SizedBox(height: 8),
-                              // Feature Tiles
+                              
                               Padding(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 20,
@@ -1058,7 +1058,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
                               const SizedBox(height: 15),
 
-                              // Layanan Section
+                              
                               Padding(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 18,
@@ -1083,7 +1083,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                     ),
                                     const SizedBox(height: 16),
 
-                                    // Hero Card - Streak
+                                    
                                     _buildLayananHeroCard(
                                       label: 'STREAK',
                                       title: 'Streak',
@@ -1108,7 +1108,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                     ),
                                     const SizedBox(height: 16),
 
-                                    // 2x2 Grid for other features
+                                    
                                     GridView.count(
                                       shrinkWrap: true,
                                       physics:

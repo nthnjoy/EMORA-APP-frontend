@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'screens/login_page.dart';
 import 'screens/main_navigation_page.dart';
@@ -17,17 +17,16 @@ void main() async {
   await LaravelSessionService.initialize();
   await NotificationService().init();
   
-  // ✅ RESTORE notification schedule saat app startup
+  
   await _restoreNotificationSchedule();
 
-  // ✅ Mulai layanan badge notifikasi
+  
   NotificationBadgeService().init();
   
   ThemeManager().init();
   runApp(const MyApp());
 }
 
-/// ✅ Restore notification schedule dari SharedPreferences
 Future<void> _restoreNotificationSchedule() async {
   try {
     final prefs = await SharedPreferences.getInstance();

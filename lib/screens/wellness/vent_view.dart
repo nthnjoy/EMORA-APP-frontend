@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class VentView extends StatefulWidget {
@@ -81,7 +81,7 @@ class _VentViewState extends State<VentView> with TickerProviderStateMixin {
     final primaryColor = Theme.of(context).primaryColor;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A), // Dark mode for focus
+      backgroundColor: const Color(0xFF0F172A), 
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,

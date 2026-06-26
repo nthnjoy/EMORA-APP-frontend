@@ -1,4 +1,4 @@
-import 'dart:math';
+﻿import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -36,7 +36,7 @@ class _BubblePopViewState extends State<BubblePopView> {
     setState(() {
       bubbles.removeAt(index);
       score++;
-      // Add a replacement bubble after a delay
+      
       Future.delayed(const Duration(milliseconds: 500), () {
         if (mounted) {
           setState(() {

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/music_player_manager.dart';
 import '../screens/music_page.dart';
@@ -44,7 +44,7 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget> {
         ? currentPosition.inMilliseconds / totalDuration.inMilliseconds 
         : 0.0;
 
-    // Map mood name to color
+    
     Color themeColor = const Color(0xFF2E7D32);
     for (final mood in musicMoods) {
       if (mood.tracks.any((t) => t.audioUrl == currentTrack.audioUrl)) {

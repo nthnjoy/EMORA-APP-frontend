@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/story_service.dart';
 import '../services/laravel_session_service.dart';
@@ -42,7 +42,7 @@ class _StoryPageState extends State<StoryPage> {
           ? result['ai_level'] 
           : int.tryParse(result['ai_level']?.toString() ?? '0') ?? 0;
           
-      // Force trigger untuk akun testing Whisnu
+      
       final String? userNim = LaravelSessionService.user?['nim']?.toString();
       final String? username = LaravelSessionService.user?['username']?.toString();
       final bool isTestingUser = userNim == '11423045' || username == 'whisnu';
@@ -81,7 +81,7 @@ class _StoryPageState extends State<StoryPage> {
     final displayName = LaravelSessionService.user?['name'] ?? 'Pengguna';
     final primaryColor = Theme.of(context).primaryColor;
 
-    // Warna background sheet mengikuti tema — dibuat lebih terang dari primaryColor
+    
     final sheetBg = Color.lerp(primaryColor.withOpacity(0.08), Colors.white, 0.82) ?? const Color(0xFFEDF3ED);
     final sendBtnColor = primaryColor;
 
@@ -96,12 +96,12 @@ class _StoryPageState extends State<StoryPage> {
         resizeToAvoidBottomInset: false,
         body: Stack(
           children: [
-            // Background gelap yang bisa di-tap untuk tutup
+            
             GestureDetector(
               onTap: () => Navigator.of(context).pop(),
               child: Container(color: Colors.black54),
             ),
-            // Konten form
+            
             Align(
               alignment: Alignment.bottomCenter,
               child: Padding(
@@ -187,7 +187,7 @@ class _StoryPageState extends State<StoryPage> {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        // Tombol Kirim
+                        
                         Align(
                           alignment: Alignment.centerRight,
                           child: SizedBox(

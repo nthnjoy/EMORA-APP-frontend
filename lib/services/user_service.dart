@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'api_config.dart';
@@ -100,12 +100,12 @@ class UserService {
       ).timeout(const Duration(seconds: 10));
 
       final result = jsonDecode(response.body);
-      // Debug logging for troubleshooting
+      
       try {
         debugPrint('[UserService.setActiveTheme] status=${response.statusCode} body=${response.body}');
       } catch (_) {}
       if (response.statusCode == 200 && result['success'] == true) {
-        // Fetch latest user data to ensure consistency
+        
         final userResult = await fetchCurrentUser();
         if (userResult['success']) {
           return {'success': true, 'data': userResult['data']};
@@ -120,7 +120,7 @@ class UserService {
   }
 
   static Future<Map<String, dynamic>> updateGender(String gender) async {
-    // Try multiple payload formats to be compatible with varying backend expectations
+    
     final attempts = <Map<String, dynamic>>[
       {'contentType': 'application/json', 'body': jsonEncode({'jenis_kelamin': gender})},
       {'contentType': 'application/json', 'body': jsonEncode({'jenis_kelamin': _capitalize(gender)})},
@@ -159,10 +159,10 @@ class UserService {
           }
           return {'success': true, 'message': 'Berhasil memperbarui jenis kelamin'};
         }
-        // if not successful, try next attempt
+        
       } catch (e) {
         debugPrint('[UserService.updateGender] attempt exception: ${e.toString()}');
-        // continue to next attempt
+        
       }
     }
 

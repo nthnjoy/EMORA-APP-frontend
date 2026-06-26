@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../utils/quote_data.dart';
 import '../services/ai_service.dart';
 
@@ -144,7 +144,7 @@ class _QuotesPageState extends State<QuotesPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header Card
+              
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),

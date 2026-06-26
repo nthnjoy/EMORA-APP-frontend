@@ -1,4 +1,4 @@
-import 'dart:ui';
+﻿import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/activity_service.dart';
@@ -13,7 +13,7 @@ class NewActivityFeaturePage extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // Background Gradient
+          
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -28,7 +28,7 @@ class NewActivityFeaturePage extends StatelessWidget {
             ),
           ),
           
-          // Floating Blobs (Aesthetic)
+          
           Positioned(
             top: -50,
             right: -50,

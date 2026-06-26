@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/user_service.dart';
 import '../services/theme_manager.dart';
+import '../screens/main_navigation_page.dart';
 
 class GenderDialog {
-  /// Shows the gender selection dialog.
-  /// Returns `true` when the gender was successfully saved, otherwise `false` or null.
-  static Future<bool?> show(BuildContext context, {bool isProfileEdit = false}) async {
+  static Future<void> show(BuildContext context, {bool isProfileEdit = false}) async {
     String? selectedGender;
     bool isLoading = false;
-
     final titleText = isProfileEdit
         ? 'Mengubah Data Jenis Kelamin Anda?'
         : 'Halo, Selamat Datang!';
@@ -17,7 +15,7 @@ class GenderDialog {
         ? 'Lakukan perubahan sesuai dengan data Jenis Kelamin anda!'
         : 'Untuk menyesuaikan kenyamanan Anda, bolehkah kami tahu jenis kelamin Anda?';
 
-    return showDialog<bool>(
+    return showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
@@ -31,7 +29,14 @@ class GenderDialog {
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: [
+                  String? selectedGender;
+                  bool isLoading = false;
+                  final titleText = isProfileEdit
+                      ? 'Mengubah Data Jenis Kelamin Anda?'
+                      : 'Halo, Selamat Datang!';
+                  final subtitleText = isProfileEdit
+                      ? 'Lakukan perubahan sesuai dengan data Jenis Kelamin anda!'
+                      : 'Untuk menyesuaikan kenyamanan Anda, bolehkah kami tahu jenis kelamin Anda?';
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -59,8 +64,6 @@ class GenderDialog {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),
-
-                    // Gender options
                     Row(
                       children: [
                         Expanded(
@@ -69,12 +72,14 @@ class GenderDialog {
                             child: Container(
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               decoration: BoxDecoration(
-                                color: selectedGender == "Laki-laki"
-                                    ? Colors.blue.shade100
-                                    : Colors.grey.shade50,
+                                color: selectedGender == "Laki-laki" 
+                                  ? Colors.blue.shade100 
+                                  : Colors.grey.shade50,
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: selectedGender == "Laki-laki" ? Colors.blue : Colors.transparent,
+                                  color: selectedGender == "Laki-laki" 
+                                    ? Colors.blue 
+                                    : Colors.transparent,
                                 ),
                               ),
                               child: Column(
@@ -85,7 +90,9 @@ class GenderDialog {
                                     "Laki-laki",
                                     style: GoogleFonts.poppins(
                                       fontWeight: FontWeight.w500,
-                                      color: selectedGender == "Laki-laki" ? Colors.blue.shade700 : Colors.grey.shade700,
+                                      color: selectedGender == "Laki-laki" 
+                                        ? Colors.blue.shade700 
+                                        : Colors.grey.shade700,
                                     ),
                                   ),
                                 ],
@@ -100,10 +107,14 @@ class GenderDialog {
                             child: Container(
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               decoration: BoxDecoration(
-                                color: selectedGender == "Perempuan" ? Colors.pink.shade100 : Colors.grey.shade50,
+                                color: selectedGender == "Perempuan" 
+                                  ? Colors.pink.shade100 
+                                  : Colors.grey.shade50,
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: selectedGender == "Perempuan" ? Colors.pink : Colors.transparent,
+                                  color: selectedGender == "Perempuan" 
+                                    ? Colors.pink 
+                                    : Colors.transparent,
                                 ),
                               ),
                               child: Column(
@@ -114,7 +125,9 @@ class GenderDialog {
                                     "Perempuan",
                                     style: GoogleFonts.poppins(
                                       fontWeight: FontWeight.w500,
-                                      color: selectedGender == "Perempuan" ? Colors.pink.shade700 : Colors.grey.shade700,
+                                      color: selectedGender == "Perempuan" 
+                                        ? Colors.pink.shade700 
+                                        : Colors.grey.shade700,
                                     ),
                                   ),
                                 ],
@@ -124,33 +137,48 @@ class GenderDialog {
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 32),
-
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: (selectedGender == null || isLoading)
-                            ? null
-                            : () async {
-                                setState(() => isLoading = true);
-
-                                try {
-                                  // Normalize payload to a simple value backend might expect
-                                  final payloadGender = selectedGender == 'Perempuan' ? 'perempuan' : 'laki-laki';
-
-                                  final result = await UserService.updateGender(payloadGender);
-
+                          ? null 
+                          : () async {
+                              // Set loading state
+                              setState(() => isLoading = true);
+                              
+                              try {
+                                final result = await UserService.updateGender(selectedGender!);
+                                
+                                // Check if dialog still mounted before proceeding
+                                if (!context.mounted) return;
+                                
+                                if (result['success']) {
+                                  // Refresh user data dari server agar LaravelSessionService ter-update
+                                  final userRefresh = await UserService.fetchCurrentUser();
+                                  
+                                  // Check mounted again after async operation
                                   if (!context.mounted) return;
-
-                                  if (result['success'] == true) {
-                                    final userRefresh = await UserService.fetchCurrentUser();
-                                    if (!context.mounted) return;
-
-                                    if (userRefresh['success'] == true) {
-                                      ThemeManager().updateGenderAndTheme();
-                                      Navigator.of(context).pop(true);
-                                    } else {
+                                  
+                                  if (userRefresh['success']) {
+                                    // Sekarang theme manager bisa membaca gender yang sudah ter-update
+                                    ThemeManager().updateGenderAndTheme();
+                                    
+                                    // Close dialog
+                                    Navigator.of(context).pop();
+                                    
+                                    // Refresh seluruh aplikasi dengan full reload
+                                    if (context.mounted) {
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => const MainNavigationPage(),
+                                        ),
+                                      );
+                                    }
+                                  } else {
+                                    // User refresh failed
+                                    if (context.mounted) {
                                       setState(() => isLoading = false);
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
@@ -159,7 +187,10 @@ class GenderDialog {
                                         ),
                                       );
                                     }
-                                  } else {
+                                  }
+                                } else {
+                                  // Gender update failed
+                                  if (context.mounted) {
                                     setState(() => isLoading = false);
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
@@ -168,17 +199,20 @@ class GenderDialog {
                                       ),
                                     );
                                   }
-                                } catch (e) {
-                                  if (!context.mounted) return;
+                                }
+                              } catch (e) {
+                                // Unexpected error
+                                if (context.mounted) {
                                   setState(() => isLoading = false);
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Terjadi kesalahan yang tidak terduga'),
+                                    SnackBar(
+                                      content: const Text('Terjadi kesalahan yang tidak terduga'),
                                       backgroundColor: Colors.red,
                                     ),
                                   );
                                 }
-                              },
+                              }
+                            },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF2E7D32),
                           padding: const EdgeInsets.symmetric(vertical: 16),
@@ -188,23 +222,23 @@ class GenderDialog {
                           disabledBackgroundColor: Colors.grey.shade300,
                         ),
                         child: isLoading
-                            ? SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white.withOpacity(0.8),
-                                  ),
-                                ),
-                              )
-                            : Text(
-                                'Simpan',
-                                style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                          ? SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white.withOpacity(0.8),
                                 ),
                               ),
+                            )
+                          : Text(
+                              "Simpan",
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
                       ),
                     ),
                   ],

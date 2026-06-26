@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 class AppAvatar extends StatelessWidget {
   final String? gender;
@@ -23,7 +23,7 @@ class AppAvatar extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Outer badge circle
+          
           Container(
             width: outer,
             height: outer,

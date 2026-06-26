@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../services/laravel_session_service.dart';
 import '../utils/theme_colors.dart';
 
@@ -36,14 +36,14 @@ class ThemeManager with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Mengatur tema berdasarkan jenis kelamin user
+  
   void _setGenderBasedTheme() {
     final gender = LaravelSessionService.gender?.toString().toLowerCase().trim() ?? '';
 
     if (gender.contains('perempuan')) {
-      _genderBasedTheme = 'pink'; // Soft Pink untuk perempuan
+      _genderBasedTheme = 'pink'; 
     } else {
-      _genderBasedTheme = 'default'; // Green default untuk laki-laki atau belum pilih
+      _genderBasedTheme = 'default'; 
     }
   }
 
@@ -52,13 +52,13 @@ class ThemeManager with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Dipanggil ketika user mengubah gender
+  
   void updateGenderAndTheme() {
     _setGenderBasedTheme();
-    init(); // Re-initialize dengan gender baru
+    init(); 
   }
 
-  /// Mengembalikan true jika tema soft pink gratis untuk user (perempuan)
+  
   bool isThemeFreeForUser(String themeId) {
     if (themeId != 'pink') return false;
     final gender = LaravelSessionService.gender?.toString().toLowerCase().trim() ?? '';

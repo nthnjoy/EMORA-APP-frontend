@@ -1,9 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DATA MODEL
-// ─────────────────────────────────────────────────────────────────────────────
 class _GuideSection {
   final String heading;
   final List<_GuideItem> items;
@@ -116,9 +113,6 @@ const List<_GuideSection> _guideSections = [
   ),
 ];
 
-// ─────────────────────────────────────────────────────────────────────────────
-// GUIDE PAGE
-// ─────────────────────────────────────────────────────────────────────────────
 class GuidePage extends StatelessWidget {
   const GuidePage({super.key});
 
@@ -134,7 +128,7 @@ class GuidePage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: bgColor,
-      // ── App Bar ──────────────────────────────────────────────────────────
+      
       appBar: AppBar(
         backgroundColor: primary,
         elevation: 0,
@@ -155,7 +149,7 @@ class GuidePage extends StatelessWidget {
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          // ── Hero Banner ─────────────────────────────────────────────────
+          
           SliverToBoxAdapter(
             child: Container(
               width: double.infinity,
@@ -168,7 +162,7 @@ class GuidePage extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
               child: Column(
                 children: [
-                  // Ikon buku
+              
                   Container(
                     width: 80,
                     height: 80,
@@ -202,7 +196,7 @@ class GuidePage extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
-                  // Chip jumlah fitur
+                
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
@@ -231,7 +225,6 @@ class GuidePage extends StatelessWidget {
             ),
           ),
 
-          // ── Daftar Seksi ────────────────────────────────────────────────
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(20, 28, 20, 40),
             sliver: SliverList(
@@ -257,9 +250,6 @@ class GuidePage extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// WIDGET SEKSI
-// ─────────────────────────────────────────────────────────────────────────────
 class _SectionCard extends StatelessWidget {
   final _GuideSection section;
   final Color primary;
@@ -282,7 +272,7 @@ class _SectionCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ── Heading seksi ────────────────────────────────────────────────
+   
         Row(
           children: [
             Container(
@@ -306,7 +296,7 @@ class _SectionCard extends StatelessWidget {
         ),
         const SizedBox(height: 12),
 
-        // ── Kartu berisi semua item ──────────────────────────────────────
+       
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
@@ -341,9 +331,6 @@ class _SectionCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// WIDGET ITEM TUNGGAL
-// ─────────────────────────────────────────────────────────────────────────────
 class _GuideItemTile extends StatefulWidget {
   final _GuideItem item;
   final Color primary;
@@ -383,7 +370,7 @@ class _GuideItemTileState extends State<_GuideItemTile> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Ikon fitur
+                
                 Container(
                   width: 40,
                   height: 40,
@@ -399,7 +386,7 @@ class _GuideItemTileState extends State<_GuideItemTile> {
                 ),
                 const SizedBox(width: 14),
 
-                // Judul + deskripsi
+                
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -435,7 +422,7 @@ class _GuideItemTileState extends State<_GuideItemTile> {
                 ),
                 const SizedBox(width: 8),
 
-                // Chevron animasi
+                
                 AnimatedRotation(
                   duration: const Duration(milliseconds: 250),
                   turns: _expanded ? 0.5 : 0,
@@ -449,7 +436,7 @@ class _GuideItemTileState extends State<_GuideItemTile> {
             ),
           ),
         ),
-        // Divider (kecuali item terakhir)
+        
         if (!widget.isLast)
           Divider(
             height: 1,

@@ -1,16 +1,14 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'api_config.dart';
 import 'laravel_session_service.dart';
 
-/// Service untuk membersihkan data dari database
-/// Digunakan untuk testing/maintenance purposes
 class DatabaseCleanupService {
   const DatabaseCleanupService._();
 
-  /// Membersihkan semua mood data yang dibuat pada tanggal tertentu
-  /// Untuk semua user yang punya data di tanggal tersebut
+  
+  
   static Future<Map<String, dynamic>> clearMoodsForDate(DateTime date) async {
     if (!LaravelSessionService.isAuthenticated) {
       return {
@@ -20,8 +18,8 @@ class DatabaseCleanupService {
     }
 
     try {
-      // Untuk bersihkan semua user, perlu endpoint khusus di backend
-      // Sebagai alternatif, kita bisa bersihkan user saat ini
+      
+      
       final dateStr = date.toIso8601String().split('T')[0];
       
       final response = await http
@@ -46,7 +44,7 @@ class DatabaseCleanupService {
     }
   }
 
-  /// Membersihkan semua perasaan (feeling) data untuk tanggal tertentu
+  
   static Future<Map<String, dynamic>> clearFeelingsForDate(DateTime date) async {
     if (!LaravelSessionService.isAuthenticated) {
       return {
@@ -80,7 +78,7 @@ class DatabaseCleanupService {
     }
   }
 
-  /// Membersihkan mood dan feeling untuk hari ini untuk user saat ini
+  
   static Future<Map<String, dynamic>> clearCurrentUserTodayData() async {
     if (!LaravelSessionService.isAuthenticated) {
       return {

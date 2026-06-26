@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:emolens_app/screens/main_navigation_page.dart';
 import 'package:emolens_app/services/laravel_auth_service.dart';
 import 'package:emolens_app/services/laravel_session_service.dart';
@@ -23,7 +23,7 @@ class _LoginPageState extends State<LoginPage> {
     final username = usernameController.text.trim();
     final password = passwordController.text.trim();
 
-    // VALIDASI INPUT
+    
     if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -141,7 +141,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image
+          
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -150,7 +150,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-          // Overlay for readability
+          
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -163,14 +163,14 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-          // Main Content
+          
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Logo/Title
+                  
                   Text(
                     'Emolens',
                     style: GoogleFonts.poppins(
@@ -192,7 +192,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 60),
 
-                  // Login Card
+                  
                   Container(
                     padding: const EdgeInsets.all(32),
                     decoration: BoxDecoration(
@@ -226,7 +226,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         const SizedBox(height: 30),
 
-                        // Username Field
+                        
                         TextField(
                           controller: usernameController,
                           style: GoogleFonts.poppins(fontSize: 14),
@@ -235,7 +235,7 @@ class _LoginPageState extends State<LoginPage> {
                             hintStyle: GoogleFonts.poppins(fontSize: 14, color: Colors.grey.shade500),
                             prefixIcon: const Icon(Icons.person_outline, color: const Color(0xFF4A6841)),
                             filled: true,
-                            fillColor: const Color(0xFFF1F4EE), // Matching the light green theme
+                            fillColor: const Color(0xFFF1F4EE), 
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
                               borderSide: BorderSide.none,
@@ -245,7 +245,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         const SizedBox(height: 16),
 
-                        // Password Field
+                        
                         TextField(
                           controller: passwordController,
                           obscureText: true,
@@ -265,14 +265,14 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         const SizedBox(height: 32),
 
-                        // Login Button
+                        
                         SizedBox(
                           width: double.infinity,
                           height: 52,
                           child: ElevatedButton(
                             onPressed: isLoading ? null : login,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF4A6841), // Deep sage green
+                              backgroundColor: const Color(0xFF4A6841), 
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),

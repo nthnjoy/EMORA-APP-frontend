@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AiPage extends StatelessWidget {
@@ -9,7 +9,7 @@ class AiPage extends StatelessWidget {
     final themeColor = Theme.of(context).primaryColor;
     
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F4EE), // Matching the background style
+      backgroundColor: const Color(0xFFF1F4EE), 
       appBar: AppBar(
         title: Text(
           'Konseling AI',
@@ -32,7 +32,7 @@ class AiPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Illustration or Icon
+              
               Container(
                 width: 150,
                 height: 150,
@@ -56,7 +56,7 @@ class AiPage extends StatelessWidget {
               ),
               const SizedBox(height: 40),
               
-              // Title
+              
               Text(
                 'Segera Hadir!',
                 style: GoogleFonts.poppins(
@@ -68,7 +68,7 @@ class AiPage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               
-              // Description
+              
               Text(
                 'Fitur Konseling AI Emolens sedang dalam tahap pengembangan. Nantikan pembaruan selanjutnya untuk bisa curhat dan ngobrol langsung dengan asisten pintar kami!',
                 style: GoogleFonts.poppins(
@@ -81,7 +81,7 @@ class AiPage extends StatelessWidget {
               
               const SizedBox(height: 50),
               
-              // Back Button
+              
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(

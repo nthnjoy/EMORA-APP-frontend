@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/laravel_session_service.dart';
 import '../services/theme_manager.dart';
@@ -22,14 +22,14 @@ class _ProfilePageState extends State<ProfilePage> {
   bool isLoading = false;
   bool isLoggingOut = false;
   String? errorMessage;
-  // Removed local user variable to avoid stale data
-  // Map<String, dynamic>? user;
+  
+  
   int totalPoints = 0;
 
   @override
   void initState() {
     super.initState();
-    // user = LaravelSessionService.user; // Removed local assignment
+    
     _loadPoints();
     refreshProfile();
   }
@@ -57,7 +57,7 @@ class _ProfilePageState extends State<ProfilePage> {
     if (result['success'] == true) {
       setState(
         () {},
-      ); // Just refresh the UI, build() will use the latest from LaravelSessionService
+      ); 
       await _loadPoints();
     } else {
       setState(() {
@@ -239,7 +239,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                             }
                                           } else {
                                             if (isThemeFreForFemale) {
-                                              // Free for female users, just activate
+                                              
                                               final res =
                                                   await UserService.setActiveTheme(
                                                     theme.id,
@@ -588,9 +588,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 alignment: Alignment.topCenter,
                 clipBehavior: Clip.none,
                 children: [
-                  // ── Background header profil ────────────────────────────
-                  // Untuk menggeser gambar, ubah nilai _profileBgOffsetX dan
-                  // _profileBgOffsetY di bawah. Nilai positif = geser kanan/bawah.
+                  
+                  
+                  
                   SizedBox(
                     height: 200,
                     width: double.infinity,
@@ -604,21 +604,21 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: Stack(
                         fit: StackFit.expand,
                         children: [
-                          // Gambar background — atur posisi dengan Offset(X, Y):
-                          // X positif = geser kanan, X negatif = geser kiri
-                          // Y positif = geser bawah, Y negatif = geser atas (kepala naik)
+                          
+                          
+                          
                           OverflowBox(
                             maxHeight: double.infinity,
                             alignment: Alignment.topCenter,
                             child: Transform.translate(
                               offset: gender.toLowerCase().contains('perempuan')
                                   ? const Offset(
-                                      0,    // ← perempuan: geser kiri/kanan
-                                      -80,    // ← perempuan: geser atas/bawah (0 = dari atas)
+                                      0,    
+                                      -80,  
                                     )
                                   : const Offset(
-                                      0,    // laki-laki: geser kiri/kanan
-                                      -80,    // laki-laki: geser atas/bawah
+                                      0,    
+                                      -80,   
                                     ),
                               child: Image.asset(
                                 gender.toLowerCase().contains('perempuan')
@@ -629,7 +629,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               ),
                             ),
                           ),
-                          // Overlay gradient
+                          
                           Container(
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
@@ -647,9 +647,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   Positioned(
-                    // ── Posisi avatar profil ──────────────────────────────
-                    // Ubah nilai top untuk menggeser avatar ke bawah (+) atau atas (-)
-                    top: 150, // ← geser avatar: nilai lebih besar = lebih ke bawah
+                    top: 150,
                     child: _buildProfileAvatar(gender),
                   ),
                 ],

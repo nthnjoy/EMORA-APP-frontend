@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/laravel_session_service.dart';
 
@@ -63,7 +63,7 @@ class _StreakPageState extends State<StreakPage> with SingleTickerProviderStateM
     final displayName = LaravelSessionService.displayName;
     final firstName = displayName.split(' ').first;
 
-    // Tentukan State (Padam, Sedang, Tinggi)
+    
     Color bgColorStart;
     Color bgColorEnd;
     List<Color> flameColors;
@@ -71,21 +71,21 @@ class _StreakPageState extends State<StreakPage> with SingleTickerProviderStateM
     String subtitleText;
 
     if (streak == 0) {
-      // Padam (Abu-abu)
+      
       bgColorStart = const Color(0xFF6B7280);
       bgColorEnd = const Color(0xFF374151);
       flameColors = [Colors.grey.shade300, Colors.grey.shade500, Colors.grey.shade700];
       titleText = 'Streaknya padam, \n$firstName...';
       subtitleText = 'Laporan emosional mu sekarang untuk membantu kami mendukung kesejahteraan emosional Anda.';
     } else if (streak < 5) {
-      // Sedang (Orange/Kuning)
+      
       bgColorStart = const Color(0xFFFFB347);
       bgColorEnd = const Color(0xFFFF7B00);
       flameColors = [Colors.yellow.shade300, Colors.orange.shade500, Colors.deepOrange.shade600];
       titleText = 'Lencana Streak ditingkatkan, \n$firstName...';
       subtitleText = 'Laporan emosional mu dalam 7 hari ini sudah sebanyak $totalInput, terus laporkan emosional mu untuk membantu kami mendukung kesejahteraan emosional Anda.';
     } else {
-      // Tinggi (Merah)
+      
       bgColorStart = const Color(0xFFFF4B4B);
       bgColorEnd = const Color(0xFFB90000);
       flameColors = [Colors.orange.shade300, Colors.red.shade600, Colors.red.shade900];
@@ -112,7 +112,7 @@ class _StreakPageState extends State<StreakPage> with SingleTickerProviderStateM
                     ),
                     child: Column(
                       children: [
-                        // Custom Top Bar
+                        
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                           child: Row(

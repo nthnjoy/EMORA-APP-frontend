@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'old_activity_page.dart';
 import '../services/activity_service.dart';
@@ -190,6 +190,4 @@ class _ActivityPageState extends State<ActivityPage> {
     );
   }
 }
-
-
 

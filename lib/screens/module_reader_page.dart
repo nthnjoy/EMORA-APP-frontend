@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,9 +6,6 @@ import 'package:http/http.dart' as http;
 import 'package:pdfx/pdfx.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-// ──────────────────────────────────────────────────
-// Argument model yang dikirim ke halaman ini
-// ──────────────────────────────────────────────────
 class ModuleReaderArgs {
   final String id;
   final String title;
@@ -35,9 +32,6 @@ class ModuleReaderArgs {
   });
 }
 
-// ──────────────────────────────────────────────────
-// Halaman utama reader — router antara PDF dan teks
-// ──────────────────────────────────────────────────
 class ModuleReaderPage extends StatefulWidget {
   final ModuleReaderArgs args;
   final Future<void> Function() onCompleted;
@@ -130,8 +124,8 @@ class _PdfReaderViewState extends State<_PdfReaderView> {
   Future<void> _loadPdf() async {
     final url = widget.module.contentUrl!;
 
-    // Flutter Web: Browser tidak bisa fetch PDF lintas domain (CORS)
-    // Solusi: buka di tab browser baru
+    
+    
     if (kIsWeb) {
       final uri = Uri.parse(url);
       if (await canLaunchUrl(uri)) {
@@ -140,11 +134,11 @@ class _PdfReaderViewState extends State<_PdfReaderView> {
       
       if (mounted) {
         setState(() {
-          _isLoaded = true; // Tandai loaded agar tidak loading terus
+          _isLoaded = true; 
         });
       }
 
-      // Tandai selesai otomatis karena PDF dibuka di luar app
+      
       if (mounted && !_hasCompleted) {
         await Future.delayed(const Duration(seconds: 2));
         if (mounted && !_hasCompleted) {
@@ -155,7 +149,7 @@ class _PdfReaderViewState extends State<_PdfReaderView> {
       return;
     }
 
-    // Mobile: fetch langsung via http
+    
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
@@ -189,8 +183,8 @@ class _PdfReaderViewState extends State<_PdfReaderView> {
   void _onPageChanged(int page) {
     setState(() => _currentPage = page);
 
-    // Selesai jika halaman mencapai akhir atau 1 halaman sebelum akhir
-    // (Workaround untuk bug pdfx dimana halaman terakhir kadang sulit di-scroll)
+    
+    
     if (_totalPages > 0 && page >= _totalPages - 1) {
       if (!_hasCompleted) {
         setState(() => _hasCompleted = true);
@@ -205,7 +199,7 @@ class _PdfReaderViewState extends State<_PdfReaderView> {
       _isLoaded = true;
     });
 
-    // Jika hanya 1 halaman, langsung selesai
+    
     if (document.pagesCount == 1 && !_hasCompleted) {
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted && !_hasCompleted) {
@@ -232,13 +226,13 @@ class _PdfReaderViewState extends State<_PdfReaderView> {
 
     return Column(
       children: [
-        // ─── Top Bar ──────────────────────────────────────────────────
+        
         _buildTopBar(context, module),
 
-        // ─── Progress info ────────────────────────────────────────────
+        
         if (_isLoaded) _buildProgressBar(module),
 
-        // ─── PDF Viewer ───────────────────────────────────────────────
+        
         Expanded(
           child: kIsWeb 
             ? _buildWebView(module)
@@ -275,8 +269,8 @@ class _PdfReaderViewState extends State<_PdfReaderView> {
                               ),
                             ),
                   
-                  // Status bar bawah ditampilkan sebagai overlay (Stack) 
-                  // agar tidak mengubah ukuran PdfViewPinch yang bisa membuatnya blank
+                  
+                  
                   if (_hasCompleted && _isLoaded)
                     Positioned(
                       bottom: 0,
@@ -590,10 +584,6 @@ class _PdfReaderViewState extends State<_PdfReaderView> {
   }
 }
 
-// ══════════════════════════════════════════════════
-//  TEXT READER VIEW
-//  Jika tidak ada PDF — konten teks dengan scroll validation >= 90%
-// ══════════════════════════════════════════════════
 class _TextReaderView extends StatefulWidget {
   final ModuleReaderArgs module;
   final bool hasCompleted;
@@ -620,11 +610,11 @@ class _TextReaderViewState extends State<_TextReaderView> {
     _hasCompleted = widget.hasCompleted;
     if (!_hasCompleted) {
       _scrollController.addListener(_onScroll);
-      // Logika untuk konten pendek: Cek setelah build selesai
+      
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && _scrollController.hasClients) {
           final max = _scrollController.position.maxScrollExtent;
-          // Jika tidak bisa di-scroll (konten pendek), berikan poin setelah 3 detik
+          
           if (max <= 0) {
             Future.delayed(const Duration(seconds: 3), () {
               if (mounted && !_hasCompleted) {
@@ -677,7 +667,7 @@ class _TextReaderViewState extends State<_TextReaderView> {
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
-        // ─── SliverAppBar dengan hero ──────────────────────────────────
+        
         SliverAppBar(
           expandedHeight: module.thumbnailUrl != null ? 240 : 160,
           pinned: true,
@@ -755,7 +745,7 @@ class _TextReaderViewState extends State<_TextReaderView> {
           ),
         ),
 
-        // ─── Progress bar ─────────────────────────────────────────────
+        
         SliverToBoxAdapter(
           child: Container(
             color: Colors.white,
@@ -805,7 +795,7 @@ class _TextReaderViewState extends State<_TextReaderView> {
           ),
         ),
 
-        // ─── Konten teks ──────────────────────────────────────────────
+        
         SliverToBoxAdapter(
           child: Container(
             color: Colors.white,
@@ -869,7 +859,7 @@ class _TextReaderViewState extends State<_TextReaderView> {
           ),
         ),
 
-        // ─── Banner status ────────────────────────────────────────────
+        
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),

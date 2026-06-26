@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -38,20 +38,20 @@ class _BreathingViewState extends State<BreathingView> with SingleTickerProvider
   void _runCycle() async {
     if (!mounted || !_isActive) return;
 
-    // 1. INHALE (Always 4s)
+    
     _controller.duration = const Duration(seconds: 4);
     setState(() { _currentStep = 'Tarik Napas'; _subText = 'Hirup udara lewat hidung'; _secondsRemaining = 4; });
     _controller.forward();
     await _countdown(4);
 
     if (!mounted || !_isActive) return;
-    // 2. HOLD (4s for box, 7s for relax)
+    
     int hold1 = widget.pattern == BreathingPattern.box ? 4 : 7;
     setState(() { _currentStep = 'Tahan'; _subText = 'Tahan napasmu'; _secondsRemaining = hold1; });
     await _countdown(hold1);
 
     if (!mounted || !_isActive) return;
-    // 3. EXHALE (4s for box, 8s for relax)
+    
     int exhale = widget.pattern == BreathingPattern.box ? 4 : 8;
     _controller.duration = Duration(seconds: exhale);
     setState(() { _currentStep = 'Hembuskan'; _subText = 'Keluarkan lewat mulut (seperti meniup)'; _secondsRemaining = exhale; });
@@ -59,7 +59,7 @@ class _BreathingViewState extends State<BreathingView> with SingleTickerProvider
     await _countdown(exhale);
 
     if (!mounted || !_isActive) return;
-    // 4. HOLD (4s only for box)
+    
     if (widget.pattern == BreathingPattern.box) {
       setState(() { _currentStep = 'Tahan'; _subText = 'Rileks sejenak'; _secondsRemaining = 4; });
       await _countdown(4);

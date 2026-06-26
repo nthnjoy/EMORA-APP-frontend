@@ -1,4 +1,4 @@
-import 'dart:math';
+﻿import 'dart:math';
 
 class QuoteData {
   static final Map<String, List<String>> moodQuotes = {
@@ -18,8 +18,8 @@ class QuoteData {
       'Jangan lupa berbagi tawa dengan seseorang hari ini.',
       'Hatimu adalah taman, dan hari ini bunga-bunga bermekaran.',
       'Biarkan kebahagiaan ini menjadi bahan bakarmu untuk besok.',
-      // ... adding many more variations to reach the goal conceptually, 
-      // in practice I will provide a large list but manageable for this turn.
+      
+      
       'Setiap tawa adalah doa yang terjawab.',
       'Keajaiban terjadi pada mereka yang percaya dan bahagia.',
       'Jadikan hari ini alasan untuk mencintai hidup lebih dalam.',
